@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
@@ -8,6 +8,7 @@ import { EnvironmentVariables } from './config/env.validation';
 import { validateConfig } from './config/validate-config';
 import { DatabaseModule } from './database/database.module';
 import { CacheModule } from './shared/cache/cache.module';
+import { SecurityMiddleware } from './shared/middleware/security.middleware';
 
 @Module({
   imports: [
@@ -25,4 +26,10 @@ import { CacheModule } from './shared/cache/cache.module';
   controllers: [AppController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer
+      .apply(SecurityMiddleware)
+      .forRoutes('*'); // Aplicar a todas as rotas
+  }
+}
