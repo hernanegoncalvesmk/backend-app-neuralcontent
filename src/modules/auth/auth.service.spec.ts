@@ -16,6 +16,7 @@ import {
   RefreshTokenDto,
   UserRole 
 } from './dto';
+import { UserStatus } from '../users/dto/create-user.dto';
 import { 
   AuthenticationException,
   BusinessValidationException 
@@ -37,8 +38,65 @@ describe('AuthService', () => {
     name: 'Test User',
     password: '$2b$12$hashedPassword',
     role: UserRole.USER,
-    status: 'active',
-    emailVerifiedAt: new Date(),
+    status: UserStatus.ACTIVE,
+    phone: undefined,
+    avatarUrl: undefined,
+    bio: undefined,
+    city: undefined,
+    country: undefined,
+    timezone: undefined,
+    preferredLanguage: 'pt-BR',
+    lastLoginAt: new Date(),
+    lastLoginIp: '127.0.0.1',
+    isEmailVerified: true,
+    emailVerificationToken: undefined,
+    emailVerificationTokenExpiresAt: undefined,
+    passwordResetToken: undefined,
+    passwordResetTokenExpiresAt: undefined,
+    failedLoginAttempts: 0,
+    lockedUntil: undefined,
+    emailNotifications: true,
+    marketingEmails: false,
+    metadata: {},
+    createdAt: new Date(),
+    updatedAt: new Date(),
+    // Relations
+    sessions: [],
+    // Methods
+    canLogin: () => true,
+    isActive: () => true,
+    isLocked: () => false,
+    isLockedOut: () => false,
+    isAdmin: () => false,
+    isModerator: () => false,
+    hasAdminRights: () => false,
+    incrementFailedLogin: jest.fn(),
+    incrementFailedAttempts: jest.fn(),
+    resetFailedLogin: jest.fn(),
+    resetFailedAttempts: jest.fn(),
+    lockAccount: jest.fn(),
+    unlockAccount: jest.fn(),
+    updateLastLogin: jest.fn(),
+    generateEmailVerificationToken: jest.fn(),
+    generatePasswordResetToken: jest.fn(),
+    clearEmailVerificationToken: jest.fn(),
+    clearPasswordResetToken: jest.fn(),
+    updatePassword: jest.fn(),
+    getFullName: () => 'Test User',
+    getInitials: () => 'TU',
+    getAvatarUrl: () => 'https://via.placeholder.com/150',
+    getDisplayName: () => 'Test User',
+    hasRole: jest.fn(),
+    checkPassword: jest.fn(),
+    toResponseDto: jest.fn(),
+    // TypeORM BaseEntity methods
+    version: 1,
+    hasId: () => true,
+    save: jest.fn(),
+    remove: jest.fn(),
+    softRemove: jest.fn(),
+    recover: jest.fn(),
+    reload: jest.fn(),
   };
 
   const mockLoginDto: LoginDto = {
@@ -187,7 +245,7 @@ describe('AuthService', () => {
 
     it('should throw AuthenticationException for inactive user', async () => {
       // Arrange
-      const inactiveUser = { ...mockUser, status: 'inactive' };
+      const inactiveUser = { ...mockUser, status: UserStatus.INACTIVE };
       jest.spyOn(userRepository, 'findOne').mockResolvedValue(inactiveUser as User);
 
       // Act & Assert
@@ -230,7 +288,7 @@ describe('AuthService', () => {
         name: mockRegisterDto.name,
         password: 'hashed-password',
         role: mockRegisterDto.role,
-        status: 'active',
+        status: UserStatus.ACTIVE,
       });
     });
 
