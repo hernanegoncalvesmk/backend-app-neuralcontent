@@ -1,12 +1,20 @@
 import { NestFactory } from '@nestjs/core';
 import { ConfigService } from '@nestjs/config';
-import { ValidationPipe, Logger } from '@nestjs/common';
+import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
+import { LoggerService } from './shared/logger/logger.service';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    bufferLogs: true, // Buffer logs until custom logger is ready
+  });
+  
   const configService = app.get(ConfigService);
-  const logger = new Logger('Bootstrap');
+  const logger = app.get(LoggerService);
+  logger.setContext('Bootstrap');
+
+  // Use custom logger
+  app.useLogger(logger);
 
   // Get configuration values
   const port = configService.get<number>('app.port', 3001);
@@ -28,16 +36,29 @@ async function bootstrap() {
     }),
   );
 
+  // Graceful shutdown handling
+  process.on('SIGTERM', async () => {
+    logger.logShutdown('SIGTERM');
+    await app.close();
+  });
+
+  process.on('SIGINT', async () => {
+    logger.logShutdown('SIGINT');
+    await app.close();
+  });
+
   // Start the application
   await app.listen(port);
 
-  logger.log(`🚀 Application is running on: http://localhost:${port}/${apiPrefix}`);
-  logger.log(`📋 Environment: ${nodeEnv}`);
+  // Log startup information using custom logger
+  logger.logStartup(port, nodeEnv);
+  logger.log(`📋 API Prefix: /${apiPrefix}`);
   logger.log(`🔧 Configuration loaded and validated successfully`);
 }
 
 bootstrap().catch((error) => {
-  const logger = new Logger('Bootstrap');
-  logger.error('❌ Failed to start application:', error.message);
+  // Fallback logger for bootstrap errors
+  console.error('❌ Failed to start application:', error.message);
+  console.error(error.stack);
   process.exit(1);
 });
