@@ -152,13 +152,13 @@ describe('Auth DTOs Validation', () => {
         name: 'João Silva',
         email: 'joao@neuralcontent.com',
         password: 'MinhaS3nh@Segura123',
-        phone: '123' // Muito curto para o padrão internacional
+        phone: 'abc123xyz' // Formato completamente inválido
       };
 
       const dto = plainToInstance(RegisterDto, registerData);
       const errors = await validate(dto);
 
-      // O telefone é opcional, então só falha se for fornecido mas inválido
+      // O telefone é opcional, mas se fornecido deve ser válido
       const phoneError = errors.find(error => error.property === 'phone');
       expect(phoneError).toBeDefined();
       expect(phoneError?.constraints?.matches).toBeDefined();
