@@ -1,7 +1,10 @@
 import { Test, TestingModule } from '@nestjs/testing';
+import { JwtService } from '@nestjs/jwt';
+import { Reflector } from '@nestjs/core';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { LoggerService } from '../../shared/logger/logger.service';
+import { AuthGuard } from '../../shared/guards/auth.guard';
 import { 
   LoginDto, 
   RegisterDto, 
@@ -40,6 +43,19 @@ describe('AuthController', () => {
     debug: jest.fn(),
   };
 
+  // Mock do JwtService
+  const mockJwtService = {
+    sign: jest.fn(),
+    verify: jest.fn(),
+    decode: jest.fn(),
+  };
+
+  // Mock do Reflector
+  const mockReflector = {
+    getAllAndOverride: jest.fn(),
+    get: jest.fn(),
+  };
+
   // Mock do Request
   const mockRequest = {
     ip: '127.0.0.1',
@@ -52,6 +68,7 @@ describe('AuthController', () => {
       email: 'test@neuralcontent.com',
       name: 'Test User',
       role: 'user' as UserRole,
+      status: 'active',
       isEmailVerified: true,
     }
   };
@@ -67,6 +84,20 @@ describe('AuthController', () => {
         {
           provide: LoggerService,
           useValue: mockLoggerService,
+        },
+        {
+          provide: JwtService,
+          useValue: mockJwtService,
+        },
+        {
+          provide: Reflector,
+          useValue: mockReflector,
+        },
+        {
+          provide: AuthGuard,
+          useValue: {
+            canActivate: jest.fn(() => true),
+          },
         },
       ],
     }).compile();

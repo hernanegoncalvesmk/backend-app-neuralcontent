@@ -252,12 +252,12 @@ export class AuthController {
   private extractClientInfo(request: Request) {
     const userAgent = request.get('User-Agent') || '';
     
-    // Detectar tipo de dispositivo básico
+    // Detectar tipo de dispositivo básico - iPad primeiro para não ser capturado como mobile
     let deviceType = 'desktop';
-    if (/Mobile|Android|iPhone|iPad/i.test(userAgent)) {
-      deviceType = 'mobile';
-    } else if (/Tablet|iPad/i.test(userAgent)) {
+    if (/Tablet|iPad/i.test(userAgent)) {
       deviceType = 'tablet';
+    } else if (/Mobile|Android|iPhone/i.test(userAgent)) {
+      deviceType = 'mobile';
     }
 
     return {
