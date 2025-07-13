@@ -18,5 +18,8 @@ export {
   ResetPasswordDto 
 } from './refresh-token.dto';
 
+// DTOs de gestão de senha
+export { ChangePasswordDto } from './change-password.dto';
+
 // Re-export do UserRole para uso externo
 export type { UserRole as AuthUserRole } from './register.dto';

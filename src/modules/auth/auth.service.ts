@@ -113,13 +113,18 @@ export class AuthService {
 
       this.logger.log(`Login bem-sucedido para usuário: ${user.email}`);
 
+      // Calcular timestamp de expiração
+      const expiresAt = Math.floor(Date.now() / 1000) + 3600; // 1 hora em timestamp
+
       return {
         ...tokens,
+        expiresAt,
         user: {
           id: user.id,
           email: user.email,
           name: user.name,
           role: user.role,
+          isEmailVerified: !!user.emailVerifiedAt,
         },
       };
 
@@ -172,13 +177,18 @@ export class AuthService {
 
       this.logger.log(`Usuário registrado com sucesso: ${savedUser.email}`);
 
+      // Calcular timestamp de expiração
+      const expiresAt = Math.floor(Date.now() / 1000) + 3600; // 1 hora em timestamp
+
       return {
         ...tokens,
+        expiresAt,
         user: {
           id: savedUser.id,
           email: savedUser.email,
           name: savedUser.name,
           role: savedUser.role,
+          isEmailVerified: !!savedUser.emailVerifiedAt,
         },
       };
 
@@ -241,13 +251,18 @@ export class AuthService {
 
       this.logger.log(`Token renovado para usuário: ${session.user.email}`);
 
+      // Calcular timestamp de expiração
+      const expiresAt = Math.floor(Date.now() / 1000) + 3600; // 1 hora em timestamp
+
       return {
         ...tokens,
+        expiresAt,
         user: {
           id: session.user.id,
           email: session.user.email,
           name: session.user.name,
           role: session.user.role,
+          isEmailVerified: !!session.user.emailVerifiedAt,
         },
       };
 
