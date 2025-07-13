@@ -1,88 +1,56 @@
+
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { APP_INTERCEPTOR, APP_FILTER, APP_GUARD } from '@nestjs/core';
+import { ThrottlerModule } from '@nestjs/throttler';
+
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { DatabaseModule } from './database/database.module';
-import { entities } from './models/entities';
 
-// Common imports
-import {
-  LoggingInterceptor,
-  TransformInterceptor,
-  TimeoutInterceptor,
-  AllExceptionsFilter,
-  ValidationExceptionFilter,
-} from './common';
+// Feature Modules
+import { AuthModule } from './modules/auth/auth.module';
+import { UsersModule } from './modules/users/users.module';
+import { PlansModule } from './modules/plans/plans.module';
+import { PaymentsModule } from './modules/payments/payments.module';
+import { TranslationsModule } from './modules/translations/translations.module';
+import { AdminModule } from './modules/admin/admin.module';
 
 @Module({
   imports: [
-    // Configuration module
+    // Environment Configuration
     ConfigModule.forRoot({
       isGlobal: true,
       envFilePath: '.env',
     }),
-    
-    // Database module
-    TypeOrmModule.forRootAsync({
-      useFactory: () => ({
-        type: 'mysql',
-        host: process.env.DB_HOST || 'localhost',
-        port: parseInt(process.env.DB_PORT!, 10) || 3306,
-        username: process.env.DB_USER,
-        password: process.env.DB_PASS,
-        database: process.env.DB_NAME,
-        entities: entities,
-        synchronize: false, // Never true in production
-        logging: process.env.NODE_ENV === 'development' ? ['query', 'error'] : ['error'],
-        
-        // Connection pool settings
-        extra: {
-          connectionLimit: parseInt(process.env.DB_CONNECTION_LIMIT!, 10) || 10,
-          acquireTimeout: parseInt(process.env.DB_TIMEOUT!, 10) || 60000,
-          timeout: parseInt(process.env.DB_TIMEOUT!, 10) || 60000,
-          reconnect: true,
-          debug: false,
-        },
-        
-        // Cache settings
-        cache: {
-          duration: 30000, // 30 seconds
-        },
-      }),
+
+    // Database Configuration
+    TypeOrmModule.forRoot({
+      type: 'mysql',
+      host: process.env.DB_HOST || 'localhost',
+      port: parseInt(process.env.DB_PORT, 10) || 3306,
+      username: process.env.DB_USERNAME || 'root',
+      password: process.env.DB_PASSWORD || 'password',
+      database: process.env.DB_NAME || 'neuralcontent',
+      autoLoadEntities: true,
+      synchronize: process.env.NODE_ENV === 'development',
+      logging: process.env.NODE_ENV === 'development',
     }),
-    
-    // Feature modules will be added here
-    DatabaseModule,
+
+    // Rate Limiting
+    ThrottlerModule.forRoot([{
+      ttl: parseInt(process.env.RATE_LIMIT_TTL, 10) || 60000,
+      limit: parseInt(process.env.RATE_LIMIT_LIMIT, 10) || 100,
+    }]),
+
+    // Feature Modules
+    AuthModule,
+    UsersModule,
+    PlansModule,
+    PaymentsModule,
+    TranslationsModule,
+    AdminModule,
   ],
   controllers: [AppController],
-  providers: [
-    AppService,
-    
-    // Global Interceptors
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: LoggingInterceptor,
-    },
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: TimeoutInterceptor,
-    },
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: TransformInterceptor,
-    },
-    
-    // Global Exception Filters
-    {
-      provide: APP_FILTER,
-      useClass: AllExceptionsFilter,
-    },
-    {
-      provide: APP_FILTER,
-      useClass: ValidationExceptionFilter,
-    },
-  ],
+  providers: [AppService],
 })
 export class AppModule {}
