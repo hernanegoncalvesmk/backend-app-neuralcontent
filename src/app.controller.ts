@@ -1,8 +1,14 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Param, BadRequestException, InternalServerErrorException } from '@nestjs/common';
 import { AppService } from './app.service';
 import { DatabaseHealthService } from './database/database-health.service';
 import { CacheService } from './shared/cache/cache.service';
 import { LoggerService } from './shared/logger/logger.service';
+import { 
+  BusinessValidationException, 
+  ResourceNotFoundException, 
+  AuthenticationException,
+  PaymentException 
+} from './shared/exceptions/custom.exceptions';
 
 @Controller()
 export class AppController {
@@ -77,5 +83,49 @@ export class AppController {
       redis: health,
       metrics,
     };
+  }
+
+  // Endpoints de teste para validar o tratamento de erros
+  @Get('test/error/:type')
+  testError(@Param('type') type: string) {
+    this.logger.log(`Testing error type: ${type}`);
+    
+    switch (type) {
+      case 'business':
+        throw new BusinessValidationException('Teste de erro de validação de negócio', {
+          field: 'testField',
+          value: 'invalidValue'
+        });
+        
+      case 'notfound':
+        throw new ResourceNotFoundException('testResource', 'test123', {
+          additionalInfo: 'Recurso de teste'
+        });
+        
+      case 'auth':
+        throw new AuthenticationException('Teste de erro de autenticação', {
+          reason: 'invalid_token'
+        });
+        
+      case 'payment':
+        throw new PaymentException('Teste de erro de pagamento', 'stripe', 'test-tx-123', {
+          amount: 100
+        });
+        
+      case 'badrequest':
+        throw new BadRequestException('Teste de BadRequest padrão do NestJS');
+        
+      case 'internal':
+        throw new InternalServerErrorException('Teste de erro interno');
+        
+      case 'system':
+        // Simula um erro de sistema não tratado
+        throw new Error('Erro de sistema não tratado');
+        
+      default:
+        throw new BusinessValidationException('Tipo de erro inválido para teste', {
+          allowedTypes: ['business', 'notfound', 'auth', 'payment', 'badrequest', 'internal', 'system']
+        });
+    }
   }
 }

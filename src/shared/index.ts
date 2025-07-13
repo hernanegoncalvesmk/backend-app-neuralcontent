@@ -4,6 +4,12 @@ export * from './cache';
 // Logger Module
 export * from './logger';
 
+// Exception Filters
+export * from './filters';
+
+// Custom Exceptions
+export * from './exceptions';
+
 // Interceptors
 export * from './interceptors/logging.interceptor';
 
