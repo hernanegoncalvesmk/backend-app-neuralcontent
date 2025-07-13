@@ -15,6 +15,7 @@ import { SecurityMiddleware } from './shared/middleware/security.middleware';
 import { HttpExceptionFilter } from './shared/filters/http-exception.filter';
 import { AllExceptionsFilter } from './shared/filters/all-exceptions.filter';
 import { AuthModule } from './modules/auth/auth.module';
+import { UsersModule } from './modules/users/users.module';
 
 @Module({
   imports: [
@@ -30,6 +31,7 @@ import { AuthModule } from './modules/auth/auth.module';
     CacheModule,
     LoggerModule,
     AuthModule,
+    UsersModule,
   ],
   controllers: [AppController],
   providers: [

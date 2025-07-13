@@ -6,7 +6,7 @@ import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 
 import { AuthService } from './auth.service';
-import { User } from '../../database/entities/user.entity';
+import { User } from '../users/entities/user.entity';
 import { UserSession } from './entities/user-session.entity';
 import { LoggerService } from '../../shared/logger/logger.service';
 import { CacheService } from '../../shared/cache/cache.service';

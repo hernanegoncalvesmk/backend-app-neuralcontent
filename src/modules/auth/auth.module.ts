@@ -7,7 +7,7 @@ import { PassportModule } from '@nestjs/passport';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { UserSession } from './entities/user-session.entity';
-import { User } from '../../database/entities/user.entity';
+import { User } from '../users/entities/user.entity';
 
 // Shared modules
 import { LoggerModule } from '../../shared/logger/logger.module';

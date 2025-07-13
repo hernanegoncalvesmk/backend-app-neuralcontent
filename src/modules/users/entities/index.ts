@@ -8,6 +8,3 @@
 
 // Entidade principal
 export { User } from './user.entity';
-
-// Re-export da entidade User do database para compatibilidade
-export { User as DatabaseUser } from '../../../database/entities/user.entity';

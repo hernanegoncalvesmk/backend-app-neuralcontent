@@ -1,5 +1,5 @@
 // Export all entities for easy import
-export { User } from './user.entity';
+export { User } from '../../modules/users/entities/user.entity';
 
 // Export base entity
 export { BaseEntity } from '../base.entity';

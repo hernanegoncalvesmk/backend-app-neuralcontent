@@ -6,7 +6,7 @@ import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { LoggerService } from '../../shared/logger/logger.service';
 import { CacheService } from '../../shared/cache/cache.service';
-import { User } from '../../database/entities/user.entity';
+import { User } from '../users/entities/user.entity';
 import { UserSession } from './entities/user-session.entity';
 import { 
   LoginDto, 
@@ -16,6 +16,7 @@ import {
   LogoutDto,
   UserRole 
 } from './dto';
+import { UserStatus } from '../users/dto/create-user.dto';
 import { 
   BusinessValidationException, 
   ResourceNotFoundException,
@@ -124,7 +125,7 @@ export class AuthService {
           email: user.email,
           name: user.name,
           role: user.role,
-          isEmailVerified: !!user.emailVerifiedAt,
+          isEmailVerified: user.isEmailVerified,
         },
       };
 
@@ -164,7 +165,7 @@ export class AuthService {
         name: registerDto.name,
         password: hashedPassword,
         role: registerDto.role || UserRole.USER,
-        status: 'active', // Em produção, pode ser 'pending' para verificação de email
+        status: UserStatus.ACTIVE, // Em produção, pode ser UserStatus.PENDING para verificação de email
       });
 
       const savedUser = await this.userRepository.save(user);
@@ -188,7 +189,7 @@ export class AuthService {
           email: savedUser.email,
           name: savedUser.name,
           role: savedUser.role,
-          isEmailVerified: !!savedUser.emailVerifiedAt,
+          isEmailVerified: savedUser.isEmailVerified,
         },
       };
 
@@ -262,7 +263,7 @@ export class AuthService {
           email: session.user.email,
           name: session.user.name,
           role: session.user.role,
-          isEmailVerified: !!session.user.emailVerifiedAt,
+          isEmailVerified: session.user.isEmailVerified,
         },
       };
 
