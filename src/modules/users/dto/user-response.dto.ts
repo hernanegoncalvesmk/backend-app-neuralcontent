@@ -62,6 +62,48 @@ export class UserResponseDto {
   @Expose()
   avatarUrl?: string;
 
+  @ApiPropertyOptional({
+    description: 'Telefone de contato do usuário',
+    example: '+55 11 99999-9999',
+  })
+  @Expose()
+  phone?: string;
+
+  @ApiPropertyOptional({
+    description: 'Biografia ou descrição do usuário',
+    example: 'Desenvolvedor apaixonado por tecnologia e inovação.',
+  })
+  @Expose()
+  bio?: string;
+
+  @ApiPropertyOptional({
+    description: 'Cidade do usuário',
+    example: 'São Paulo',
+  })
+  @Expose()
+  city?: string;
+
+  @ApiPropertyOptional({
+    description: 'País do usuário',
+    example: 'Brasil',
+  })
+  @Expose()
+  country?: string;
+
+  @ApiPropertyOptional({
+    description: 'Timezone do usuário',
+    example: 'America/Sao_Paulo',
+  })
+  @Expose()
+  timezone?: string;
+
+  @ApiPropertyOptional({
+    description: 'Idioma preferido do usuário',
+    example: 'pt-BR',
+  })
+  @Expose()
+  preferredLanguage?: string;
+
   @ApiProperty({
     description: 'Data de criação do usuário',
     example: '2025-07-13T10:30:00Z',
@@ -89,6 +131,21 @@ export class UserResponseDto {
   // Campos excluídos da resposta
   @Exclude()
   password: string;
+
+  @Exclude()
+  emailVerificationToken: string;
+
+  @Exclude()
+  passwordResetToken: string;
+
+  @Exclude()
+  failedLoginAttempts: number;
+
+  @Exclude()
+  lockedUntil: Date;
+
+  @Exclude()
+  metadata: any;
 
   @Exclude()
   deletedAt: Date;
