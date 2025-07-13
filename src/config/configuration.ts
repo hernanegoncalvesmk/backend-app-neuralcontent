@@ -1,4 +1,5 @@
 import { registerAs } from '@nestjs/config';
+import redisConfig from './redis.config';
 
 export default registerAs('app', () => ({
   // Application Configuration
@@ -19,14 +20,6 @@ export default registerAs('app', () => ({
     database: process.env.DB_NAME || 'neuralcontent',
     synchronize: process.env.NODE_ENV === 'development',
     logging: process.env.NODE_ENV === 'development',
-  },
-  
-  // Redis Configuration
-  redis: {
-    host: process.env.REDIS_HOST || 'localhost',
-    port: parseInt(process.env.REDIS_PORT || '6379', 10),
-    password: process.env.REDIS_PASSWORD || undefined,
-    ttl: 300, // 5 minutes default TTL
   },
   
   // JWT Configuration

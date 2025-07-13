@@ -69,6 +69,17 @@ export class EnvironmentVariables {
   @IsString()
   REDIS_PASSWORD?: string;
 
+  @IsOptional()
+  @IsNumber()
+  @Min(0)
+  @Max(15)
+  @Transform(({ value }) => value ? parseInt(value, 10) : 0)
+  REDIS_DB?: number;
+
+  @IsOptional()
+  @IsString()
+  REDIS_KEY_PREFIX?: string;
+
   // JWT Configuration
   @IsString()
   @IsNotEmpty()
