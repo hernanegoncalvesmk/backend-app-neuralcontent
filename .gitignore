@@ -12,6 +12,12 @@ yarn-debug.log*
 yarn-error.log*
 lerna-debug.log*
 
+# PM2 Logs
+logs/*.log
+logs/*.out
+logs/*.err
+.pm2
+
 # OS
 .DS_Store
 
@@ -54,3 +60,22 @@ pids
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# Build and deployment
+/dist
+/build
+*.tgz
+*.tar.gz
+
+# Database
+*.sqlite
+*.db
+
+# Cache
+.cache
+.parcel-cache
+
+# Production artifacts
+*.map
+*.min.js
+*.min.css
