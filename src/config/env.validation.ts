@@ -1,4 +1,4 @@
-import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, IsUrl, Min, Max } from 'class-validator';
+import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, IsUrl, IsIn, Min, Max } from 'class-validator';
 import { Transform } from 'class-transformer';
 
 export enum Environment {
@@ -105,6 +105,15 @@ export class EnvironmentVariables {
   @IsString()
   @IsNotEmpty()
   PAYPAL_CLIENT_ID: string;
+
+  @IsString()
+  @IsNotEmpty()
+  PAYPAL_CLIENT_SECRET: string;
+
+  @IsOptional()
+  @IsString()
+  @IsIn(['sandbox', 'live'])
+  PAYPAL_ENVIRONMENT?: string;
 
   @IsString()
   @IsNotEmpty()

@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { JwtModule } from '@nestjs/jwt';
 import { CreditsController } from './credits.controller';
 import { CreditsService } from './credits.service';
 import { CreditTransaction } from './entities/credit-transaction.entity';
@@ -32,6 +33,9 @@ import { LoggerModule } from '../../shared/logger/logger.module';
   imports: [
     // Importa as entidades necessárias para o módulo
     TypeOrmModule.forFeature([CreditTransaction, User]),
+    
+    // Importa o módulo JWT para autenticação
+    JwtModule,
     
     // Importa o módulo de logger para rastreamento
     LoggerModule,

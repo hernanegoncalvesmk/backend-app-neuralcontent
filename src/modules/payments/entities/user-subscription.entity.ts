@@ -47,14 +47,14 @@ export class UserSubscription {
     description: 'ID do usuário da assinatura',
     example: '123e4567-e89b-12d3-a456-426614174000',
   })
-  @Column({ type: 'varchar', length: 255, name: 'user_id' })
+  @Column({ type: 'uuid', name: 'user_id' })
   userId: string;
 
   @ApiProperty({
     description: 'ID do plano da assinatura',
     example: '123e4567-e89b-12d3-a456-426614174000',
   })
-  @Column({ type: 'varchar', length: 255, name: 'plan_id' })
+  @Column({ type: 'uuid', name: 'plan_id' })
   planId: string;
 
   @ApiProperty({

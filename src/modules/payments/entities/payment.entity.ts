@@ -56,7 +56,7 @@ export class Payment {
     description: 'ID do usuário que realizou o pagamento',
     example: '123e4567-e89b-12d3-a456-426614174000',
   })
-  @Column({ type: 'varchar', length: 255, name: 'user_id' })
+  @Column({ type: 'uuid', name: 'user_id' })
   userId: string;
 
   @ApiProperty({
@@ -64,7 +64,7 @@ export class Payment {
     example: '123e4567-e89b-12d3-a456-426614174000',
     required: false,
   })
-  @Column({ type: 'varchar', length: 255, name: 'plan_id', nullable: true })
+  @Column({ type: 'uuid', name: 'plan_id', nullable: true })
   planId?: string;
 
   @ApiProperty({
