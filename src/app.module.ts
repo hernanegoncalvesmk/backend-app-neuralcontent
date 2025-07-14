@@ -17,6 +17,8 @@ import { AllExceptionsFilter } from './shared/filters/all-exceptions.filter';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
 import { PlansModule } from './modules/plans/plans.module';
+import { PaymentsModule } from './modules/payments/payments.module';
+import { CreditsModule } from './modules/credits/credits.module';
 
 @Module({
   imports: [
@@ -34,6 +36,8 @@ import { PlansModule } from './modules/plans/plans.module';
     AuthModule,
     UsersModule,
     PlansModule,
+    PaymentsModule,
+    CreditsModule,
   ],
   controllers: [AppController],
   providers: [
