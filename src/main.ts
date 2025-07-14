@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
 import { LoggerService } from './shared/logger/logger.service';
+import { setupSwagger, setupSwaggerDev } from './config/swagger.config';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
@@ -35,6 +36,14 @@ async function bootstrap() {
       },
     }),
   );
+
+  // Setup Swagger documentation
+  setupSwagger(app);
+
+  // Log Swagger setup in development
+  if (nodeEnv === 'development') {
+    setupSwaggerDev(app);
+  }
 
   // Graceful shutdown handling
   process.on('SIGTERM', async () => {
