@@ -16,6 +16,7 @@ import { HttpExceptionFilter } from './shared/filters/http-exception.filter';
 import { AllExceptionsFilter } from './shared/filters/all-exceptions.filter';
 import { AuthModule } from './modules/auth/auth.module';
 import { UsersModule } from './modules/users/users.module';
+import { PlansModule } from './modules/plans/plans.module';
 
 @Module({
   imports: [
@@ -32,6 +33,7 @@ import { UsersModule } from './modules/users/users.module';
     LoggerModule,
     AuthModule,
     UsersModule,
+    PlansModule,
   ],
   controllers: [AppController],
   providers: [

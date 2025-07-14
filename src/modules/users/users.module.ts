@@ -4,6 +4,7 @@ import { ConfigModule } from '@nestjs/config';
 import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
 import { User } from './entities/user.entity';
+import { AuthModule } from '../auth/auth.module';
 
 /**
  * UsersModule - Módulo de gestão de usuários
@@ -24,6 +25,7 @@ import { User } from './entities/user.entity';
   imports: [
     TypeOrmModule.forFeature([User]),
     ConfigModule, // Para acessar configurações
+    AuthModule, // Para AuthGuard e JWT
   ],
   controllers: [UsersController],
   providers: [UsersService],
