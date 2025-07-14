@@ -35,7 +35,7 @@ import {
  * @author NeuralContent Team
  * @since 1.0.0
  */
-@ApiTags('🔧 Admin')
+@ApiTags('✅ Administração')
 @Controller('admin')
 @ApiBearerAuth()
 export class AdminController {

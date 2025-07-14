@@ -35,7 +35,7 @@ import { LoggerService } from '../../shared/logger/logger.service';
  * @author NeuralContent Team
  * @since 1.0.0
  */
-@ApiTags('Autenticação')
+@ApiTags('✅ Autenticação')
 @Controller('auth')
 export class AuthController {
   constructor(

@@ -1,4 +1,5 @@
 import { Controller, Get, Param, BadRequestException, InternalServerErrorException } from '@nestjs/common';
+import { ApiTags } from '@nestjs/swagger';
 import { AppService } from './app.service';
 import { DatabaseHealthService } from './database/database-health.service';
 import { CacheService } from './shared/cache/cache.service';
@@ -10,6 +11,7 @@ import {
   PaymentException 
 } from './shared/exceptions/custom.exceptions';
 
+@ApiTags('✅ Aplicações')
 @Controller()
 export class AppController {
   constructor(
@@ -22,9 +24,17 @@ export class AppController {
   }
 
   @Get()
-  getHello(): string {
+  getHello() {
     this.logger.log('Hello endpoint accessed');
-    return this.appService.getHello();
+    const baseInfo = this.appService.getHello();
+    
+    return {
+      message: baseInfo,
+      version: '1.0.0',
+      environment: process.env.NODE_ENV || 'development',
+      api: 'NeuralContent API',
+      status: 'online'
+    };
   }
 
   @Get('health')

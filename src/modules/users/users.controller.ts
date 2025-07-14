@@ -36,7 +36,7 @@ import { RolesGuard, UserRole } from '../../shared/guards/roles.guard';
 import { Roles } from '../../shared/decorators/roles.decorator';
 import { Public } from '../../shared/decorators/public.decorator';
 
-@ApiTags('users')
+@ApiTags('✅ Usuários')
 @ApiBearerAuth()
 @UseGuards(AuthGuard, RolesGuard)
 @Controller('users')
