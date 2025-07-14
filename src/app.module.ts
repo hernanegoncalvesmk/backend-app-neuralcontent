@@ -19,6 +19,7 @@ import { UsersModule } from './modules/users/users.module';
 import { PlansModule } from './modules/plans/plans.module';
 import { PaymentsModule } from './modules/payments/payments.module';
 import { CreditsModule } from './modules/credits/credits.module';
+import { AdminModule } from './modules/admin/admin.module';
 
 @Module({
   imports: [
@@ -38,6 +39,7 @@ import { CreditsModule } from './modules/credits/credits.module';
     PlansModule,
     PaymentsModule,
     CreditsModule,
+    AdminModule,
   ],
   controllers: [AppController],
   providers: [
