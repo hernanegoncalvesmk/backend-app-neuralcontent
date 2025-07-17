@@ -7,3 +7,4 @@
  */
 
 export { UserSession } from './user-session.entity';
+export { VerificationToken, VerificationTokenType } from './verification-token.entity';

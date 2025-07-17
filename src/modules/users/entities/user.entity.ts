@@ -2,6 +2,7 @@ import { Entity, Column, Index, OneToMany, OneToOne } from 'typeorm';
 import { BaseEntity } from '../../../database/base.entity';
 import { UserSession } from '../../auth/entities/user-session.entity';
 import { CreditBalance } from '../../credits/entities/credit-balance.entity';
+import { VerificationToken } from '../../auth/entities/verification-token.entity';
 
 /**
  * Enums para User entity
@@ -150,6 +151,12 @@ export class User extends BaseEntity {
     eager: false,
   })
   creditBalance: CreditBalance;
+
+  @OneToMany(() => VerificationToken, (verificationToken) => verificationToken.user, {
+    cascade: true,
+    eager: false,
+  })
+  verificationTokens: VerificationToken[];
 
   // Métodos de conveniência
 

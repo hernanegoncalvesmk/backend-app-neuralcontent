@@ -7,6 +7,7 @@ import { PassportModule } from '@nestjs/passport';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { UserSession } from './entities/user-session.entity';
+import { VerificationToken } from './entities/verification-token.entity';
 import { User } from '../users/entities/user.entity';
 
 // Shared modules
@@ -34,6 +35,7 @@ import { CacheModule } from '../../shared/cache/cache.module';
     TypeOrmModule.forFeature([
       User,
       UserSession,
+      VerificationToken,
     ]),
 
     // JWT Module com configuração assíncrona
