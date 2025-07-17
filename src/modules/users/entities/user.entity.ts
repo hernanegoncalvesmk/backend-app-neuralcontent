@@ -1,6 +1,7 @@
-import { Entity, Column, Index, OneToMany } from 'typeorm';
+import { Entity, Column, Index, OneToMany, OneToOne } from 'typeorm';
 import { BaseEntity } from '../../../database/base.entity';
 import { UserSession } from '../../auth/entities/user-session.entity';
+import { CreditBalance } from '../../credits/entities/credit-balance.entity';
 
 /**
  * Enums para User entity
@@ -143,6 +144,12 @@ export class User extends BaseEntity {
     cascade: true,
   })
   sessions: UserSession[];
+
+  @OneToOne(() => CreditBalance, (creditBalance) => creditBalance.user, {
+    cascade: true,
+    eager: false,
+  })
+  creditBalance: CreditBalance;
 
   // Métodos de conveniência
 

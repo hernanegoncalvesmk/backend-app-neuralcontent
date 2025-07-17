@@ -4,6 +4,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { CreditsController } from './credits.controller';
 import { CreditsService } from './credits.service';
 import { CreditTransaction } from './entities/credit-transaction.entity';
+import { CreditBalance } from './entities/credit-balance.entity';
 import { User } from '../users/entities/user.entity';
 import { LoggerModule } from '../../shared/logger/logger.module';
 
@@ -32,7 +33,7 @@ import { LoggerModule } from '../../shared/logger/logger.module';
 @Module({
   imports: [
     // Importa as entidades necessárias para o módulo
-    TypeOrmModule.forFeature([CreditTransaction, User]),
+    TypeOrmModule.forFeature([CreditTransaction, CreditBalance, User]),
     
     // Importa o módulo JWT para autenticação
     JwtModule,
