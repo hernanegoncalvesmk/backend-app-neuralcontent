@@ -2,7 +2,7 @@ import { Injectable, BadRequestException, NotFoundException, ConflictException }
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import { LoggerService } from '../../shared/logger/logger.service';
-import { CreditTransaction, CreditTransactionType, CreditTransactionStatus, CreditServiceType } from './entities/credit-transaction.entity';
+import { CreditTransaction, CreditTransactionType } from './entities/credit-transaction.entity';
 import { User } from '../users/entities/user.entity';
 import {
   ConsumeCreditsDto,
@@ -44,8 +44,8 @@ export class CreditsService {
       const balance = await this.getUserCreditBalance(dto.userId);
       const hasEnoughCredits = balance >= dto.amount;
 
-      // Calcula custos baseados no tipo de serviço
-      const serviceCost = this.calculateServiceCost(dto.serviceType, dto.amount);
+      // Usar o amount diretamente como custo
+      const serviceCost = dto.amount;
       const hasEnoughForService = balance >= serviceCost;
 
       const response: ValidateCreditsResponseDto = {
@@ -100,28 +100,33 @@ export class CreditsService {
         throw new BadRequestException('Créditos insuficientes para a operação');
       }
 
-      const serviceCost = this.calculateServiceCost(dto.serviceType, dto.amount);
+      const serviceCost = dto.amount; // Usar diretamente o valor informado
       const previousBalance = await this.getUserCreditBalance(dto.userId);
 
-      // Cria a transação de consumo
-      const transaction = queryRunner.manager.create(CreditTransaction, {
+      // Preparar dados da transação
+      const transactionData: any = {
         user,
-        type: CreditTransactionType.CONSUMPTION,
+        type: CreditTransactionType.USED,
         amount: -serviceCost, // Valor negativo para consumo
-        balance: previousBalance - serviceCost,
-        serviceType: dto.serviceType,
+        balanceBefore: previousBalance,
+        balanceAfter: previousBalance - serviceCost,
         description: dto.description,
-        status: CreditTransactionStatus.COMPLETED,
-        sessionId: dto.sessionId,
-        clientIp: dto.clientIp,
-        userAgent: dto.userAgent,
+        relatedEntityType: 'service_consumption',
         metadata: {
           ...dto.metadata,
           originalAmount: dto.amount,
           serviceCost,
           consumedAt: new Date().toISOString(),
         },
-      });
+      };
+
+      // Adicionar relatedEntityId se sessionId for fornecido
+      if (dto.sessionId) {
+        transactionData.relatedEntityId = parseInt(dto.sessionId);
+      }
+
+      // Cria a transação de consumo
+      const transaction = queryRunner.manager.create(CreditTransaction, transactionData);
 
       const savedTransaction = await queryRunner.manager.save(transaction);
 
@@ -177,12 +182,11 @@ export class CreditsService {
         user,
         type: dto.type,
         amount: dto.amount, // Valor positivo para adição
-        balance: previousBalance + dto.amount,
+        balanceBefore: previousBalance,
+        balanceAfter: previousBalance + dto.amount,
         description: dto.description,
-        status: CreditTransactionStatus.COMPLETED,
-        sessionId: dto.sessionId,
-        clientIp: dto.clientIp,
-        userAgent: dto.userAgent,
+        relatedEntityType: 'payment',
+        relatedEntityId: dto.paymentId ? parseInt(dto.paymentId) : undefined,
         expiresAt,
         metadata: {
           ...dto.metadata,
@@ -257,11 +261,13 @@ export class CreditsService {
       // Cria transação de débito (usuário origem)
       const debitTransaction = queryRunner.manager.create(CreditTransaction, {
         user: fromUser,
-        type: CreditTransactionType.TRANSFER,
+        type: CreditTransactionType.USED,
         amount: -dto.amount, // Valor negativo para débito
-        balance: fromUserBalance - dto.amount,
+        balanceBefore: fromUserBalance,
+        balanceAfter: fromUserBalance - dto.amount,
         description: `${dto.description} (Envio para ${toUser.email})`,
-        status: CreditTransactionStatus.COMPLETED,
+        relatedEntityType: 'transfer',
+        relatedEntityId: parseInt(dto.toUserId),
         metadata: {
           ...dto.metadata,
           transferType: 'debit',
@@ -274,11 +280,13 @@ export class CreditsService {
       // Cria transação de crédito (usuário destino)
       const creditTransaction = queryRunner.manager.create(CreditTransaction, {
         user: toUser,
-        type: CreditTransactionType.TRANSFER,
+        type: CreditTransactionType.GRANTED,
         amount: dto.amount, // Valor positivo para crédito
-        balance: toUserBalance + dto.amount,
+        balanceBefore: toUserBalance,
+        balanceAfter: toUserBalance + dto.amount,
         description: `${dto.description} (Recebido de ${fromUser.email})`,
-        status: CreditTransactionStatus.COMPLETED,
+        relatedEntityType: 'transfer',
+        relatedEntityId: parseInt(dto.fromUserId),
         metadata: {
           ...dto.metadata,
           transferType: 'credit',
@@ -326,7 +334,6 @@ export class CreditsService {
         .createQueryBuilder('transaction')
         .select('COALESCE(SUM(transaction.amount), 0)', 'balance')
         .where('transaction.userId = :userId', { userId: parseInt(userId) })
-        .andWhere('transaction.status = :status', { status: CreditTransactionStatus.COMPLETED })
         .andWhere('(transaction.expiresAt IS NULL OR transaction.expiresAt > :now)', { now: new Date() })
         .getRawOne();
 
@@ -360,24 +367,6 @@ export class CreditsService {
   }
 
   /**
-   * Calcula o custo do serviço baseado no tipo
-   */
-  private calculateServiceCost(serviceType: CreditServiceType, amount: number): number {
-    const serviceMultipliers: Record<CreditServiceType, number> = {
-      [CreditServiceType.TEXT_GENERATION]: 1,
-      [CreditServiceType.IMAGE_GENERATION]: 2,
-      [CreditServiceType.TRANSLATION]: 1,
-      [CreditServiceType.SUMMARIZATION]: 1,
-      [CreditServiceType.VOICE_SYNTHESIS]: 2,
-      [CreditServiceType.DOCUMENT_ANALYSIS]: 1,
-      [CreditServiceType.CUSTOM_SERVICE]: 1,
-    };
-
-    const multiplier = serviceMultipliers[serviceType] || 1;
-    return Math.ceil(amount * multiplier);
-  }
-
-  /**
    * Calcula data de expiração padrão (1 ano)
    */
   private calculateDefaultExpiration(): Date {
@@ -396,7 +385,6 @@ export class CreditsService {
       const expiredTransactions = await this.creditTransactionRepository.find({
         where: {
           expiresAt: { /* LessThan */ } as any, // TypeORM LessThan operator
-          status: CreditTransactionStatus.COMPLETED,
         },
       });
 
@@ -404,13 +392,10 @@ export class CreditsService {
         return 0;
       }
 
-      // Marca transações como canceladas (não existe status EXPIRED)
-      await this.creditTransactionRepository.update(
-        { id: { /* In */ } as any }, // TypeORM In operator
-        { status: CreditTransactionStatus.CANCELLED },
-      );
+      // Como não temos mais status, as transações expiradas são tratadas automaticamente
+      // pela query de saldo que filtra por expiresAt
 
-      this.logger.log(`Removed ${expiredTransactions.length} expired credit transactions`);
+      this.logger.log(`Found ${expiredTransactions.length} expired credit transactions`);
       return expiredTransactions.length;
     } catch (error) {
       this.logger.error('Error removing expired credits:', error);

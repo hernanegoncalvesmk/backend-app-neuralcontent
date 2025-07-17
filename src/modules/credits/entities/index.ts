@@ -1,1 +1,1 @@
-export { CreditTransaction, CreditTransactionType, CreditTransactionStatus, CreditServiceType } from './credit-transaction.entity';
+export { CreditTransaction, CreditTransactionType } from './credit-transaction.entity';

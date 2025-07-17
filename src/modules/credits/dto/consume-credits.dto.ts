@@ -2,7 +2,6 @@ import { ApiProperty } from '@nestjs/swagger';
 import {
   IsNotEmpty,
   IsPositive,
-  IsEnum,
   IsOptional,
   IsString,
   IsObject,
@@ -13,7 +12,6 @@ import {
   Length,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { CreditServiceType } from '../entities/credit-transaction.entity';
 
 /**
  * DTO para consumo de créditos
@@ -43,12 +41,12 @@ export class ConsumeCreditsDto {
 
   @ApiProperty({
     description: 'Tipo de serviço que está consumindo os créditos',
-    enum: CreditServiceType,
-    example: CreditServiceType.TEXT_GENERATION,
+    example: 'text_generation',
+    enum: ['text_generation', 'image_generation', 'translation', 'summarization', 'voice_synthesis', 'document_analysis', 'custom_service'],
   })
   @IsNotEmpty()
-  @IsEnum(CreditServiceType)
-  serviceType: CreditServiceType;
+  @IsString()
+  serviceType: string;
 
   @ApiProperty({
     description: 'Descrição detalhada do consumo',
@@ -145,10 +143,9 @@ export class ConsumeCreditsResponseDto {
 
   @ApiProperty({
     description: 'Tipo do serviço consumido',
-    enum: CreditServiceType,
-    example: CreditServiceType.TEXT_GENERATION,
+    example: 'text_generation',
   })
-  serviceType: CreditServiceType;
+  serviceType: string;
 
   @ApiProperty({
     description: 'Mensagem descritiva do resultado',
@@ -191,12 +188,11 @@ export class ValidateCreditsDto {
 
   @ApiProperty({
     description: 'Tipo do serviço para calcular custo',
-    enum: CreditServiceType,
-    example: CreditServiceType.TEXT_GENERATION,
+    example: 'text_generation',
   })
   @IsNotEmpty()
-  @IsEnum(CreditServiceType)
-  serviceType: CreditServiceType;
+  @IsString()
+  serviceType: string;
 }
 
 /**
@@ -241,10 +237,9 @@ export class ValidateCreditsResponseDto {
 
   @ApiProperty({
     description: 'Tipo do serviço',
-    enum: CreditServiceType,
-    example: CreditServiceType.TEXT_GENERATION,
+    example: 'text_generation',
   })
-  serviceType: CreditServiceType;
+  serviceType: string;
 
   @ApiProperty({
     description: 'Mensagem explicativa',
