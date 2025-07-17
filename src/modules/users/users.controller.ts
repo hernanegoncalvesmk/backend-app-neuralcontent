@@ -30,7 +30,7 @@ import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto, ChangePasswordDto } from './dto/update-user.dto';
 import { UserResponseDto, UserListResponseDto, UserStatsResponseDto } from './dto/user-response.dto';
-import { UserRole as DtoUserRole, UserStatus } from './dto/create-user.dto';
+import { UserRole as DtoUserRole } from './dto/create-user.dto';
 import { AuthGuard } from '../../shared/guards/auth.guard';
 import { RolesGuard, UserRole } from '../../shared/guards/roles.guard';
 import { Roles } from '../../shared/decorators/roles.decorator';
@@ -111,10 +111,10 @@ export class UsersController {
     description: 'Filter by user role',
   })
   @ApiQuery({ 
-    name: 'status', 
+    name: 'isActive', 
     required: false, 
-    enum: UserStatus, 
-    description: 'Filter by user status',
+    type: Boolean,
+    description: 'Filter by user active status',
   })
   @ApiResponse({ 
     status: HttpStatus.OK, 
@@ -134,7 +134,7 @@ export class UsersController {
     @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit: number,
     @Query('search') search?: string,
     @Query('role') role?: DtoUserRole,
-    @Query('status') status?: UserStatus,
+    @Query('isActive', new DefaultValuePipe(undefined)) isActive?: boolean,
   ): Promise<UserListResponseDto> {
     // Limite máximo de 100 itens por página
     const limitedLimit = Math.min(limit, 100);
@@ -144,7 +144,7 @@ export class UsersController {
       limit: limitedLimit,
       search,
       role,
-      status,
+      isActive,
     });
   }
 
@@ -315,13 +315,12 @@ export class UsersController {
     schema: {
       type: 'object',
       properties: {
-        status: {
-          type: 'string',
-          enum: Object.values(UserStatus),
-          description: 'New user status',
+        isActive: {
+          type: 'boolean',
+          description: 'User active status',
         },
       },
-      required: ['status'],
+      required: ['isActive'],
     },
   })
   @ApiResponse({ 
@@ -347,9 +346,9 @@ export class UsersController {
   })
   async updateStatus(
     @Param('id', ParseIntPipe) id: number,
-    @Body('status') status: UserStatus,
+    @Body('isActive') isActive: boolean,
   ): Promise<UserResponseDto> {
-    const user = await this.usersService.updateStatus(id, status);
+    const user = await this.usersService.updateActiveStatus(id, isActive);
     return new UserResponseDto(user);
   }
 
@@ -470,7 +469,7 @@ export class UsersController {
     description: 'Insufficient permissions',
   })
   async activateUser(@Param('id', ParseIntPipe) id: number): Promise<UserResponseDto> {
-    const user = await this.usersService.updateStatus(id, UserStatus.ACTIVE);
+    const user = await this.usersService.updateActiveStatus(id, true);
     return new UserResponseDto(user);
   }
 
@@ -504,7 +503,7 @@ export class UsersController {
     description: 'Insufficient permissions',
   })
   async deactivateUser(@Param('id', ParseIntPipe) id: number): Promise<UserResponseDto> {
-    const user = await this.usersService.updateStatus(id, UserStatus.INACTIVE);
+    const user = await this.usersService.updateActiveStatus(id, false);
     return new UserResponseDto(user);
   }
 }

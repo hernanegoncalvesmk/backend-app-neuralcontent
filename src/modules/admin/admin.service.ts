@@ -17,8 +17,7 @@ import {
   UserStatus as AdminUserStatus,
   UserRole as AdminUserRole,
 } from './dto';
-import { User } from '../users/entities/user.entity';
-import { UserStatus, UserRole } from '../users/dto/create-user.dto';
+import { User, UserRole } from '../users/entities/user.entity';
 import { CreditTransaction } from '../credits/entities/credit-transaction.entity';
 
 @Injectable()
@@ -76,14 +75,14 @@ export class AdminService {
     const activeUsers = await this.userRepository.count({
       where: {
         lastLoginAt: MoreThan(new Date(Date.now() - 30 * 24 * 60 * 60 * 1000)), // últimos 30 dias
-        status: UserStatus.ACTIVE,
+        isActive: true,
       },
     });
 
     const premiumUsers = await this.userRepository.count({
       where: {
         role: UserRole.ADMIN, // Usando ADMIN em vez de PREMIUM que não existe
-        status: UserStatus.ACTIVE,
+        isActive: true,
       },
     });
 
@@ -232,9 +231,9 @@ export class AdminService {
 
     const usersResponse: AdminUserResponseDto[] = users.map(user => ({
       id: user.id.toString(),
-      name: user.name,
+      name: `${user.firstName} ${user.lastName}`.trim(),
       email: user.email,
-      status: this.mapUserStatus(user.status),
+      status: this.mapUserStatus(user.isActive),
       role: this.mapUserRole(user.role),
       emailVerified: user.isEmailVerified,
       credits: 0, // Campo não existe na entidade User, implementar integração com créditos
@@ -268,9 +267,9 @@ export class AdminService {
 
     return {
       id: user.id.toString(),
-      name: user.name,
+      name: `${user.firstName} ${user.lastName}`.trim(),
       email: user.email,
-      status: this.mapUserStatus(user.status),
+      status: this.mapUserStatus(user.isActive),
       role: this.mapUserRole(user.role),
       emailVerified: user.isEmailVerified,
       credits: 0,
@@ -324,17 +323,17 @@ export class AdminService {
 
     switch (action) {
       case 'activate':
-        await this.userRepository.update(userIds.map(id => parseInt(id)), { status: UserStatus.ACTIVE });
+        await this.userRepository.update(userIds.map(id => parseInt(id)), { isActive: true });
         affected = userIds.length;
         break;
 
       case 'suspend':
-        await this.userRepository.update(userIds.map(id => parseInt(id)), { status: UserStatus.SUSPENDED });
+        await this.userRepository.update(userIds.map(id => parseInt(id)), { isActive: false });
         affected = userIds.length;
         break;
 
       case 'ban':
-        await this.userRepository.update(userIds.map(id => parseInt(id)), { status: UserStatus.INACTIVE });
+        await this.userRepository.update(userIds.map(id => parseInt(id)), { isActive: false });
         affected = userIds.length;
         break;
 
@@ -348,7 +347,7 @@ export class AdminService {
 
       case 'delete':
         // Soft delete - apenas muda status
-        await this.userRepository.update(userIds.map(id => parseInt(id)), { status: UserStatus.INACTIVE });
+        await this.userRepository.update(userIds.map(id => parseInt(id)), { isActive: false });
         affected = userIds.length;
         break;
 
@@ -403,21 +402,10 @@ export class AdminService {
   }
 
   /**
-   * Mapear UserStatus da entidade para AdminUserStatus
+   * Mapear isActive para AdminUserStatus
    */
-  private mapUserStatus(status: UserStatus): AdminUserStatus {
-    switch (status) {
-      case UserStatus.ACTIVE:
-        return AdminUserStatus.ACTIVE;
-      case UserStatus.INACTIVE:
-        return AdminUserStatus.INACTIVE;
-      case UserStatus.PENDING:
-        return AdminUserStatus.PENDING;
-      case UserStatus.SUSPENDED:
-        return AdminUserStatus.SUSPENDED;
-      default:
-        return AdminUserStatus.INACTIVE;
-    }
+  private mapUserStatus(isActive: boolean): AdminUserStatus {
+    return isActive ? AdminUserStatus.ACTIVE : AdminUserStatus.INACTIVE;
   }
 
   /**
@@ -429,10 +417,10 @@ export class AdminService {
         return AdminUserRole.USER;
       case UserRole.ADMIN:
         return AdminUserRole.ADMIN;
-      case UserRole.MODERATOR:
-        return AdminUserRole.MODERATOR;
       case UserRole.SUPER_ADMIN:
         return AdminUserRole.SUPER_ADMIN;
+      case UserRole.GUEST:
+        return AdminUserRole.USER; // Mapear GUEST para USER no admin
       default:
         return AdminUserRole.USER;
     }

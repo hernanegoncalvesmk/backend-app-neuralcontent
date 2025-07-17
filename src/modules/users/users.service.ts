@@ -12,7 +12,7 @@ import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 
 // DTOs
-import { CreateUserDto, UserRole, UserStatus } from './dto/create-user.dto';
+import { CreateUserDto, UserRole } from './dto/create-user.dto';
 import { UpdateUserDto, ChangePasswordDto } from './dto/update-user.dto';
 import { QueryUsersDto } from './dto/query-users.dto';
 import {
@@ -35,8 +35,8 @@ export interface FindAllUsersOptions {
   limit?: number;
   search?: string;
   role?: UserRole;
-  status?: UserStatus;
-  sortBy?: 'email' | 'name' | 'createdAt' | 'lastLoginAt';
+  isActive?: boolean;
+  sortBy?: 'email' | 'firstName' | 'lastName' | 'createdAt' | 'lastLoginAt';
   sortOrder?: 'ASC' | 'DESC';
 }
 
@@ -99,9 +99,8 @@ export class UsersService {
         ...userData,
         password: hashedPassword,
         // Definir campos padrão
-        status: UserStatus.PENDING,
+        isActive: true,
         isEmailVerified: false,
-        failedLoginAttempts: 0,
         termsAcceptedAt: new Date(),
       });
 
@@ -134,7 +133,7 @@ export class UsersService {
       limit = 10,
       search,
       role,
-      status,
+      isActive,
       sortBy = 'createdAt',
       sortOrder = 'DESC',
     } = options;
@@ -144,7 +143,7 @@ export class UsersService {
         .where('user.deletedAt IS NULL'); // Apenas usuários não deletados
 
       // Aplicar filtros
-      this.applySearchFilters(queryBuilder, { search, role, status });
+      this.applySearchFilters(queryBuilder, { search, role, isActive });
 
       // Aplicar ordenação
       queryBuilder.orderBy(`user.${sortBy}`, sortOrder);
@@ -205,7 +204,7 @@ export class UsersService {
         email: email.toLowerCase().trim(),
         deletedAt: IsNull() 
       },
-      select: ['id', 'email', 'name', 'role', 'status', 'password'], // Incluir password quando necessário
+      select: ['id', 'email', 'firstName', 'lastName', 'role', 'isActive', 'password'], // Incluir password quando necessário
     });
 
     if (!user) {
@@ -239,7 +238,7 @@ export class UsersService {
   async findActiveUsers(): Promise<User[]> {
     return this.userRepository.find({
       where: { 
-        status: UserStatus.ACTIVE,
+        isActive: true,
         deletedAt: IsNull() 
       },
       order: { lastLoginAt: 'DESC' },
@@ -357,7 +356,7 @@ export class UsersService {
 
       // Soft delete
       user.deletedAt = new Date();
-      user.status = UserStatus.INACTIVE;
+      user.isActive = false;
 
       await this.userRepository.save(user);
       
@@ -386,16 +385,14 @@ export class UsersService {
       const [
         totalUsers,
         activeUsers,
-        pendingUsers,
-        suspendedUsers,
+        inactiveUsers,
         newUsersToday,
         newUsersThisWeek,
         newUsersThisMonth,
       ] = await Promise.all([
         this.userRepository.count({ where: { deletedAt: IsNull() } }),
-        this.userRepository.count({ where: { status: UserStatus.ACTIVE, deletedAt: IsNull() } }),
-        this.userRepository.count({ where: { status: UserStatus.PENDING, deletedAt: IsNull() } }),
-        this.userRepository.count({ where: { status: UserStatus.SUSPENDED, deletedAt: IsNull() } }),
+        this.userRepository.count({ where: { isActive: true, deletedAt: IsNull() } }),
+        this.userRepository.count({ where: { isActive: false, deletedAt: IsNull() } }),
         this.userRepository.count({ where: { createdAt: MoreThanOrEqual(today), deletedAt: IsNull() } }),
         this.userRepository.count({ where: { createdAt: MoreThanOrEqual(weekAgo), deletedAt: IsNull() } }),
         this.userRepository.count({ where: { createdAt: MoreThanOrEqual(monthAgo), deletedAt: IsNull() } }),
@@ -404,8 +401,7 @@ export class UsersService {
       const stats = {
         totalUsers,
         activeUsers,
-        pendingUsers,
-        suspendedUsers,
+        inactiveUsers,
         newUsersToday,
         newUsersThisWeek,
         newUsersThisMonth,
@@ -424,9 +420,9 @@ export class UsersService {
     return this.getStats();
   }
 
-  async updateStatus(id: number, status: UserStatus): Promise<User> {
+  async updateActiveStatus(id: number, isActive: boolean): Promise<User> {
     const user = await this.findOne(id);
-    user.status = status;
+    user.isActive = isActive;
     user.updatedAt = new Date();
     return this.userRepository.save(user);
   }
@@ -434,8 +430,7 @@ export class UsersService {
   async unlockAccount(id: number): Promise<void> {
     const user = await this.findOne(id);
     
-    user.lockedUntil = undefined;
-    user.failedLoginAttempts = 0;
+    user.isActive = true;
     user.updatedAt = new Date();
 
     await this.userRepository.save(user);
@@ -458,15 +453,15 @@ export class UsersService {
   }
 
   /**
-   * Contar usuários por status
+   * Contar usuários por status ativo/inativo
    * 
-   * @param status - Status dos usuários
+   * @param isActive - Status ativo dos usuários
    * @returns Número de usuários
    */
-  async countByStatus(status: UserStatus): Promise<number> {
+  async countByActiveStatus(isActive: boolean): Promise<number> {
     return this.userRepository.count({
       where: { 
-        status,
+        isActive,
         deletedAt: IsNull() 
       },
     });
@@ -600,11 +595,11 @@ export class UsersService {
    * @param filters - Filtros a serem aplicados
    */
   private applySearchFilters(queryBuilder: any, filters: any): void {
-    const { search, role, status } = filters;
+    const { search, role, isActive } = filters;
 
     if (search) {
       queryBuilder.andWhere(
-        '(user.name ILIKE :search OR user.email ILIKE :search)',
+        '(user.firstName ILIKE :search OR user.lastName ILIKE :search OR user.email ILIKE :search)',
         { search: `%${search}%` },
       );
     }
@@ -613,8 +608,8 @@ export class UsersService {
       queryBuilder.andWhere('user.role = :role', { role });
     }
 
-    if (status) {
-      queryBuilder.andWhere('user.status = :status', { status });
+    if (typeof isActive === 'boolean') {
+      queryBuilder.andWhere('user.isActive = :isActive', { isActive });
     }
   }
 

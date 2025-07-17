@@ -6,7 +6,7 @@ import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { LoggerService } from '../../shared/logger/logger.service';
 import { CacheService } from '../../shared/cache/cache.service';
-import { User } from '../users/entities/user.entity';
+import { User, UserRole as EntityUserRole } from '../users/entities/user.entity';
 import { UserSession } from './entities/user-session.entity';
 import { 
   LoginDto, 
@@ -16,7 +16,6 @@ import {
   LogoutDto,
   UserRole 
 } from './dto';
-import { UserStatus } from '../users/dto/create-user.dto';
 import { 
   BusinessValidationException, 
   ResourceNotFoundException,
@@ -77,7 +76,7 @@ export class AuthService {
       // Buscar usuário com senha
       const user = await this.userRepository.findOne({
         where: { email: loginDto.email },
-        select: ['id', 'email', 'name', 'password', 'role', 'status'],
+        select: ['id', 'email', 'firstName', 'lastName', 'password', 'role', 'isActive'],
       });
 
       if (!user) {
@@ -86,9 +85,9 @@ export class AuthService {
       }
 
       // Verificar status do usuário
-      if (user.status !== 'active') {
+      if (!user.isActive) {
         this.logger.warn(`Usuário inativo tentou fazer login: ${loginDto.email}`);
-        throw new AuthenticationException(`Conta ${user.status}. Entre em contato com o suporte.`);
+        throw new AuthenticationException('Conta inativa. Entre em contato com o suporte.');
       }
 
       // Verificar senha
@@ -108,7 +107,8 @@ export class AuthService {
       await this.cacheService.set(`user:${user.id}`, {
         id: user.id,
         email: user.email,
-        name: user.name,
+        firstName: user.firstName,
+        lastName: user.lastName,
         role: user.role,
       }, 3600); // 1 hora
 
@@ -123,7 +123,8 @@ export class AuthService {
         user: {
           id: user.id,
           email: user.email,
-          name: user.name,
+          firstName: user.firstName,
+          lastName: user.lastName,
           role: user.role,
           isEmailVerified: user.isEmailVerified,
         },
@@ -162,21 +163,24 @@ export class AuthService {
       // Criar usuário
       const user = this.userRepository.create({
         email: registerDto.email,
-        name: registerDto.name,
+        firstName: registerDto.name.split(' ')[0] || '',
+        lastName: registerDto.name.split(' ').slice(1).join(' ') || '',
         password: hashedPassword,
-        role: registerDto.role || UserRole.USER,
-        status: UserStatus.ACTIVE, // Em produção, pode ser UserStatus.PENDING para verificação de email
+        role: (registerDto.role || UserRole.USER) as unknown as EntityUserRole,
+        isActive: true, // Em produção, pode ser false para verificação de email
       });
 
       const savedUser = await this.userRepository.save(user);
+      // TypeORM save pode retornar User ou User[] dependendo do input, fazemos cast para User
+      const userResult = Array.isArray(savedUser) ? savedUser[0] : savedUser;
 
       // Gerar tokens
-      const tokens = await this.generateTokens(savedUser);
+      const tokens = await this.generateTokens(userResult);
 
       // Criar sessão
-      await this.createSession(savedUser.id, tokens.refreshToken);
+      await this.createSession(userResult.id, tokens.refreshToken);
 
-      this.logger.log(`Usuário registrado com sucesso: ${savedUser.email}`);
+      this.logger.log(`Usuário registrado com sucesso: ${userResult.email}`);
 
       // Calcular timestamp de expiração
       const expiresAt = Math.floor(Date.now() / 1000) + 3600; // 1 hora em timestamp
@@ -185,11 +189,12 @@ export class AuthService {
         ...tokens,
         expiresAt,
         user: {
-          id: savedUser.id,
-          email: savedUser.email,
-          name: savedUser.name,
-          role: savedUser.role,
-          isEmailVerified: savedUser.isEmailVerified,
+          id: userResult.id,
+          email: userResult.email,
+          firstName: userResult.firstName,
+          lastName: userResult.lastName,
+          role: userResult.role,
+          isEmailVerified: userResult.isEmailVerified,
         },
       };
 
@@ -261,7 +266,8 @@ export class AuthService {
         user: {
           id: session.user.id,
           email: session.user.email,
-          name: session.user.name,
+          firstName: session.user.firstName,
+          lastName: session.user.lastName,
           role: session.user.role,
           isEmailVerified: session.user.isEmailVerified,
         },

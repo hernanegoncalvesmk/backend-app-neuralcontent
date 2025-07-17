@@ -1,7 +1,23 @@
 import { Entity, Column, Index, OneToMany } from 'typeorm';
 import { BaseEntity } from '../../../database/base.entity';
 import { UserSession } from '../../auth/entities/user-session.entity';
-import { UserRole, UserStatus } from '../dto';
+
+/**
+ * Enums para User entity
+ */
+export enum UserRole {
+  SUPER_ADMIN = 'super-admin',
+  ADMIN = 'admin', 
+  USER = 'user',
+  GUEST = 'guest',
+}
+
+export enum UserStatus {
+  ACTIVE = 'active',
+  INACTIVE = 'inactive', 
+  PENDING = 'pending',
+  SUSPENDED = 'suspended',
+}
 
 /**
  * Entidade User - Usuários do sistema NeuralContent
@@ -16,12 +32,14 @@ import { UserRole, UserStatus } from '../dto';
  * - Gestão de sessões
  * - Controle de acesso baseado em roles
  * - Auditoria completa
+ * 
+ * @table usr_users - Alinhado com migration 002
  */
-@Entity('users')
+@Entity('usr_users')
 @Index(['email'], { unique: true })
-@Index(['status'])
+@Index(['isActive'])
 @Index(['role'])
-@Index(['isEmailVerified'])
+@Index(['emailVerifiedAt'])
 @Index(['lastLoginAt'])
 export class User extends BaseEntity {
   @Column({
@@ -35,9 +53,18 @@ export class User extends BaseEntity {
   @Column({
     type: 'varchar',
     length: 100,
-    comment: 'Nome completo do usuário',
+    name: 'first_name',
+    comment: 'Primeiro nome do usuário',
   })
-  name: string;
+  firstName: string;
+
+  @Column({
+    type: 'varchar',
+    length: 100,
+    name: 'last_name', 
+    comment: 'Sobrenome do usuário',
+  })
+  lastName: string;
 
   @Column({
     type: 'varchar',
@@ -49,14 +76,6 @@ export class User extends BaseEntity {
 
   @Column({
     type: 'enum',
-    enum: UserStatus,
-    default: UserStatus.PENDING,
-    comment: 'Status atual do usuário no sistema',
-  })
-  status: UserStatus;
-
-  @Column({
-    type: 'enum',
     enum: UserRole,
     default: UserRole.USER,
     comment: 'Papel/função do usuário no sistema',
@@ -65,129 +84,59 @@ export class User extends BaseEntity {
 
   @Column({
     type: 'boolean',
+    default: true,
+    name: 'is_active',
+    comment: 'Indica se o usuário está ativo no sistema',
+  })
+  isActive: boolean;
+
+  @Column({
+    type: 'boolean',
     default: false,
+    name: 'is_email_verified',
     comment: 'Indica se o email foi verificado pelo usuário',
   })
   isEmailVerified: boolean;
 
   @Column({
+    type: 'timestamp',
+    nullable: true,
+    name: 'email_verified_at',
+    comment: 'Data e hora da verificação do email',
+  })
+  emailVerifiedAt?: Date;
+
+  @Column({
     type: 'varchar',
     length: 500,
     nullable: true,
+    name: 'avatar_url',
     comment: 'URL do avatar/foto do usuário',
   })
-  avatarUrl?: string;
-
-  @Column({
-    type: 'text',
-    nullable: true,
-    comment: 'Biografia ou descrição do usuário',
-  })
-  bio?: string;
+  avatar?: string;
 
   @Column({
     type: 'varchar',
-    length: 50,
+    length: 20,
     nullable: true,
     comment: 'Telefone de contato do usuário',
   })
   phone?: string;
 
   @Column({
-    type: 'varchar',
-    length: 100,
-    nullable: true,
-    comment: 'Cidade do usuário',
-  })
-  city?: string;
-
-  @Column({
-    type: 'varchar',
-    length: 50,
-    nullable: true,
-    comment: 'País do usuário',
-  })
-  country?: string;
-
-  @Column({
-    type: 'varchar',
-    length: 20,
-    nullable: true,
-    comment: 'Idioma preferido do usuário',
-  })
-  preferredLanguage?: string;
-
-  @Column({
-    type: 'varchar',
-    length: 50,
-    nullable: true,
-    comment: 'Timezone do usuário',
-  })
-  timezone?: string;
-
-  @Column({
     type: 'timestamp',
     nullable: true,
+    name: 'last_login_at',
     comment: 'Data e hora do último login',
   })
   lastLoginAt?: Date;
 
   @Column({
-    type: 'varchar',
-    length: 100,
-    nullable: true,
-    comment: 'IP do último login',
-  })
-  lastLoginIp?: string;
-
-  @Column({
-    type: 'int',
-    default: 0,
-    comment: 'Contador de tentativas de login falhadas',
-  })
-  failedLoginAttempts: number;
-
-  @Column({
-    type: 'timestamp',
-    nullable: true,
-    comment: 'Data de bloqueio temporário por tentativas falhas',
-  })
-  lockedUntil?: Date;
-
-  @Column({
-    type: 'timestamp',
-    nullable: true,
-    comment: 'Data de expiração do token de verificação de email',
-  })
-  emailVerificationTokenExpiresAt?: Date;
-
-  @Column({
-    type: 'timestamp',
-    nullable: true,
-    comment: 'Data de expiração do token de reset de senha',
-  })
-  passwordResetTokenExpiresAt?: Date;
-
-  @Column({
-    type: 'boolean',
-    default: true,
-    comment: 'Preferência para receber notificações por email',
-  })
-  emailNotifications: boolean;
-
-  @Column({
-    type: 'boolean',
-    default: false,
-    comment: 'Preferência para receber newsletters',
-  })
-  marketingEmails: boolean;
-
-  @Column({
     type: 'json',
     nullable: true,
-    comment: 'Metadados adicionais do usuário em formato JSON',
+    comment: 'Preferências do usuário em formato JSON',
   })
-  metadata?: Record<string, any>;
+  preferences?: Record<string, any>;
 
   // Relacionamentos
   @OneToMany(() => UserSession, session => session.user, {
@@ -198,91 +147,65 @@ export class User extends BaseEntity {
   // Métodos de conveniência
 
   /**
+   * Retorna o nome completo do usuário
+   */
+  getFullName(): string {
+    return `${this.firstName} ${this.lastName}`.trim();
+  }
+
+  /**
    * Verifica se o usuário está ativo
    */
-  isActive(): boolean {
-    return this.status === UserStatus.ACTIVE;
+  getUserIsActive(): boolean {
+    return this.isActive;
   }
 
   /**
    * Verifica se o usuário é administrador
    */
   isAdmin(): boolean {
-    return this.role === UserRole.ADMIN;
-  }
-
-  /**
-   * Verifica se o usuário é moderador
-   */
-  isModerator(): boolean {
-    return this.role === UserRole.MODERATOR;
+    return this.role === UserRole.ADMIN || this.role === UserRole.SUPER_ADMIN;
   }
 
   /**
    * Verifica se o usuário tem permissões administrativas
    */
   hasAdminRights(): boolean {
-    return this.isAdmin() || this.isModerator();
-  }
-
-  /**
-   * Verifica se o usuário está bloqueado por tentativas de login
-   */
-  isLockedOut(): boolean {
-    return Boolean(this.lockedUntil && this.lockedUntil > new Date());
+    return this.isAdmin();
   }
 
   /**
    * Verifica se o usuário pode fazer login
    */
   canLogin(): boolean {
-    return this.isActive() && this.isEmailVerified && !this.isLockedOut();
+    return this.isActive && this.isEmailVerified;
   }
 
   /**
    * Atualiza dados do último login
    */
-  updateLastLogin(ip?: string): void {
+  updateLastLogin(): void {
     this.lastLoginAt = new Date();
-    if (ip) {
-      this.lastLoginIp = ip;
-    }
-    this.failedLoginAttempts = 0;
-    this.lockedUntil = undefined;
-  }
-
-  /**
-   * Incrementa tentativas de login falhadas
-   */
-  incrementFailedAttempts(): void {
-    this.failedLoginAttempts += 1;
-    
-    // Bloquear por 15 minutos após 5 tentativas
-    if (this.failedLoginAttempts >= 5) {
-      const lockDuration = 15 * 60 * 1000; // 15 minutos em ms
-      this.lockedUntil = new Date(Date.now() + lockDuration);
-    }
-  }
-
-  /**
-   * Reseta tentativas de login falhadas
-   */
-  resetFailedAttempts(): void {
-    this.failedLoginAttempts = 0;
-    this.lockedUntil = undefined;
   }
 
   /**
    * Gera URL do avatar usando Gravatar como fallback
    */
   getAvatarUrl(): string {
-    if (this.avatarUrl) {
-      return this.avatarUrl;
+    if (this.avatar) {
+      return this.avatar;
     }
     
     // Fallback para Gravatar
     const crypto = require('crypto');
     const hash = crypto.createHash('md5').update(this.email.toLowerCase()).digest('hex');
     return `https://www.gravatar.com/avatar/${hash}?d=identicon&s=200`;
+  }
+
+  /**
+   * Verifica se o email foi verificado
+   */
+  isEmailVerifiedStatus(): boolean {
+    return this.isEmailVerified && this.emailVerifiedAt !== null;
   }
 }

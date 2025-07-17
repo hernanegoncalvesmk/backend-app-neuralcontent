@@ -2,7 +2,7 @@ import { PartialType, OmitType } from '@nestjs/mapped-types';
 import { IsOptional, IsString, MinLength, MaxLength, IsEnum, IsBoolean, Matches } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { CreateUserDto, UserRole, UserStatus } from './create-user.dto';
+import { CreateUserDto, UserRole } from './create-user.dto';
 
 /**
  * DTO para atualização de usuário
@@ -15,23 +15,42 @@ export class UpdateUserDto extends PartialType(
   OmitType(CreateUserDto, ['password'] as const)
 ) {
   @ApiPropertyOptional({
-    description: 'Nome completo do usuário',
-    example: 'João Silva Santos Atualizado',
+    description: 'Primeiro nome do usuário',
+    example: 'João',
     minLength: 2,
     maxLength: 100,
   })
   @IsOptional()
   @IsString({
-    message: 'Nome deve ser uma string',
+    message: 'Primeiro nome deve ser uma string',
   })
   @MinLength(2, {
-    message: 'Nome deve ter pelo menos 2 caracteres',
+    message: 'Primeiro nome deve ter pelo menos 2 caracteres',
   })
   @MaxLength(100, {
-    message: 'Nome deve ter no máximo 100 caracteres',
+    message: 'Primeiro nome deve ter no máximo 100 caracteres',
   })
   @Transform(({ value }) => value?.trim())
-  name?: string;
+  firstName?: string;
+
+  @ApiPropertyOptional({
+    description: 'Sobrenome do usuário',
+    example: 'Silva Santos',
+    minLength: 2,
+    maxLength: 100,
+  })
+  @IsOptional()
+  @IsString({
+    message: 'Sobrenome deve ser uma string',
+  })
+  @MinLength(2, {
+    message: 'Sobrenome deve ter pelo menos 2 caracteres',
+  })
+  @MaxLength(100, {
+    message: 'Sobrenome deve ter no máximo 100 caracteres',
+  })
+  @Transform(({ value }) => value?.trim())
+  lastName?: string;
 
   @ApiPropertyOptional({
     description: 'Papel do usuário no sistema',
@@ -39,19 +58,19 @@ export class UpdateUserDto extends PartialType(
   })
   @IsOptional()
   @IsEnum(UserRole, {
-    message: 'Role deve ser: user, admin ou moderator',
+    message: 'Role deve ser: user, admin, super-admin ou guest',
   })
   role?: UserRole;
 
   @ApiPropertyOptional({
-    description: 'Status do usuário',
-    enum: UserStatus,
+    description: 'Se o usuário está ativo',
+    example: true,
   })
   @IsOptional()
-  @IsEnum(UserStatus, {
-    message: 'Status deve ser: active, inactive, pending ou suspended',
+  @IsBoolean({
+    message: 'isActive deve ser um valor booleano',
   })
-  status?: UserStatus;
+  isActive?: boolean;
 
   @ApiPropertyOptional({
     description: 'Se o email foi verificado',

@@ -7,7 +7,7 @@
  */
 
 // DTOs principais de entrada
-export { CreateUserDto, UserRole, UserStatus } from './create-user.dto';
+export { CreateUserDto, UserRole } from './create-user.dto';
 export { UpdateUserDto, ChangePasswordDto } from './update-user.dto';
 
 // DTOs de resposta
@@ -34,4 +34,3 @@ export type {
 export type { QueryUsersDto as QueryUsersDtoType } from './query-users.dto';
 export type { UserStatisticsDto as UserStatisticsDtoType } from './user-statistics.dto';
 export type { UserRole as UsersUserRole } from './create-user.dto';
-export type { UserStatus as UsersUserStatus } from './create-user.dto';

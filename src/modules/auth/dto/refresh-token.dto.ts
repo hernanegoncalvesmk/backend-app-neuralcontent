@@ -70,7 +70,8 @@ export class AuthResponseDto {
     example: {
       id: 1,
       email: 'usuario@neuralcontent.com',
-      name: 'João Silva Santos',
+      firstName: 'João',
+      lastName: 'Silva Santos',
       role: 'user',
       isEmailVerified: true
     }
@@ -78,7 +79,8 @@ export class AuthResponseDto {
   user: {
     id: number;
     email: string;
-    name: string;
+    firstName: string;
+    lastName: string;
     role: string;
     isEmailVerified: boolean;
   };

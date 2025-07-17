@@ -1,25 +1,15 @@
-import { IsEmail, IsNotEmpty, IsString, MinLength, MaxLength, IsOptional, IsEnum, Matches } from 'class-validator';
+import { IsEmail, IsNotEmpty, IsString, MinLength, MaxLength, IsOptional, IsEnum, Matches, IsBoolean } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 
 /**
- * Tipos de role disponíveis para usuários
+ * Tipos de role disponíveis para usuários - Alinhado com migration usr_users
  */
 export enum UserRole {
   USER = 'user',
-  ADMIN = 'admin',
-  MODERATOR = 'moderator',
-  SUPER_ADMIN = 'super_admin',
-}
-
-/**
- * Status disponíveis para usuários
- */
-export enum UserStatus {
-  ACTIVE = 'active',
-  INACTIVE = 'inactive',
-  PENDING = 'pending',
-  SUSPENDED = 'suspended',
+  ADMIN = 'admin', 
+  SUPER_ADMIN = 'super-admin',
+  GUEST = 'guest',
 }
 
 /**
@@ -48,25 +38,46 @@ export class CreateUserDto {
   email: string;
 
   @ApiProperty({
-    description: 'Nome completo do usuário',
-    example: 'João Silva Santos',
+    description: 'Primeiro nome do usuário',
+    example: 'João',
     minLength: 2,
     maxLength: 100,
   })
   @IsString({
-    message: 'Nome deve ser uma string',
+    message: 'Primeiro nome deve ser uma string',
   })
   @IsNotEmpty({
-    message: 'Nome é obrigatório',
+    message: 'Primeiro nome é obrigatório',
   })
   @MinLength(2, {
-    message: 'Nome deve ter pelo menos 2 caracteres',
+    message: 'Primeiro nome deve ter pelo menos 2 caracteres',
   })
   @MaxLength(100, {
-    message: 'Nome deve ter no máximo 100 caracteres',
+    message: 'Primeiro nome deve ter no máximo 100 caracteres',
   })
   @Transform(({ value }) => value?.trim())
-  name: string;
+  firstName: string;
+
+  @ApiProperty({
+    description: 'Sobrenome do usuário',
+    example: 'Silva Santos',
+    minLength: 2,
+    maxLength: 100,
+  })
+  @IsString({
+    message: 'Sobrenome deve ser uma string',
+  })
+  @IsNotEmpty({
+    message: 'Sobrenome é obrigatório',
+  })
+  @MinLength(2, {
+    message: 'Sobrenome deve ter pelo menos 2 caracteres',
+  })
+  @MaxLength(100, {
+    message: 'Sobrenome deve ter no máximo 100 caracteres',
+  })
+  @Transform(({ value }) => value?.trim())
+  lastName: string;
 
   @ApiProperty({
     description: 'Senha do usuário',
@@ -106,27 +117,26 @@ export class CreateUserDto {
   role?: UserRole;
 
   @ApiPropertyOptional({
-    description: 'Status inicial do usuário',
-    enum: UserStatus,
-    default: UserStatus.PENDING,
+    description: 'Status se o usuário está ativo',
+    default: true,
   })
   @IsOptional()
-  @IsEnum(UserStatus, {
-    message: 'Status deve ser: active, inactive, pending ou suspended',
+  @IsBoolean({
+    message: 'isActive deve ser um valor booleano',
   })
-  status?: UserStatus;
+  isActive?: boolean;
 
   @ApiPropertyOptional({
     description: 'Telefone de contato do usuário',
     example: '+55 11 99999-9999',
-    maxLength: 50,
+    maxLength: 20,
   })
   @IsOptional()
   @IsString({
     message: 'Telefone deve ser uma string',
   })
-  @MaxLength(50, {
-    message: 'Telefone deve ter no máximo 50 caracteres',
+  @MaxLength(20, {
+    message: 'Telefone deve ter no máximo 20 caracteres',
   })
   @Transform(({ value }) => value?.trim())
   phone?: string;
