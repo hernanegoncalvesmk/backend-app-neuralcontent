@@ -420,4 +420,79 @@ export class PaymentsService {
       order: { createdAt: 'DESC' },
     });
   }
+
+  /**
+   * Cria uma nova assinatura para um usuário
+   */
+  async createUserSubscription(createSubscriptionDto: any): Promise<UserSubscription> {
+    this.logger.log(`Creating subscription for user ${createSubscriptionDto.userId}`);
+
+    try {
+      const subscription = new UserSubscription();
+      Object.assign(subscription, createSubscriptionDto);
+      subscription.status = createSubscriptionDto.status || SubscriptionStatus.ACTIVE;
+
+      const savedSubscription = await this.subscriptionRepository.save(subscription);
+      this.logger.log(`Subscription created with ID: ${savedSubscription.id}`);
+
+      return savedSubscription;
+    } catch (error) {
+      this.logger.error(`Error creating subscription: ${error.message}`);
+      throw new BadRequestException('Erro ao criar assinatura');
+    }
+  }
+
+  /**
+   * Atualiza uma assinatura existente
+   */
+  async updateUserSubscription(subscriptionId: string, updateSubscriptionDto: any): Promise<UserSubscription> {
+    this.logger.log(`Updating subscription ${subscriptionId}`);
+
+    const subscription = await this.subscriptionRepository.findOne({ 
+      where: { id: subscriptionId } 
+    });
+
+    if (!subscription) {
+      throw new NotFoundException('Assinatura não encontrada');
+    }
+
+    try {
+      Object.assign(subscription, updateSubscriptionDto);
+      const updatedSubscription = await this.subscriptionRepository.save(subscription);
+      
+      this.logger.log(`Subscription ${subscriptionId} updated successfully`);
+      return updatedSubscription;
+    } catch (error) {
+      this.logger.error(`Error updating subscription: ${error.message}`);
+      throw new BadRequestException('Erro ao atualizar assinatura');
+    }
+  }
+
+  /**
+   * Cancela uma assinatura
+   */
+  async cancelUserSubscription(subscriptionId: string): Promise<{message: string}> {
+    this.logger.log(`Canceling subscription ${subscriptionId}`);
+
+    const subscription = await this.subscriptionRepository.findOne({ 
+      where: { id: subscriptionId } 
+    });
+
+    if (!subscription) {
+      throw new NotFoundException('Assinatura não encontrada');
+    }
+
+    try {
+      subscription.status = SubscriptionStatus.CANCELLED;
+      subscription.cancelledAt = new Date();
+      
+      await this.subscriptionRepository.save(subscription);
+      
+      this.logger.log(`Subscription ${subscriptionId} canceled successfully`);
+      return { message: 'Assinatura cancelada com sucesso' };
+    } catch (error) {
+      this.logger.error(`Error canceling subscription: ${error.message}`);
+      throw new BadRequestException('Erro ao cancelar assinatura');
+    }
+  }
 }

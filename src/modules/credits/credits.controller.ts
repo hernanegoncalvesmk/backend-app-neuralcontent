@@ -64,7 +64,7 @@ export class CreditsController {
     description: 'Usuário não encontrado',
   })
   async validateCredits(@Body() dto: ValidateCreditsDto): Promise<ValidateCreditsResponseDto> {
-    return this.creditsService.validateCredits(dto);
+    return this.creditsService.validateCredits(dto.userId, dto);
   }
 
   /**
@@ -89,7 +89,7 @@ export class CreditsController {
     description: 'Usuário não encontrado',
   })
   async consumeCredits(@Body() dto: ConsumeCreditsDto): Promise<ConsumeCreditsResponseDto> {
-    return this.creditsService.consumeCredits(dto);
+    return this.creditsService.consumeCredits(dto.userId, dto);
   }
 
   /**
@@ -120,7 +120,7 @@ export class CreditsController {
     description: 'Usuário não encontrado',
   })
   async addCredits(@Body() dto: AddCreditsDto): Promise<AddCreditsResponseDto> {
-    return this.creditsService.addCredits(dto);
+    return this.creditsService.addCredits(dto.userId, dto);
   }
 
   /**
@@ -145,7 +145,7 @@ export class CreditsController {
     description: 'Usuário origem ou destino não encontrado',
   })
   async transferCredits(@Body() dto: TransferCreditsDto): Promise<TransferCreditsResponseDto> {
-    return this.creditsService.transferCredits(dto);
+    return this.creditsService.transferCredits(dto.fromUserId, dto);
   }
 
   /**
@@ -221,7 +221,7 @@ export class CreditsController {
     @Query('limit', new DefaultValuePipe(50), ParseIntPipe) limit: number,
     @Query('offset', new DefaultValuePipe(0), ParseIntPipe) offset: number,
   ): Promise<CreditTransaction[]> {
-    return this.creditsService.getUserTransactionHistory(userId, limit, offset);
+    return this.creditsService.getCreditTransactionHistory(userId, limit, offset);
   }
 
   /**
@@ -285,7 +285,7 @@ export class CreditsController {
     @Query('offset', new DefaultValuePipe(0), ParseIntPipe) offset: number,
   ): Promise<CreditTransaction[]> {
     const userId = req.user.sub.toString();
-    return this.creditsService.getUserTransactionHistory(userId, limit, offset);
+    return this.creditsService.getCreditTransactionHistory(userId, limit, offset);
   }
 
   /**
@@ -310,7 +310,7 @@ export class CreditsController {
     @Body() dto: Omit<ConsumeCreditsDto, 'userId'>,
   ): Promise<ConsumeCreditsResponseDto> {
     const userId = req.user.sub.toString();
-    return this.creditsService.consumeCredits({
+    return this.creditsService.consumeCredits(userId, {
       ...dto,
       userId,
     });
@@ -334,7 +334,7 @@ export class CreditsController {
     @Body() dto: Omit<ValidateCreditsDto, 'userId'>,
   ): Promise<ValidateCreditsResponseDto> {
     const userId = req.user.sub.toString();
-    return this.creditsService.validateCredits({
+    return this.creditsService.validateCredits(userId, {
       ...dto,
       userId,
     });
@@ -414,7 +414,7 @@ export class CreditsController {
     @Param('userId') userId: string,
     @Body() createData: any
   ) {
-    return this.creditsService.createInitialCreditBalance(userId, createData);
+    return this.creditsService.createCreditBalance(userId, createData);
   }
 
   @ApiOperation({

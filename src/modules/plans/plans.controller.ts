@@ -23,6 +23,8 @@ import {
 } from '@nestjs/swagger';
 import { PlansService } from './plans.service';
 import { CreatePlanDto, UpdatePlanDto, PlanResponseDto } from './dto';
+import { CreatePlanPriceDto } from './dto/create-plan-price.dto';
+import { UpdatePlanPriceDto } from './dto/update-plan-price.dto';
 import { AuthGuard } from '../../shared/guards/auth.guard';
 import { RolesGuard, UserRole } from '../../shared/guards/roles.guard';
 import { Roles } from '../../shared/decorators/roles.decorator';
@@ -401,7 +403,7 @@ export class PlansController {
   @HttpCode(HttpStatus.CREATED)
   async createPlanPrice(
     @Param('planId', ParseUUIDPipe) planId: string,
-    @Body() createPlanPriceDto: any
+    @Body() createPlanPriceDto: CreatePlanPriceDto
   ) {
     // Adiciona o planId ao DTO
     const createData = { ...createPlanPriceDto, planId };
@@ -502,7 +504,7 @@ export class PlansController {
   async updatePlanPrice(
     @Param('planId', ParseUUIDPipe) planId: string,
     @Param('priceId', ParseUUIDPipe) priceId: string,
-    @Body() updatePlanPriceDto: any
+    @Body() updatePlanPriceDto: UpdatePlanPriceDto
   ) {
     return this.plansService.updatePlanPrice(priceId, updatePlanPriceDto);
   }
