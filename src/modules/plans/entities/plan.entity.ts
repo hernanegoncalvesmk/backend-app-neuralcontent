@@ -135,13 +135,13 @@ export class Plan {
 
   // Relationships
   @ApiProperty({
-    description: 'Funcionalidades do plano',
+    description: 'Relacionamentos plano-feature',
     type: () => [PlanFeature],
     required: false,
   })
-  @OneToMany(() => PlanFeature, (feature) => feature.plan, {
+  @OneToMany(() => PlanFeature, (planFeature) => planFeature.plan, {
     cascade: true,
     eager: false,
   })
-  features: PlanFeature[];
+  planFeatures: PlanFeature[];
 }
