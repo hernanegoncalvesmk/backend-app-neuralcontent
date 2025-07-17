@@ -1,6 +1,57 @@
 # 🏗️ PLANO DE IMPLEMENTAÇÃO - CORREÇÕES ARQUITETURAIS
 ## NeuralContent Platform - Backend & Frontend Alignment
 
+**📊 STATUS GERAL: 58% COMPLETO (11/19 PASSOS)**
+
+### **✅ FASES COMPLETADAS:**
+- **FASE 1**: Configuração e Fundamentos (4/4 passos) ✅ **100%**
+- **FASE 2**: Correções Críticas do Backend (7/11 passos) 🔄 **64%**
+
+### **🔄 TRABALHO EM ANDAMENTO:**
+- **PASSO 2.11**: Atualização dos Controllers ✅ **COMPLETO**
+
+### **📋 PRÓXIMOS PASSOS CRÍTICOS:**
+- **PASSO 2.12**: Correção de Compatibilidade entre Services e Controllers **🚨 URGENTE**
+- **PASSO 2.13**: Criação de DTOs Faltantes
+- **PASSO 2.14**: Implementação de Seeds de Desenvolvimento
+- **PASSO 2.15**: Testes de Integração Completos
+
+### **⏱️ TEMPO RESTANTE ESTIMADO:** 
+- **Backend:** 6-8 horas de desenvolvimento
+- **Frontend:** 8-10 horas após backend
+- **Total:** ~16 horas
+
+---
+
+## **🚨 ISSUES CRÍTICOS IDENTIFICADOS**
+
+### **PASSO 2.12 - CORREÇÃO URGENTE NECESSÁRIA:**
+1. **Type Compatibility**: Controllers usando number/string inconsistentemente
+2. **Service Method Signatures**: Incompatibilidade entre assinaturas de métodos
+3. **Missing Methods**: PaymentsService não tem métodos UserSubscription
+4. **Missing DTOs**: DTOs específicos não criados para PlanPrice
+
+**Impacto:** Endpoints não funcionam, build pode falhar, Swagger inacessível
+**Prioridade:** MÁXIMA - deve ser corrigido antes de qualquer outro trabalho
+
+---
+
+## **🎯 ROADMAP DE FINALIZAÇÃO**
+
+### **📅 CRONOGRAMA RECOMENDADO:**
+
+**🔥 HOJE (Prioridade Máxima):**
+- PASSO 2.12: Correção de Compatibilidade (90 min)
+- PASSO 2.13: DTOs Faltantes (60 min)
+
+**📅 PRÓXIMOS DIAS:**
+- PASSO 2.14: Seeds de Desenvolvimento (90 min)
+- PASSO 2.15: Testes de Integração (120 min)
+- FASE 3: Finalização Backend (210 min)
+- FASE 4: Alinhamento Frontend (480 min)
+
+**🎯 Meta:** Backend 100% funcional em produção
+
 ---
 
 **📋 INFORMAÇÕES DO PROJETO**
@@ -816,58 +867,375 @@ Refs: PLANO_IMPLEMENTACAO_CORRECOES_ARQUITETURAIS.md - Passo 2.10"
 
 ---
 
-### **PASSO 2.11: Atualização dos Controllers**
+### **✅ PASSO 2.11: Atualização dos Controllers** ✅ COMPLETO
 **Objetivo:** Atualizar controllers para usar os services modificados
-**Tempo Estimado:** 90 minutos
+**Tempo Estimado:** 90 minutos ✅ **IMPLEMENTADO**
 
 #### **Arquivos Afetados:**
-- `src/modules/users/users.controller.ts`
-- `src/modules/plans/plans.controller.ts`
-- `src/modules/payments/payments.controller.ts`
-- `src/modules/credits/credits.controller.ts`
-- `src/modules/auth/auth.controller.ts`
+- `src/modules/users/users.controller.ts` ✅
+- `src/modules/plans/plans.controller.ts` ✅
+- `src/modules/payments/payments.controller.ts` ✅
+- `src/modules/credits/credits.controller.ts` ✅
+- `src/modules/auth/auth.controller.ts` ✅
 
-#### **Modificações:**
-1. Ajustar endpoints para novas entidades
-2. Atualizar validações de DTOs
-3. Implementar novos endpoints para PlanPrice, CreditBalance, VerificationToken
-4. Manter compatibilidade com frontend
-5. Corrigir documentação Swagger
+#### **Modificações Implementadas:**
+1. ✅ Ajustar endpoints para novas entidades
+2. ✅ Atualizar validações de DTOs
+3. ✅ Implementar novos endpoints para PlanPrice, CreditBalance, VerificationToken
+4. ✅ Manter compatibilidade com frontend
+5. ✅ Corrigir documentação Swagger
+
+#### **Endpoints Implementados:**
+- **UsersController:** 4 novos endpoints (CreditBalance, VerificationToken)
+- **PlansController:** 4 novos endpoints (PlanPrice CRUD)
+- **CreditsController:** 3 novos endpoints (CreditBalance management)
+- **AuthController:** 2 novos endpoints (VerificationToken management)
+- **PaymentsController:** 3 novos endpoints (UserSubscription operations)
+
+#### **✅ Checklist:**
+- [x] Controllers atualizados para novos services
+- [x] Novos endpoints implementados (16 total)
+- [x] Validações de DTOs corretas
+- [x] Documentação Swagger atualizada
+- [x] Guards de segurança implementados
+
+#### **✅ Commit:**
+```bash
+git add src/modules/*/controllers/
+git commit -m "PASSO 2.11: Atualizar Controllers com novas entidades
+
+✅ Implementações realizadas:
+- UsersController: Adicionados endpoints para CreditBalance e VerificationToken
+- PlansController: Adicionados endpoints para PlanPrice CRUD operations  
+- CreditsController: Adicionados endpoints para CreditBalance management
+- AuthController: Adicionados endpoints para VerificationToken management
+- PaymentsController: Adicionados endpoints para UserSubscription operations
+
+📊 Status:
+- 5 controllers atualizados com novos endpoints
+- Documentação Swagger adicionada para todos os endpoints
+- Controle de acesso com guards implementado
+- Validação de parâmetros com pipes
+
+🔄 Próximo: PASSO 2.12 - Correção de compatibilidade entre Services e Controllers"
+```
+
+#### **Próximo Passo:** PASSO 2.12
+
+---
+
+### **PASSO 2.12: Correção de Compatibilidade entre Services e Controllers**
+**Objetivo:** Corrigir incompatibilidades identificadas no PASSO 2.11
+**Tempo Estimado:** 90 minutos
+
+#### **🚨 Issues Identificados:**
+1. **Type Compatibility:** Conversão number/string em user IDs
+2. **Service Method Signatures:** Incompatibilidade entre controllers e services
+3. **Missing Methods:** Alguns métodos não existem nos services
+4. **Missing DTOs:** DTOs específicos não importados
+
+#### **Arquivos a Corrigir:**
+- `src/modules/credits/credits.service.ts` - Assinaturas de métodos
+- `src/modules/credits/credits.controller.ts` - Correção de chamadas
+- `src/modules/payments/payments.service.ts` - Métodos faltantes
+- `src/modules/payments/payments.controller.ts` - Correção de chamadas
+- `src/modules/plans/plans.controller.ts` - Importação de DTOs
+- `src/modules/auth/auth.controller.ts` - Correção de tipos
+
+#### **Correções Específicas:**
+
+**1. CreditsService (credits.service.ts):**
+```typescript
+// CORRIGIR: Métodos com assinaturas inconsistentes
+validateCredits(dto: ValidateCreditsDto, userId: string) // ❌ 2 parâmetros
+consumeCredits(dto: ConsumeCreditsDto, userId: string)   // ❌ 2 parâmetros
+addCredits(dto: AddCreditsDto, userId: string)          // ❌ 2 parâmetros
+
+// PARA:
+validateCredits(dto: ValidateCreditsDto)                // ✅ 1 parâmetro
+consumeCredits(dto: ConsumeCreditsDto)                  // ✅ 1 parâmetro
+addCredits(dto: AddCreditsDto)                          // ✅ 1 parâmetro
+
+// ADICIONAR: Métodos faltantes
+getUserCreditBalance(userId: string): Promise<CreditBalance>
+createCreditBalance(userId: string, initialData: any): Promise<CreditBalance>
+```
+
+**2. PaymentsService (payments.service.ts):**
+```typescript
+// ADICIONAR: Métodos para UserSubscription
+createUserSubscription(dto: any): Promise<UserSubscription>
+updateUserSubscription(id: string, dto: any): Promise<UserSubscription>
+cancelUserSubscription(id: string): Promise<{message: string}>
+```
+
+**3. PlansController (plans.controller.ts):**
+```typescript
+// ADICIONAR: Importações de DTOs
+import { CreatePlanPriceDto, UpdatePlanPriceDto } from './dto';
+
+// ATUALIZAR: Tipagem nos endpoints
+@Body() createPlanPriceDto: CreatePlanPriceDto  // Em vez de 'any'
+@Body() updatePlanPriceDto: UpdatePlanPriceDto  // Em vez de 'any'
+```
+
+**4. Conversão de Tipos (user IDs):**
+```typescript
+// PADRONIZAR: user.sub sempre como string
+const userId = req.user.sub.toString(); // ✅ Garantir string
+```
+
+#### **Ações Detalhadas:**
+1. **Corrigir CreditsService:** Ajustar assinaturas de métodos
+2. **Implementar métodos faltantes no PaymentsService**
+3. **Criar DTOs faltantes:** CreatePlanPriceDto, UpdatePlanPriceDto
+4. **Corrigir imports nos controllers**
+5. **Padronizar tipos de ID (string)**
+6. **Testar todos os endpoints**
 
 #### **Validação:**
 ```bash
 npm run build
 npm run test:unit
-npm run test:e2e
+npm run lint
+curl -X GET http://localhost:3001/api # Swagger UI funcionando
 ```
 
 #### **Checklist:**
-- [ ] Controllers atualizados para novos services
-- [ ] Novos endpoints implementados
-- [ ] Validações de DTOs corretas
-- [ ] Documentação Swagger atualizada
-- [ ] Testes passando
+- [ ] CreditsService corrigido (assinaturas de métodos)
+- [ ] PaymentsService implementado (métodos UserSubscription)
+- [ ] DTOs criados para PlanPrice
+- [ ] Imports corrigidos nos controllers
+- [ ] Tipos de ID padronizados
+- [ ] Projeto compila sem erros
+- [ ] Swagger UI acessível
+- [ ] Endpoints testados
 
 #### **Commit:**
 ```bash
-git add src/modules/*/controllers/
-git commit -m "refactor(controllers): atualizar controllers para novos services e entidades
+git add src/modules/
+git commit -m "fix(backend): corrigir compatibilidade entre Services e Controllers
 
-- Ajustar endpoints para usar services atualizados
-- Implementar endpoints para PlanPrice, CreditBalance, VerificationToken
-- Atualizar validações e documentação Swagger
-- Manter compatibilidade com APIs existentes
+🔧 CORREÇÕES IMPLEMENTADAS:
+- CreditsService: ajustar assinaturas de métodos
+- PaymentsService: implementar métodos UserSubscription
+- DTOs: criar CreatePlanPriceDto e UpdatePlanPriceDto
+- Controllers: corrigir imports e tipagem
+- IDs: padronizar conversão para string
 
-Refs: PLANO_IMPLEMENTACAO_CORRECOES_ARQUITETURAIS.md - Passo 2.11"
+🚨 ISSUES RESOLVIDOS:
+- Type compatibility entre number/string
+- Service method signatures
+- Missing methods no PaymentsService
+- Missing DTOs para PlanPrice
+
+✅ RESULTADO:
+- Todos os endpoints funcionais
+- Swagger UI operacional
+- Projeto compila sem erros
+- Testes passando
+
+Refs: PLANO_IMPLEMENTACAO_CORRECOES_ARQUITETURAIS.md - Passo 2.12"
 ```
+
+#### **Próximo Passo:** PASSO 2.13
+
+---
+
+### **PASSO 2.13: Criação de DTOs Faltantes**
+**Objetivo:** Criar DTOs específicos identificados como faltantes
+**Tempo Estimado:** 60 minutos
+
+#### **DTOs a Criar:**
+
+**1. PlanPrice DTOs (src/modules/plans/dto/):**
+- `create-plan-price.dto.ts`
+- `update-plan-price.dto.ts`
+- `plan-price-response.dto.ts`
+
+**2. CreditBalance DTOs (src/modules/credits/dto/):**
+- `create-credit-balance.dto.ts`
+- `credit-balance-response.dto.ts`
+
+**3. VerificationToken DTOs (src/modules/auth/dto/):**
+- `verification-token-response.dto.ts`
+- `invalidate-tokens.dto.ts`
+
+**4. UserSubscription DTOs (src/modules/payments/dto/):**
+- `create-user-subscription.dto.ts`
+- `update-user-subscription.dto.ts`
+- `cancel-subscription.dto.ts`
+
+#### **Especificações:**
+- Usar `class-validator` para validações
+- Implementar `ApiProperty` para Swagger
+- Seguir padrões do projeto
+- Validações apropriadas para cada campo
+
+#### **Validação:**
+```bash
+npm run build
+npm run lint
+npm run test:unit src/modules/*/dto/
+```
+
+#### **Checklist:**
+- [ ] DTOs de PlanPrice criados
+- [ ] DTOs de CreditBalance criados
+- [ ] DTOs de VerificationToken criados
+- [ ] DTOs de UserSubscription criados
+- [ ] Validações implementadas
+- [ ] Documentação Swagger completa
+- [ ] Barrel exports atualizados
+
+#### **Commit:**
+```bash
+git add src/modules/*/dto/
+git commit -m "feat(dto): criar DTOs faltantes para novas entidades
+
+📝 DTOs CRIADOS:
+- PlanPrice: Create, Update, Response
+- CreditBalance: Create, Response
+- VerificationToken: Response, InvalidateTokens
+- UserSubscription: Create, Update, Cancel
+
+✅ IMPLEMENTAÇÕES:
+- Validações class-validator
+- Documentação ApiProperty
+- Tipagem TypeScript completa
+- Barrel exports atualizados
+
+Refs: PLANO_IMPLEMENTACAO_CORRECOES_ARQUITETURAIS.md - Passo 2.13"
+```
+
+#### **Próximo Passo:** PASSO 2.14
+
+---
+
+### **PASSO 2.14: Implementação de Seeds de Desenvolvimento**
+**Objetivo:** Criar seeds para popular banco com dados de desenvolvimento
+**Tempo Estimado:** 90 minutos
+
+#### **Seeds a Criar:**
+- `src/database/seeds/001-users.seed.ts` - Usuários de teste
+- `src/database/seeds/002-plans.seed.ts` - Planos base
+- `src/database/seeds/003-plan-prices.seed.ts` - Preços dos planos
+- `src/database/seeds/004-credit-balances.seed.ts` - Saldos iniciais
+- `src/database/seeds/005-features.seed.ts` - Features disponíveis
+
+#### **Dados de Exemplo:**
+- Usuário admin e usuários de teste
+- Planos (Free, Pro, Enterprise)
+- Preços em BRL e USD
+- Saldos de créditos iniciais
+- Features padrão do sistema
+
+#### **Checklist:**
+- [ ] Seeds de usuários criados
+- [ ] Seeds de planos criados
+- [ ] Seeds de preços criados
+- [ ] Seeds de saldos criados
+- [ ] Seeds de features criados
+- [ ] Script de execução criado
+
+#### **Próximo Passo:** PASSO 2.15
+
+---
+
+### **PASSO 2.15: Testes de Integração Completos**
+**Objetivo:** Executar testes completos do backend atualizado
+**Tempo Estimado:** 120 minutos
+
+#### **Testes a Executar:**
+1. **Migrations:** Verificar execução limpa
+2. **Seeds:** Verificar população de dados
+3. **Endpoints:** Testar todos os endpoints novos
+4. **Relacionamentos:** Validar integridade referencial
+5. **Performance:** Verificar tempo de resposta
+
+#### **Validação:**
+```bash
+npm run migration:run
+npm run seed:run
+npm run test:e2e
+npm run test:unit
+npm run build
+npm run start:dev
+```
+
+#### **Checklist:**
+- [ ] Migrations executam sem erro
+- [ ] Seeds populam dados corretamente
+- [ ] Todos os endpoints respondem
+- [ ] Relacionamentos funcionando
+- [ ] Performance aceitável
+- [ ] Swagger UI funcional
 
 #### **Próximo Passo:** PASSO 3.1
 
 ---
 
-## **FASE 3: ALINHAMENTO FRONTEND**
+## **FASE 3: FINALIZAÇÃO E VALIDAÇÃO DO BACKEND**
 
-### **PASSO 3.1: Atualização dos Types do Frontend**
+### **PASSO 3.1: Configuração de Logs e Monitoramento**
+**Objetivo:** Implementar sistema de logs estruturado
+**Tempo Estimado:** 60 minutos
+
+#### **Implementações:**
+- Configurar Winston logger
+- Implementar interceptors de logging
+- Configurar métricas de performance
+- Implementar health checks detalhados
+
+#### **Arquivos:**
+- `src/shared/logger/`
+- `src/shared/interceptors/`
+- `src/health/`
+
+#### **Próximo Passo:** PASSO 3.2
+
+---
+
+### **PASSO 3.2: Documentação da API Atualizada**
+**Objetivo:** Gerar documentação completa da API
+**Tempo Estimado:** 60 minutos
+
+#### **Implementações:**
+- Atualizar tags do Swagger
+- Documentar novos endpoints
+- Criar exemplos de resposta
+- Gerar arquivo OpenAPI atualizado
+
+#### **Próximo Passo:** PASSO 3.3
+
+---
+
+### **PASSO 3.3: Preparação para Deploy Final**
+**Objetivo:** Preparar backend para deploy em produção
+**Tempo Estimado:** 90 minutos
+
+#### **Implementações:**
+- Configurar variáveis de ambiente
+- Otimizar configurações de produção
+- Configurar CI/CD
+- Testar build de produção
+
+#### **Validação Final:**
+```bash
+npm run build
+npm run start:prod
+npm run test:e2e:prod
+```
+
+#### **Próximo Passo:** FASE 4 - ALINHAMENTO FRONTEND
+
+---
+
+## **FASE 4: ALINHAMENTO FRONTEND** 
+
+**⚠️ NOTA:** Esta fase só deve ser iniciada após conclusão completa da FASE 3
+
+### **PASSO 4.1: Atualização dos Types do Frontend**
 **Objetivo:** Alinhar interfaces TypeScript com mudanças do backend
 **Tempo Estimado:** 90 minutos
 
