@@ -237,7 +237,7 @@ export class AuthService {
       // Verificar hash do refresh token
       const isTokenValid = await bcrypt.compare(
         refreshTokenDto.refreshToken, 
-        session.refreshTokenHash
+        session.refreshToken
       );
 
       if (!isTokenValid) {
@@ -250,9 +250,7 @@ export class AuthService {
       const tokens = await this.generateTokens(session.user);
 
       // Atualizar sessão
-      session.refreshTokenHash = await bcrypt.hash(tokens.refreshToken, this.BCRYPT_ROUNDS);
-      session.incrementRefreshCount();
-      session.updateActivity();
+      session.refreshToken = await bcrypt.hash(tokens.refreshToken, this.BCRYPT_ROUNDS);
       await this.sessionRepository.save(session);
 
       this.logger.log(`Token renovado para usuário: ${session.user.email}`);
@@ -301,7 +299,7 @@ export class AuthService {
       // Invalidar sessão
       await this.sessionRepository.update(
         { 
-          userId: payload.sub,
+          userId: payload.sub.toString(),
           isActive: true,
         },
         { 
@@ -378,15 +376,13 @@ export class AuthService {
     expiresAt.setDate(expiresAt.getDate() + 7); // 7 dias
 
     const session = this.sessionRepository.create({
-      userId,
-      refreshTokenHash,
+      userId: userId.toString(),
+      sessionToken: UserSession.generateSessionToken(),
+      refreshToken: refreshTokenHash,
       expiresAt,
       isActive: true,
       ipAddress: clientInfo?.ipAddress,
       userAgent: clientInfo?.userAgent,
-      location: clientInfo?.location,
-      deviceType: clientInfo?.deviceType,
-      lastActivityAt: new Date(),
     });
 
     return await this.sessionRepository.save(session);
@@ -397,7 +393,7 @@ export class AuthService {
    */
   private async limitUserSessions(userId: number, maxSessions: number): Promise<void> {
     const activeSessions = await this.sessionRepository.find({
-      where: { userId, isActive: true },
+      where: { userId: userId.toString(), isActive: true },
       order: { createdAt: 'ASC' },
     });
 
