@@ -1,10 +1,17 @@
-import { IsNotEmpty, IsString, IsNumber, Min, IsOptional, IsDateString } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsString,
+  IsNumber,
+  Min,
+  IsOptional,
+  IsDateString,
+} from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 
 /**
  * DTO para criação de saldo de créditos
- * 
+ *
  * @description Valida dados para criação de novos saldos de créditos
  * @author NeuralContent Team
  * @since 1.0.0
@@ -27,9 +34,12 @@ export class CreateCreditBalanceDto {
     example: 1000,
     minimum: 0,
   })
-  @IsNumber({}, {
-    message: 'Créditos mensais deve ser um número',
-  })
+  @IsNumber(
+    {},
+    {
+      message: 'Créditos mensais deve ser um número',
+    },
+  )
   @Min(0, {
     message: 'Créditos mensais deve ser maior ou igual a zero',
   })
@@ -43,22 +53,28 @@ export class CreateCreditBalanceDto {
     default: 0,
   })
   @IsOptional()
-  @IsNumber({}, {
-    message: 'Créditos utilizados deve ser um número',
-  })
+  @IsNumber(
+    {},
+    {
+      message: 'Créditos utilizados deve ser um número',
+    },
+  )
   @Min(0, {
     message: 'Créditos utilizados deve ser maior ou igual a zero',
   })
-  @Transform(({ value }) => value ? parseInt(value) : 0)
+  @Transform(({ value }) => (value ? parseInt(value) : 0))
   monthlyUsed?: number;
 
   @ApiProperty({
     description: 'Data do próximo reset mensal de créditos',
     example: '2025-08-13T12:00:00Z',
   })
-  @IsDateString({}, {
-    message: 'Data de reset deve ser uma data válida no formato ISO',
-  })
+  @IsDateString(
+    {},
+    {
+      message: 'Data de reset deve ser uma data válida no formato ISO',
+    },
+  )
   monthlyResetAt: string;
 
   @ApiPropertyOptional({
@@ -68,13 +84,16 @@ export class CreateCreditBalanceDto {
     default: 0,
   })
   @IsOptional()
-  @IsNumber({}, {
-    message: 'Créditos extras deve ser um número',
-  })
+  @IsNumber(
+    {},
+    {
+      message: 'Créditos extras deve ser um número',
+    },
+  )
   @Min(0, {
     message: 'Créditos extras deve ser maior ou igual a zero',
   })
-  @Transform(({ value }) => value ? parseInt(value) : 0)
+  @Transform(({ value }) => (value ? parseInt(value) : 0))
   extraCredits?: number;
 
   @ApiPropertyOptional({
@@ -84,13 +103,16 @@ export class CreateCreditBalanceDto {
     default: 0,
   })
   @IsOptional()
-  @IsNumber({}, {
-    message: 'Créditos extras utilizados deve ser um número',
-  })
+  @IsNumber(
+    {},
+    {
+      message: 'Créditos extras utilizados deve ser um número',
+    },
+  )
   @Min(0, {
     message: 'Créditos extras utilizados deve ser maior ou igual a zero',
   })
-  @Transform(({ value }) => value ? parseInt(value) : 0)
+  @Transform(({ value }) => (value ? parseInt(value) : 0))
   extraUsed?: number;
 
   @ApiPropertyOptional({
@@ -100,13 +122,16 @@ export class CreateCreditBalanceDto {
     default: 0,
   })
   @IsOptional()
-  @IsNumber({}, {
-    message: 'Total consumido deve ser um número',
-  })
+  @IsNumber(
+    {},
+    {
+      message: 'Total consumido deve ser um número',
+    },
+  )
   @Min(0, {
     message: 'Total consumido deve ser maior ou igual a zero',
   })
-  @Transform(({ value }) => value ? parseInt(value) : 0)
+  @Transform(({ value }) => (value ? parseInt(value) : 0))
   totalConsumed?: number;
 
   @ApiPropertyOptional({
@@ -114,8 +139,12 @@ export class CreateCreditBalanceDto {
     example: '2025-01-13T12:00:00Z',
   })
   @IsOptional()
-  @IsDateString({}, {
-    message: 'Data da última sincronização deve ser uma data válida no formato ISO',
-  })
+  @IsDateString(
+    {},
+    {
+      message:
+        'Data da última sincronização deve ser uma data válida no formato ISO',
+    },
+  )
   lastSyncAt?: string;
 }

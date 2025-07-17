@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  Logger,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, Between, MoreThan } from 'typeorm';
 import {
@@ -34,7 +39,9 @@ export class AdminService {
   /**
    * Obter estatísticas gerais do sistema
    */
-  async getAdminStats(query: AdminStatsQueryDto): Promise<AdminStatsResponseDto> {
+  async getAdminStats(
+    query: AdminStatsQueryDto,
+  ): Promise<AdminStatsResponseDto> {
     this.logger.log('Gerando estatísticas do sistema');
 
     const { startDate, endDate, period = StatsPeriod.MONTHLY } = query;
@@ -43,12 +50,13 @@ export class AdminService {
     const dateRange = this.getDateRange(startDate, endDate, period);
 
     // Buscar estatísticas em paralelo
-    const [userStats, revenueStats, creditsStats, systemStats] = await Promise.all([
-      this.getUserStats(dateRange),
-      this.getRevenueStats(dateRange),
-      this.getCreditsStats(dateRange),
-      this.getSystemHealthStats(),
-    ]);
+    const [userStats, revenueStats, creditsStats, systemStats] =
+      await Promise.all([
+        this.getUserStats(dateRange),
+        this.getRevenueStats(dateRange),
+        this.getCreditsStats(dateRange),
+        this.getSystemHealthStats(),
+      ]);
 
     return {
       userStats,
@@ -63,7 +71,10 @@ export class AdminService {
   /**
    * Obter estatísticas de usuários
    */
-  private async getUserStats(dateRange: { start: Date; end: Date }): Promise<UserStatsDto> {
+  private async getUserStats(dateRange: {
+    start: Date;
+    end: Date;
+  }): Promise<UserStatsDto> {
     const totalUsers = await this.userRepository.count();
 
     const newUsers = await this.userRepository.count({
@@ -94,7 +105,10 @@ export class AdminService {
       },
     });
 
-    const growthRate = previousUsers > 0 ? ((newUsers - previousUsers) / previousUsers) * 100 : 100;
+    const growthRate =
+      previousUsers > 0
+        ? ((newUsers - previousUsers) / previousUsers) * 100
+        : 100;
 
     return {
       totalUsers,
@@ -108,10 +122,13 @@ export class AdminService {
   /**
    * Obter estatísticas de receita
    */
-  private async getRevenueStats(dateRange: { start: Date; end: Date }): Promise<RevenueStatsDto> {
+  private async getRevenueStats(dateRange: {
+    start: Date;
+    end: Date;
+  }): Promise<RevenueStatsDto> {
     // Por enquanto simulamos os dados de receita
     // Em uma implementação real, seria integrado com o módulo de pagamentos
-    const totalRevenue = 15000.00;
+    const totalRevenue = 15000.0;
     const totalTransactions = 120;
     const averageRevenuePerUser = totalRevenue / totalTransactions;
     const conversionRate = 12.5;
@@ -129,7 +146,10 @@ export class AdminService {
   /**
    * Obter estatísticas de créditos
    */
-  private async getCreditsStats(dateRange: { start: Date; end: Date }): Promise<CreditsStatsDto> {
+  private async getCreditsStats(dateRange: {
+    start: Date;
+    end: Date;
+  }): Promise<CreditsStatsDto> {
     const consumedCredits = await this.creditTransactionRepository
       .createQueryBuilder('ct')
       .select('SUM(ABS(ct.amount))')
@@ -171,13 +191,14 @@ export class AdminService {
       .getRawMany();
 
     const totalUsers = await this.userRepository.count();
-    const averageCreditsPerUser = totalUsers > 0 ? totalCreditsConsumed / totalUsers : 0;
+    const averageCreditsPerUser =
+      totalUsers > 0 ? totalCreditsConsumed / totalUsers : 0;
 
     return {
       totalCreditsConsumed,
       totalCreditsAdded,
       averageCreditsPerUser: Math.round(averageCreditsPerUser * 100) / 100,
-      topCreditConsumers: topConsumers.map(consumer => ({
+      topCreditConsumers: topConsumers.map((consumer) => ({
         userId: consumer.userId,
         userName: consumer.userName || 'Nome não disponível',
         creditsConsumed: parseInt(consumer.creditsConsumed || '0'),
@@ -203,7 +224,9 @@ export class AdminService {
   /**
    * Listar usuários com filtros
    */
-  async getUsers(filters: AdminUserFilterDto): Promise<AdminUserListResponseDto> {
+  async getUsers(
+    filters: AdminUserFilterDto,
+  ): Promise<AdminUserListResponseDto> {
     const { status, role, search, page = 1, limit = 20 } = filters;
 
     const queryBuilder = this.userRepository.createQueryBuilder('user');
@@ -219,7 +242,7 @@ export class AdminService {
     if (search) {
       queryBuilder.andWhere(
         '(user.name ILIKE :search OR user.email ILIKE :search)',
-        { search: `%${search}%` }
+        { search: `%${search}%` },
       );
     }
 
@@ -229,7 +252,7 @@ export class AdminService {
 
     const [users, total] = await queryBuilder.getManyAndCount();
 
-    const usersResponse: AdminUserResponseDto[] = users.map(user => ({
+    const usersResponse: AdminUserResponseDto[] = users.map((user) => ({
       id: user.id.toString(),
       name: `${user.firstName} ${user.lastName}`.trim(),
       email: user.email,
@@ -259,7 +282,9 @@ export class AdminService {
    * Obter usuário específico
    */
   async getUserById(id: string): Promise<AdminUserResponseDto> {
-    const user = await this.userRepository.findOne({ where: { id: parseInt(id) } });
+    const user = await this.userRepository.findOne({
+      where: { id: parseInt(id) },
+    });
 
     if (!user) {
       throw new NotFoundException('Usuário não encontrado');
@@ -284,8 +309,13 @@ export class AdminService {
   /**
    * Atualizar usuário
    */
-  async updateUser(id: string, updateData: AdminUpdateUserDto): Promise<AdminUserResponseDto> {
-    const user = await this.userRepository.findOne({ where: { id: parseInt(id) } });
+  async updateUser(
+    id: string,
+    updateData: AdminUpdateUserDto,
+  ): Promise<AdminUserResponseDto> {
+    const user = await this.userRepository.findOne({
+      where: { id: parseInt(id) },
+    });
 
     if (!user) {
       throw new NotFoundException('Usuário não encontrado');
@@ -314,32 +344,47 @@ export class AdminService {
   /**
    * Executar ação em lote nos usuários
    */
-  async bulkAction(bulkAction: AdminBulkActionDto): Promise<{ success: boolean; affected: number }> {
+  async bulkAction(
+    bulkAction: AdminBulkActionDto,
+  ): Promise<{ success: boolean; affected: number }> {
     const { userIds, action, value } = bulkAction;
 
-    this.logger.log(`Executando ação em lote: ${action} para ${userIds.length} usuários`);
+    this.logger.log(
+      `Executando ação em lote: ${action} para ${userIds.length} usuários`,
+    );
 
     let affected = 0;
 
     switch (action) {
       case 'activate':
-        await this.userRepository.update(userIds.map(id => parseInt(id)), { isActive: true });
+        await this.userRepository.update(
+          userIds.map((id) => parseInt(id)),
+          { isActive: true },
+        );
         affected = userIds.length;
         break;
 
       case 'suspend':
-        await this.userRepository.update(userIds.map(id => parseInt(id)), { isActive: false });
+        await this.userRepository.update(
+          userIds.map((id) => parseInt(id)),
+          { isActive: false },
+        );
         affected = userIds.length;
         break;
 
       case 'ban':
-        await this.userRepository.update(userIds.map(id => parseInt(id)), { isActive: false });
+        await this.userRepository.update(
+          userIds.map((id) => parseInt(id)),
+          { isActive: false },
+        );
         affected = userIds.length;
         break;
 
       case 'add_credits':
         if (!value || value <= 0) {
-          throw new BadRequestException('Valor de créditos deve ser maior que zero');
+          throw new BadRequestException(
+            'Valor de créditos deve ser maior que zero',
+          );
         }
         // TODO: Implementar sistema de créditos quando integrado com a entidade User
         affected = userIds.length;
@@ -347,7 +392,10 @@ export class AdminService {
 
       case 'delete':
         // Soft delete - apenas muda status
-        await this.userRepository.update(userIds.map(id => parseInt(id)), { isActive: false });
+        await this.userRepository.update(
+          userIds.map((id) => parseInt(id)),
+          { isActive: false },
+        );
         affected = userIds.length;
         break;
 
@@ -355,7 +403,9 @@ export class AdminService {
         throw new BadRequestException('Ação não suportada');
     }
 
-    this.logger.log(`Ação em lote ${action} executada com sucesso. ${affected} usuários afetados`);
+    this.logger.log(
+      `Ação em lote ${action} executada com sucesso. ${affected} usuários afetados`,
+    );
 
     return { success: true, affected };
   }
@@ -363,7 +413,11 @@ export class AdminService {
   /**
    * Obter período de datas
    */
-  private getDateRange(startDate?: string, endDate?: string, period?: StatsPeriod) {
+  private getDateRange(
+    startDate?: string,
+    endDate?: string,
+    period?: StatsPeriod,
+  ) {
     const end = endDate ? new Date(endDate) : new Date();
     let start: Date;
 

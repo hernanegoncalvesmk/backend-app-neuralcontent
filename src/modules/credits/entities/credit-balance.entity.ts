@@ -13,18 +13,18 @@ import { User } from '../../users/entities/user.entity';
 
 /**
  * Entidade CreditBalance - Controle centralizado de saldos de créditos
- * 
+ *
  * @description Controla o saldo de créditos de cada usuário de forma centralizada
  * @author NeuralContent Team
  * @since 1.0.0
- * 
+ *
  * @features
  * - Controle de créditos mensais e extras
  * - Cálculo automático de saldos disponíveis
  * - Reset mensal automático
  * - Otimização para consultas frequentes
  * - Sincronização com CreditTransaction
- * 
+ *
  * @table crd_credit_balances - Alinhado com migration 007
  */
 @Entity('crd_credit_balances')
@@ -159,7 +159,10 @@ export class CreditBalance {
     minimum: 0,
   })
   get availableCredits(): number {
-    const monthlyAvailable = Math.max(0, this.monthlyCredits - this.monthlyUsed);
+    const monthlyAvailable = Math.max(
+      0,
+      this.monthlyCredits - this.monthlyUsed,
+    );
     const extraAvailable = Math.max(0, this.extraCredits - this.extraUsed);
     return monthlyAvailable + extraAvailable;
   }

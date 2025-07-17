@@ -7,11 +7,11 @@ import { CreditTransaction } from '../credits/entities/credit-transaction.entity
 
 /**
  * Módulo Administrativo
- * 
+ *
  * @description Módulo responsável pelas funcionalidades administrativas do sistema
  * @author NeuralContent Team
  * @since 1.0.0
- * 
+ *
  * @features
  * - Estatísticas do sistema (usuários, receita, créditos)
  * - Gestão de usuários (CRUD, ações em lote)
@@ -21,12 +21,7 @@ import { CreditTransaction } from '../credits/entities/credit-transaction.entity
  * - Export de dados
  */
 @Module({
-  imports: [
-    TypeOrmModule.forFeature([
-      User,
-      CreditTransaction,
-    ]),
-  ],
+  imports: [TypeOrmModule.forFeature([User, CreditTransaction])],
   controllers: [AdminController],
   providers: [AdminService],
   exports: [AdminService],

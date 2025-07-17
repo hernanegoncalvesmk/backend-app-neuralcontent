@@ -18,7 +18,7 @@ export class BaseCustomException extends HttpException {
       method?: string;
       userAgent?: string;
       ip?: string;
-    }
+    },
   ) {
     super(message, status);
     this.timestamp = new Date().toISOString();
@@ -43,7 +43,7 @@ export class BusinessValidationException extends BaseCustomException {
  */
 export class ResourceNotFoundException extends BaseCustomException {
   constructor(resource: string, identifier?: string | number, context?: any) {
-    const message = identifier 
+    const message = identifier
       ? `${resource} with identifier '${identifier}' not found`
       : `${resource} not found`;
     super(message, HttpStatus.NOT_FOUND, context);
@@ -64,7 +64,11 @@ export class ResourceConflictException extends BaseCustomException {
  */
 export class UnauthorizedOperationException extends BaseCustomException {
   constructor(operation: string, context?: any) {
-    super(`Unauthorized to perform operation: ${operation}`, HttpStatus.FORBIDDEN, context);
+    super(
+      `Unauthorized to perform operation: ${operation}`,
+      HttpStatus.FORBIDDEN,
+      context,
+    );
   }
 }
 
@@ -89,7 +93,11 @@ export class RateLimitExceededException extends BaseCustomException {
   public readonly retryAfter?: number;
 
   constructor(retryAfter?: number, context?: any) {
-    super('Rate limit exceeded. Please try again later.', HttpStatus.TOO_MANY_REQUESTS, context);
+    super(
+      'Rate limit exceeded. Please try again later.',
+      HttpStatus.TOO_MANY_REQUESTS,
+      context,
+    );
     this.retryAfter = retryAfter;
   }
 }
@@ -119,8 +127,17 @@ export class ExternalServiceException extends BaseCustomException {
   public readonly service: string;
   public readonly originalError?: any;
 
-  constructor(service: string, message: string, originalError?: any, context?: any) {
-    super(`External service error (${service}): ${message}`, HttpStatus.BAD_GATEWAY, context);
+  constructor(
+    service: string,
+    message: string,
+    originalError?: any,
+    context?: any,
+  ) {
+    super(
+      `External service error (${service}): ${message}`,
+      HttpStatus.BAD_GATEWAY,
+      context,
+    );
     this.service = service;
     this.originalError = originalError;
   }
@@ -133,7 +150,11 @@ export class ConfigurationException extends BaseCustomException {
   public readonly configKey?: string;
 
   constructor(message: string, configKey?: string, context?: any) {
-    super(`Configuration error: ${message}`, HttpStatus.INTERNAL_SERVER_ERROR, context);
+    super(
+      `Configuration error: ${message}`,
+      HttpStatus.INTERNAL_SERVER_ERROR,
+      context,
+    );
     this.configKey = configKey;
   }
 }
@@ -144,7 +165,11 @@ export class ConfigurationException extends BaseCustomException {
 export class ServiceUnavailableException extends BaseCustomException {
   public readonly estimatedDowntime?: string;
 
-  constructor(message: string = 'Service temporarily unavailable', estimatedDowntime?: string, context?: any) {
+  constructor(
+    message: string = 'Service temporarily unavailable',
+    estimatedDowntime?: string,
+    context?: any,
+  ) {
     super(message, HttpStatus.SERVICE_UNAVAILABLE, context);
     this.estimatedDowntime = estimatedDowntime;
   }
@@ -162,7 +187,7 @@ export class ResourceLimitException extends BaseCustomException {
     super(
       `Resource limit exceeded for ${resource}. Current: ${current}, Limit: ${limit}`,
       HttpStatus.FORBIDDEN,
-      context
+      context,
     );
     this.resource = resource;
     this.limit = limit;
@@ -177,7 +202,12 @@ export class PaymentException extends BaseCustomException {
   public readonly paymentProvider?: string;
   public readonly transactionId?: string;
 
-  constructor(message: string, paymentProvider?: string, transactionId?: string, context?: any) {
+  constructor(
+    message: string,
+    paymentProvider?: string,
+    transactionId?: string,
+    context?: any,
+  ) {
     super(`Payment error: ${message}`, HttpStatus.PAYMENT_REQUIRED, context);
     this.paymentProvider = paymentProvider;
     this.transactionId = transactionId;
@@ -197,7 +227,7 @@ export class ExceptionFactory {
       path: request.url,
       method: request.method,
       userAgent: request.get('user-agent'),
-      ip: request.ip || request.connection?.remoteAddress || 'unknown'
+      ip: request.ip || request.connection?.remoteAddress || 'unknown',
     };
 
     return new ExceptionClass(...args, context);

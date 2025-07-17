@@ -1,18 +1,26 @@
 import { PartialType, OmitType } from '@nestjs/mapped-types';
-import { IsOptional, IsString, MinLength, MaxLength, IsEnum, IsBoolean, Matches } from 'class-validator';
+import {
+  IsOptional,
+  IsString,
+  MinLength,
+  MaxLength,
+  IsEnum,
+  IsBoolean,
+  Matches,
+} from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { CreateUserDto, UserRole } from './create-user.dto';
 
 /**
  * DTO para atualização de usuário
- * 
+ *
  * @description Valida dados para atualização de usuários existentes
  * @author NeuralContent Team
  * @since 1.0.0
  */
 export class UpdateUserDto extends PartialType(
-  OmitType(CreateUserDto, ['password'] as const)
+  OmitType(CreateUserDto, ['password'] as const),
 ) {
   @ApiPropertyOptional({
     description: 'Primeiro nome do usuário',
@@ -193,7 +201,7 @@ export class UpdateUserDto extends PartialType(
 
 /**
  * DTO para mudança de senha
- * 
+ *
  * @description Valida dados para alteração de senha do usuário
  * @author NeuralContent Team
  * @since 1.0.0
@@ -232,12 +240,10 @@ export class ChangePasswordDto {
   @MaxLength(50, {
     message: 'Nova senha deve ter no máximo 50 caracteres',
   })
-  @Matches(
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
-    {
-      message: 'Nova senha deve conter pelo menos: 1 letra minúscula, 1 maiúscula, 1 número e 1 caractere especial',
-    }
-  )
+  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/, {
+    message:
+      'Nova senha deve conter pelo menos: 1 letra minúscula, 1 maiúscula, 1 número e 1 caractere especial',
+  })
   newPassword: string;
 
   @ApiPropertyOptional({

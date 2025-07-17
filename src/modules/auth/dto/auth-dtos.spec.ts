@@ -1,13 +1,13 @@
 import { validate } from 'class-validator';
 import { plainToInstance } from 'class-transformer';
-import { 
-  LoginDto, 
-  RegisterDto, 
-  RefreshTokenDto, 
+import {
+  LoginDto,
+  RegisterDto,
+  RefreshTokenDto,
   ChangePasswordDto,
   ForgotPasswordDto,
   ResetPasswordDto,
-  UserRole 
+  UserRole,
 } from './index';
 
 describe('Auth DTOs Validation', () => {
@@ -16,7 +16,7 @@ describe('Auth DTOs Validation', () => {
       const loginData = {
         email: 'test@neuralcontent.com',
         password: 'password123',
-        rememberMe: false
+        rememberMe: false,
       };
 
       const dto = plainToInstance(LoginDto, loginData);
@@ -31,7 +31,7 @@ describe('Auth DTOs Validation', () => {
     it('should transform email to lowercase and trim', async () => {
       const loginData = {
         email: '  TEST@NEURALCONTENT.COM  ',
-        password: 'password123'
+        password: 'password123',
       };
 
       const dto = plainToInstance(LoginDto, loginData);
@@ -43,7 +43,7 @@ describe('Auth DTOs Validation', () => {
     it('should fail with invalid email', async () => {
       const loginData = {
         email: 'invalid-email',
-        password: 'password123'
+        password: 'password123',
       };
 
       const dto = plainToInstance(LoginDto, loginData);
@@ -57,7 +57,7 @@ describe('Auth DTOs Validation', () => {
     it('should fail with short password', async () => {
       const loginData = {
         email: 'test@neuralcontent.com',
-        password: '123'
+        password: '123',
       };
 
       const dto = plainToInstance(LoginDto, loginData);
@@ -71,7 +71,7 @@ describe('Auth DTOs Validation', () => {
     it('should fail with empty email', async () => {
       const loginData = {
         email: '',
-        password: 'password123'
+        password: 'password123',
       };
 
       const dto = plainToInstance(LoginDto, loginData);
@@ -91,7 +91,7 @@ describe('Auth DTOs Validation', () => {
         role: UserRole.USER,
         phone: '+5511999999999',
         acceptTerms: true,
-        acceptMarketing: false
+        acceptMarketing: false,
       };
 
       const dto = plainToInstance(RegisterDto, registerData);
@@ -107,7 +107,7 @@ describe('Auth DTOs Validation', () => {
       const registerData = {
         name: '  João Silva  ',
         email: '  JOAO@NEURALCONTENT.COM  ',
-        password: 'MinhaS3nh@Segura123'
+        password: 'MinhaS3nh@Segura123',
       };
 
       const dto = plainToInstance(RegisterDto, registerData);
@@ -121,7 +121,7 @@ describe('Auth DTOs Validation', () => {
       const registerData = {
         name: 'João Silva',
         email: 'joao@neuralcontent.com',
-        password: 'weakpassword'
+        password: 'weakpassword',
       };
 
       const dto = plainToInstance(RegisterDto, registerData);
@@ -136,7 +136,7 @@ describe('Auth DTOs Validation', () => {
       const registerData = {
         name: 'João123',
         email: 'joao@neuralcontent.com',
-        password: 'MinhaS3nh@Segura123'
+        password: 'MinhaS3nh@Segura123',
       };
 
       const dto = plainToInstance(RegisterDto, registerData);
@@ -152,14 +152,14 @@ describe('Auth DTOs Validation', () => {
         name: 'João Silva',
         email: 'joao@neuralcontent.com',
         password: 'MinhaS3nh@Segura123',
-        phone: 'abc123xyz' // Formato completamente inválido
+        phone: 'abc123xyz', // Formato completamente inválido
       };
 
       const dto = plainToInstance(RegisterDto, registerData);
       const errors = await validate(dto);
 
       // O telefone é opcional, mas se fornecido deve ser válido
-      const phoneError = errors.find(error => error.property === 'phone');
+      const phoneError = errors.find((error) => error.property === 'phone');
       expect(phoneError).toBeDefined();
       expect(phoneError?.constraints?.matches).toBeDefined();
     });
@@ -168,7 +168,7 @@ describe('Auth DTOs Validation', () => {
       const registerData = {
         name: 'João Silva',
         email: 'joao@neuralcontent.com',
-        password: 'MinhaS3nh@Segura123'
+        password: 'MinhaS3nh@Segura123',
       };
 
       const dto = plainToInstance(RegisterDto, registerData);
@@ -181,7 +181,8 @@ describe('Auth DTOs Validation', () => {
   describe('RefreshTokenDto', () => {
     it('should validate correct refresh token', async () => {
       const refreshData = {
-        refreshToken: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c'
+        refreshToken:
+          'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c',
       };
 
       const dto = plainToInstance(RefreshTokenDto, refreshData);
@@ -193,7 +194,7 @@ describe('Auth DTOs Validation', () => {
 
     it('should fail with invalid JWT format', async () => {
       const refreshData = {
-        refreshToken: 'invalid-jwt-token'
+        refreshToken: 'invalid-jwt-token',
       };
 
       const dto = plainToInstance(RefreshTokenDto, refreshData);
@@ -206,7 +207,7 @@ describe('Auth DTOs Validation', () => {
 
     it('should fail with empty token', async () => {
       const refreshData = {
-        refreshToken: ''
+        refreshToken: '',
       };
 
       const dto = plainToInstance(RefreshTokenDto, refreshData);
@@ -222,7 +223,7 @@ describe('Auth DTOs Validation', () => {
       const changeData = {
         currentPassword: 'currentPass123',
         newPassword: 'MinhaS3nh@Nova456',
-        confirmPassword: 'MinhaS3nh@Nova456'
+        confirmPassword: 'MinhaS3nh@Nova456',
       };
 
       const dto = plainToInstance(ChangePasswordDto, changeData);
@@ -238,7 +239,7 @@ describe('Auth DTOs Validation', () => {
       const changeData = {
         currentPassword: 'currentPass123',
         newPassword: 'weakpassword',
-        confirmPassword: 'weakpassword'
+        confirmPassword: 'weakpassword',
       };
 
       const dto = plainToInstance(ChangePasswordDto, changeData);
@@ -253,7 +254,7 @@ describe('Auth DTOs Validation', () => {
       const changeData = {
         currentPassword: '123',
         newPassword: 'MinhaS3nh@Nova456',
-        confirmPassword: 'MinhaS3nh@Nova456'
+        confirmPassword: 'MinhaS3nh@Nova456',
       };
 
       const dto = plainToInstance(ChangePasswordDto, changeData);
@@ -268,7 +269,7 @@ describe('Auth DTOs Validation', () => {
   describe('ForgotPasswordDto', () => {
     it('should validate correct email', async () => {
       const forgotData = {
-        email: 'user@neuralcontent.com'
+        email: 'user@neuralcontent.com',
       };
 
       const dto = plainToInstance(ForgotPasswordDto, forgotData);
@@ -280,7 +281,7 @@ describe('Auth DTOs Validation', () => {
 
     it('should transform email to lowercase', async () => {
       const forgotData = {
-        email: '  USER@NEURALCONTENT.COM  '
+        email: '  USER@NEURALCONTENT.COM  ',
       };
 
       const dto = plainToInstance(ForgotPasswordDto, forgotData);
@@ -291,7 +292,7 @@ describe('Auth DTOs Validation', () => {
 
     it('should fail with invalid email format', async () => {
       const forgotData = {
-        email: 'invalid-email'
+        email: 'invalid-email',
       };
 
       const dto = plainToInstance(ForgotPasswordDto, forgotData);
@@ -306,7 +307,7 @@ describe('Auth DTOs Validation', () => {
     it('should validate correct reset data', async () => {
       const resetData = {
         resetToken: 'valid-reset-token-123',
-        newPassword: 'MinhaS3nh@Nova456'
+        newPassword: 'MinhaS3nh@Nova456',
       };
 
       const dto = plainToInstance(ResetPasswordDto, resetData);
@@ -320,7 +321,7 @@ describe('Auth DTOs Validation', () => {
     it('should fail with empty reset token', async () => {
       const resetData = {
         resetToken: '',
-        newPassword: 'MinhaS3nh@Nova456'
+        newPassword: 'MinhaS3nh@Nova456',
       };
 
       const dto = plainToInstance(ResetPasswordDto, resetData);
@@ -333,7 +334,7 @@ describe('Auth DTOs Validation', () => {
     it('should fail with weak new password', async () => {
       const resetData = {
         resetToken: 'valid-reset-token-123',
-        newPassword: 'weak'
+        newPassword: 'weak',
       };
 
       const dto = plainToInstance(ResetPasswordDto, resetData);

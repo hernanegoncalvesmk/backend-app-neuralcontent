@@ -7,19 +7,19 @@ import { User } from '../../users/entities/user.entity';
  * Tipos de transação de crédito - Alinhado com migration 008
  */
 export enum CreditTransactionType {
-  GRANTED = 'granted',         // Créditos concedidos
-  USED = 'used',              // Créditos utilizados
-  REFUNDED = 'refunded',      // Reembolso de créditos
-  EXPIRED = 'expired'         // Expiração de créditos
+  GRANTED = 'granted', // Créditos concedidos
+  USED = 'used', // Créditos utilizados
+  REFUNDED = 'refunded', // Reembolso de créditos
+  EXPIRED = 'expired', // Expiração de créditos
 }
 
 /**
  * Entidade CreditTransaction - Transações de créditos no sistema
- * 
+ *
  * @description Controla todas as movimentações de créditos dos usuários
  * @author NeuralContent Team
  * @since 1.0.0
- * 
+ *
  * @features
  * - Rastreamento completo de transações
  * - Tipos diversos de movimentação
@@ -52,7 +52,8 @@ export class CreditTransaction extends BaseEntity {
   type: CreditTransactionType;
 
   @ApiProperty({
-    description: 'Quantidade de créditos na transação (positivo para granted/refunded, negativo para used)',
+    description:
+      'Quantidade de créditos na transação (positivo para granted/refunded, negativo para used)',
     example: -50,
   })
   @Column({ type: 'int' })
@@ -71,11 +72,11 @@ export class CreditTransaction extends BaseEntity {
     example: 'subscription',
     required: false,
   })
-  @Column({ 
-    type: 'varchar', 
-    length: 50, 
-    nullable: true, 
-    name: 'related_entity_type' 
+  @Column({
+    type: 'varchar',
+    length: 50,
+    nullable: true,
+    name: 'related_entity_type',
   })
   relatedEntityType?: string;
 

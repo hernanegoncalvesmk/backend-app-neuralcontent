@@ -1,6 +1,14 @@
-import { MigrationInterface, QueryRunner, Table, TableIndex, TableForeignKey } from 'typeorm';
+import {
+  MigrationInterface,
+  QueryRunner,
+  Table,
+  TableIndex,
+  TableForeignKey,
+} from 'typeorm';
 
-export class CreateVerificationTokensTable1705153300000 implements MigrationInterface {
+export class CreateVerificationTokensTable1705153300000
+  implements MigrationInterface
+{
   name = 'CreateVerificationTokensTable1705153300000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
@@ -32,7 +40,11 @@ export class CreateVerificationTokensTable1705153300000 implements MigrationInte
           {
             name: 'type',
             type: 'enum',
-            enum: ['email_verification', 'password_reset', 'phone_verification'],
+            enum: [
+              'email_verification',
+              'password_reset',
+              'phone_verification',
+            ],
             comment: 'Tipo do token de verificação',
           },
           {
@@ -89,7 +101,10 @@ export class CreateVerificationTokensTable1705153300000 implements MigrationInte
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropForeignKey('usr_verification_tokens', 'FK_usr_verification_tokens_user_id');
+    await queryRunner.dropForeignKey(
+      'usr_verification_tokens',
+      'FK_usr_verification_tokens_user_id',
+    );
     await queryRunner.dropTable('usr_verification_tokens');
   }
 }

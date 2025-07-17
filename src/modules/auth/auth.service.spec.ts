@@ -10,16 +10,11 @@ import { User } from '../users/entities/user.entity';
 import { UserSession } from './entities/user-session.entity';
 import { LoggerService } from '../../shared/logger/logger.service';
 import { CacheService } from '../../shared/cache/cache.service';
-import { 
-  LoginDto, 
-  RegisterDto, 
-  RefreshTokenDto,
-  UserRole 
-} from './dto';
+import { LoginDto, RegisterDto, RefreshTokenDto, UserRole } from './dto';
 import { UserStatus } from '../users/dto/create-user.dto';
-import { 
+import {
   AuthenticationException,
-  BusinessValidationException 
+  BusinessValidationException,
 } from '../../shared/exceptions/custom.exceptions';
 
 describe('AuthService', () => {
@@ -197,7 +192,9 @@ describe('AuthService', () => {
 
     service = module.get<AuthService>(AuthService);
     userRepository = module.get<Repository<User>>(getRepositoryToken(User));
-    sessionRepository = module.get<Repository<UserSession>>(getRepositoryToken(UserSession));
+    sessionRepository = module.get<Repository<UserSession>>(
+      getRepositoryToken(UserSession),
+    );
     jwtService = module.get<JwtService>(JwtService);
     configService = module.get<ConfigService>(ConfigService);
     loggerService = module.get<LoggerService>(LoggerService);
@@ -213,13 +210,20 @@ describe('AuthService', () => {
       // Arrange
       jest.spyOn(userRepository, 'findOne').mockResolvedValue(mockUser as User);
       jest.spyOn(bcrypt, 'compare').mockResolvedValue(true as never);
-      jest.spyOn(jwtService, 'signAsync')
+      jest
+        .spyOn(jwtService, 'signAsync')
         .mockResolvedValueOnce('mock-access-token')
         .mockResolvedValueOnce('mock-refresh-token');
       jest.spyOn(sessionRepository, 'find').mockResolvedValue([]);
-      jest.spyOn(sessionRepository, 'create').mockReturnValue({} as UserSession);
-      jest.spyOn(sessionRepository, 'save').mockResolvedValue({} as UserSession);
-      jest.spyOn(bcrypt, 'hash').mockResolvedValue('hashed-refresh-token' as never);
+      jest
+        .spyOn(sessionRepository, 'create')
+        .mockReturnValue({} as UserSession);
+      jest
+        .spyOn(sessionRepository, 'save')
+        .mockResolvedValue({} as UserSession);
+      jest
+        .spyOn(bcrypt, 'hash')
+        .mockResolvedValue('hashed-refresh-token' as never);
 
       // Act
       const result = await service.login(mockLoginDto);
@@ -240,16 +244,22 @@ describe('AuthService', () => {
       jest.spyOn(userRepository, 'findOne').mockResolvedValue(null);
 
       // Act & Assert
-      await expect(service.login(mockLoginDto)).rejects.toThrow(AuthenticationException);
+      await expect(service.login(mockLoginDto)).rejects.toThrow(
+        AuthenticationException,
+      );
     });
 
     it('should throw AuthenticationException for inactive user', async () => {
       // Arrange
       const inactiveUser = { ...mockUser, status: UserStatus.INACTIVE };
-      jest.spyOn(userRepository, 'findOne').mockResolvedValue(inactiveUser as User);
+      jest
+        .spyOn(userRepository, 'findOne')
+        .mockResolvedValue(inactiveUser as User);
 
       // Act & Assert
-      await expect(service.login(mockLoginDto)).rejects.toThrow(AuthenticationException);
+      await expect(service.login(mockLoginDto)).rejects.toThrow(
+        AuthenticationException,
+      );
     });
 
     it('should throw AuthenticationException for invalid password', async () => {
@@ -258,7 +268,9 @@ describe('AuthService', () => {
       jest.spyOn(bcrypt, 'compare').mockResolvedValue(false as never);
 
       // Act & Assert
-      await expect(service.login(mockLoginDto)).rejects.toThrow(AuthenticationException);
+      await expect(service.login(mockLoginDto)).rejects.toThrow(
+        AuthenticationException,
+      );
     });
   });
 
@@ -269,12 +281,17 @@ describe('AuthService', () => {
       jest.spyOn(bcrypt, 'hash').mockResolvedValue('hashed-password' as never);
       jest.spyOn(userRepository, 'create').mockReturnValue(mockUser as User);
       jest.spyOn(userRepository, 'save').mockResolvedValue(mockUser as User);
-      jest.spyOn(jwtService, 'signAsync')
+      jest
+        .spyOn(jwtService, 'signAsync')
         .mockResolvedValueOnce('mock-access-token')
         .mockResolvedValueOnce('mock-refresh-token');
       jest.spyOn(sessionRepository, 'find').mockResolvedValue([]);
-      jest.spyOn(sessionRepository, 'create').mockReturnValue({} as UserSession);
-      jest.spyOn(sessionRepository, 'save').mockResolvedValue({} as UserSession);
+      jest
+        .spyOn(sessionRepository, 'create')
+        .mockReturnValue({} as UserSession);
+      jest
+        .spyOn(sessionRepository, 'save')
+        .mockResolvedValue({} as UserSession);
 
       // Act
       const result = await service.register(mockRegisterDto);
@@ -297,7 +314,9 @@ describe('AuthService', () => {
       jest.spyOn(userRepository, 'findOne').mockResolvedValue(mockUser as User);
 
       // Act & Assert
-      await expect(service.register(mockRegisterDto)).rejects.toThrow(BusinessValidationException);
+      await expect(service.register(mockRegisterDto)).rejects.toThrow(
+        BusinessValidationException,
+      );
     });
   });
 
@@ -320,13 +339,20 @@ describe('AuthService', () => {
     it('should successfully refresh tokens', async () => {
       // Arrange
       jest.spyOn(jwtService, 'verify').mockReturnValue({ sub: 1 });
-      jest.spyOn(sessionRepository, 'findOne').mockResolvedValue(mockSession as any);
+      jest
+        .spyOn(sessionRepository, 'findOne')
+        .mockResolvedValue(mockSession as any);
       jest.spyOn(bcrypt, 'compare').mockResolvedValue(true as never);
-      jest.spyOn(jwtService, 'signAsync')
+      jest
+        .spyOn(jwtService, 'signAsync')
         .mockResolvedValueOnce('new-access-token')
         .mockResolvedValueOnce('new-refresh-token');
-      jest.spyOn(bcrypt, 'hash').mockResolvedValue('new-hashed-refresh-token' as never);
-      jest.spyOn(sessionRepository, 'save').mockResolvedValue(mockSession as any);
+      jest
+        .spyOn(bcrypt, 'hash')
+        .mockResolvedValue('new-hashed-refresh-token' as never);
+      jest
+        .spyOn(sessionRepository, 'save')
+        .mockResolvedValue(mockSession as any);
 
       // Act
       const result = await service.refreshToken(mockRefreshTokenDto);
@@ -345,17 +371,26 @@ describe('AuthService', () => {
       jest.spyOn(sessionRepository, 'findOne').mockResolvedValue(null);
 
       // Act & Assert
-      await expect(service.refreshToken(mockRefreshTokenDto)).rejects.toThrow(AuthenticationException);
+      await expect(service.refreshToken(mockRefreshTokenDto)).rejects.toThrow(
+        AuthenticationException,
+      );
     });
 
     it('should throw AuthenticationException for expired session', async () => {
       // Arrange
-      const expiredSession = { ...mockSession, isExpired: jest.fn().mockReturnValue(true) };
+      const expiredSession = {
+        ...mockSession,
+        isExpired: jest.fn().mockReturnValue(true),
+      };
       jest.spyOn(jwtService, 'verify').mockReturnValue({ sub: 1 });
-      jest.spyOn(sessionRepository, 'findOne').mockResolvedValue(expiredSession as any);
+      jest
+        .spyOn(sessionRepository, 'findOne')
+        .mockResolvedValue(expiredSession as any);
 
       // Act & Assert
-      await expect(service.refreshToken(mockRefreshTokenDto)).rejects.toThrow(AuthenticationException);
+      await expect(service.refreshToken(mockRefreshTokenDto)).rejects.toThrow(
+        AuthenticationException,
+      );
     });
   });
 
@@ -377,7 +412,7 @@ describe('AuthService', () => {
       expect(result).toEqual({ message: 'Logout realizado com sucesso' });
       expect(sessionRepository.update).toHaveBeenCalledWith(
         { userId: 1, isActive: true },
-        { isActive: false, updatedAt: expect.any(Date) }
+        { isActive: false, updatedAt: expect.any(Date) },
       );
       expect(cacheService.del).toHaveBeenCalledWith('user:1');
     });
@@ -387,7 +422,9 @@ describe('AuthService', () => {
       jest.spyOn(jwtService, 'decode').mockReturnValue(null);
 
       // Act & Assert
-      await expect(service.logout(mockLogoutDto)).rejects.toThrow(AuthenticationException);
+      await expect(service.logout(mockLogoutDto)).rejects.toThrow(
+        AuthenticationException,
+      );
     });
   });
 });

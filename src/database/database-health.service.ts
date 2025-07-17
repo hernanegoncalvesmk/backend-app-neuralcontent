@@ -4,7 +4,7 @@ import { DataSource } from 'typeorm';
 
 /**
  * DatabaseHealthService - Serviço para verificar a saúde do banco de dados
- * 
+ *
  * Fornece métodos para verificar a conectividade e status do banco de dados
  */
 @Injectable()
@@ -22,7 +22,7 @@ export class DatabaseHealthService {
       if (!this.dataSource.isInitialized) {
         return false;
       }
-      
+
       // Executa uma query simples para testar a conexão
       await this.dataSource.query('SELECT 1');
       return true;
@@ -45,7 +45,7 @@ export class DatabaseHealthService {
   }> {
     try {
       const isConnected = await this.isConnected();
-      
+
       if (!isConnected) {
         return {
           isConnected: false,
@@ -58,10 +58,10 @@ export class DatabaseHealthService {
       }
 
       const options = this.dataSource.options as any; // Type assertion for MySQL options
-      
+
       return {
         isConnected: true,
-        database: options.database as string || 'unknown',
+        database: (options.database as string) || 'unknown',
         host: options.host || 'localhost',
         port: options.port || 3306,
         entities: this.dataSource.entityMetadatas.length,
@@ -81,11 +81,13 @@ export class DatabaseHealthService {
     timestamp: Date;
   }> {
     const startTime = Date.now();
-    
+
     try {
-      await this.dataSource.query('SELECT COUNT(*) as count FROM information_schema.tables WHERE table_schema = DATABASE()');
+      await this.dataSource.query(
+        'SELECT COUNT(*) as count FROM information_schema.tables WHERE table_schema = DATABASE()',
+      );
       const responseTime = Date.now() - startTime;
-      
+
       return {
         responseTime,
         timestamp: new Date(),

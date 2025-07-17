@@ -39,7 +39,8 @@ import { CustomThrottlerGuard } from './shared/guards/simple-throttler.guard';
       useFactory: (configService: ConfigService) => [
         {
           name: 'short',
-          ttl: configService.get<number>('app.security.rateLimitTtl', 60) * 1000,
+          ttl:
+            configService.get<number>('app.security.rateLimitTtl', 60) * 1000,
           limit: configService.get<number>('app.security.rateLimitMax', 10),
         },
         {
@@ -87,8 +88,6 @@ import { CustomThrottlerGuard } from './shared/guards/simple-throttler.guard';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer
-      .apply(SecurityMiddleware)
-      .forRoutes('*');
+    consumer.apply(SecurityMiddleware).forRoutes('*');
   }
 }

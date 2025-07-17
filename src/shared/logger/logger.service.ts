@@ -27,7 +27,7 @@ export enum LogLevel {
   WARN = 'warn',
   INFO = 'info',
   DEBUG = 'debug',
-  VERBOSE = 'verbose'
+  VERBOSE = 'verbose',
 }
 
 /**
@@ -98,22 +98,26 @@ export class LoggerService implements NestLoggerService {
       security: true,
       metadata: {
         ...context?.metadata,
-        alertType: 'security'
-      }
+        alertType: 'security',
+      },
     });
   }
 
   /**
    * Log de performance
    */
-  performance(message: string, responseTime: number, context?: LogContext): void {
+  performance(
+    message: string,
+    responseTime: number,
+    context?: LogContext,
+  ): void {
     this.printMessage(LogLevel.INFO, `[PERFORMANCE] ${message}`, {
       ...context,
       responseTime,
       metadata: {
         ...context?.metadata,
-        alertType: 'performance'
-      }
+        alertType: 'performance',
+      },
     });
   }
 
@@ -127,8 +131,8 @@ export class LoggerService implements NestLoggerService {
       metadata: {
         ...context?.metadata,
         alertType: 'audit',
-        action
-      }
+        action,
+      },
     });
   }
 
@@ -140,8 +144,8 @@ export class LoggerService implements NestLoggerService {
       ...context,
       metadata: {
         ...context?.metadata,
-        alertType: 'authentication'
-      }
+        alertType: 'authentication',
+      },
     });
   }
 
@@ -149,20 +153,28 @@ export class LoggerService implements NestLoggerService {
    * Log de integração externa
    */
   external(service: string, message: string, context?: LogContext): void {
-    this.printMessage(LogLevel.INFO, `[EXTERNAL:${service.toUpperCase()}] ${message}`, {
-      ...context,
-      metadata: {
-        ...context?.metadata,
-        alertType: 'external',
-        service
-      }
-    });
+    this.printMessage(
+      LogLevel.INFO,
+      `[EXTERNAL:${service.toUpperCase()}] ${message}`,
+      {
+        ...context,
+        metadata: {
+          ...context?.metadata,
+          alertType: 'external',
+          service,
+        },
+      },
+    );
   }
 
   /**
    * Formata e imprime a mensagem de log
    */
-  private printMessage(level: LogLevel, message: string, context?: LogContext): void {
+  private printMessage(
+    level: LogLevel,
+    message: string,
+    context?: LogContext,
+  ): void {
     const timestamp = new Date().toISOString();
     const pid = process.pid;
     const logContext = this.context || 'Application';
@@ -174,7 +186,7 @@ export class LoggerService implements NestLoggerService {
       level: level.toUpperCase(),
       context: logContext,
       message,
-      ...(context && this.sanitizeContext(context))
+      ...(context && this.sanitizeContext(context)),
     };
 
     // Formatação baseada no ambiente
@@ -193,29 +205,43 @@ export class LoggerService implements NestLoggerService {
   private printColorizedLog(level: LogLevel, logEntry: any): void {
     const colors = {
       [LogLevel.ERROR]: '\x1b[31m', // Vermelho
-      [LogLevel.WARN]: '\x1b[33m',  // Amarelo
-      [LogLevel.INFO]: '\x1b[36m',  // Ciano
+      [LogLevel.WARN]: '\x1b[33m', // Amarelo
+      [LogLevel.INFO]: '\x1b[36m', // Ciano
       [LogLevel.DEBUG]: '\x1b[35m', // Magenta
-      [LogLevel.VERBOSE]: '\x1b[37m' // Branco
+      [LogLevel.VERBOSE]: '\x1b[37m', // Branco
     };
 
     const resetColor = '\x1b[0m';
     const color = colors[level] || colors[LogLevel.INFO];
 
-    const { timestamp, pid, level: logLevel, context, message, ...rest } = logEntry;
-    
+    const {
+      timestamp,
+      pid,
+      level: logLevel,
+      context,
+      message,
+      ...rest
+    } = logEntry;
+
     // Cabeçalho colorizado
     const header = `${color}[${timestamp}]${resetColor} ${color}${logLevel}${resetColor} ${color}[${context}]${resetColor} ${color}${pid}${resetColor}`;
-    
+
     // Mensagem principal
     console.log(`${header} ${message}`);
 
     // Contexto adicional (se existir e não for vazio)
-    const hasValidContext = Object.keys(rest).length > 0 && 
-                           !(Object.keys(rest).length === 1 && typeof rest[Object.keys(rest)[0]] === 'string');
-    
+    const hasValidContext =
+      Object.keys(rest).length > 0 &&
+      !(
+        Object.keys(rest).length === 1 &&
+        typeof rest[Object.keys(rest)[0]] === 'string'
+      );
+
     if (hasValidContext) {
-      console.log(`${color}Context:${resetColor}`, JSON.stringify(rest, null, 2));
+      console.log(
+        `${color}Context:${resetColor}`,
+        JSON.stringify(rest, null, 2),
+      );
     }
   }
 
@@ -231,7 +257,8 @@ export class LoggerService implements NestLoggerService {
       sanitized.error = {
         message: sanitized.error.message,
         name: sanitized.error.name,
-        stack: this.nodeEnv !== 'production' ? sanitized.error.stack : undefined
+        stack:
+          this.nodeEnv !== 'production' ? sanitized.error.stack : undefined,
       };
     }
 
@@ -254,7 +281,7 @@ export class LoggerService implements NestLoggerService {
       method: req.method,
       url: req.originalUrl || req.url,
       userId: req.user?.id,
-      statusCode: res?.statusCode
+      statusCode: res?.statusCode,
     };
   }
 
@@ -269,11 +296,13 @@ export class LoggerService implements NestLoggerService {
    * Extrai o IP real do cliente
    */
   private getClientIp(req: any): string {
-    return req.ip || 
-           req.connection?.remoteAddress || 
-           req.socket?.remoteAddress || 
-           req.headers['x-forwarded-for']?.split(',')[0] ||
-           'unknown';
+    return (
+      req.ip ||
+      req.connection?.remoteAddress ||
+      req.socket?.remoteAddress ||
+      req.headers['x-forwarded-for']?.split(',')[0] ||
+      'unknown'
+    );
   }
 
   /**
@@ -304,8 +333,8 @@ export class LoggerService implements NestLoggerService {
         environment,
         nodeVersion: process.version,
         pid: process.pid,
-        startupTime: new Date().toISOString()
-      }
+        startupTime: new Date().toISOString(),
+      },
     });
   }
 
@@ -317,8 +346,8 @@ export class LoggerService implements NestLoggerService {
       metadata: {
         signal,
         uptime: process.uptime(),
-        shutdownTime: new Date().toISOString()
-      }
+        shutdownTime: new Date().toISOString(),
+      },
     });
   }
 }

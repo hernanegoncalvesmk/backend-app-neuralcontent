@@ -4,7 +4,7 @@ import { BillingPeriod, Currency } from '../entities/plan-price.entity';
 
 /**
  * DTO de resposta para preço de plano
- * 
+ *
  * @description Formata dados de preço de plano para resposta da API
  * @author NeuralContent Team
  * @since 1.0.0
@@ -62,7 +62,7 @@ export class PlanPriceResponseDto {
     required: false,
   })
   @Expose()
-  @Transform(({ value }) => value ? parseFloat(value) : null)
+  @Transform(({ value }) => (value ? parseFloat(value) : null))
   discountPercent?: number;
 
   @ApiProperty({
@@ -85,7 +85,7 @@ export class PlanPriceResponseDto {
     required: false,
   })
   @Expose()
-  @Transform(({ value }) => value ? parseInt(value) : null)
+  @Transform(({ value }) => (value ? parseInt(value) : null))
   displayOrder?: number;
 
   @ApiProperty({
@@ -101,7 +101,9 @@ export class PlanPriceResponseDto {
     example: '2025-01-13T12:00:00Z',
   })
   @Expose()
-  @Transform(({ value }) => value instanceof Date ? value.toISOString() : value)
+  @Transform(({ value }) =>
+    value instanceof Date ? value.toISOString() : value,
+  )
   createdAt: Date;
 
   @ApiProperty({
@@ -109,7 +111,9 @@ export class PlanPriceResponseDto {
     example: '2025-01-13T12:00:00Z',
   })
   @Expose()
-  @Transform(({ value }) => value instanceof Date ? value.toISOString() : value)
+  @Transform(({ value }) =>
+    value instanceof Date ? value.toISOString() : value,
+  )
   updatedAt: Date;
 
   @ApiProperty({
@@ -120,7 +124,8 @@ export class PlanPriceResponseDto {
   @Expose()
   @Transform(({ obj }) => {
     if (obj.discountPercent && obj.discountPercent > 0) {
-      const discount = parseFloat(obj.amount) * (parseFloat(obj.discountPercent) / 100);
+      const discount =
+        parseFloat(obj.amount) * (parseFloat(obj.discountPercent) / 100);
       return parseFloat((parseFloat(obj.amount) - discount).toFixed(2));
     }
     return parseFloat(obj.amount);

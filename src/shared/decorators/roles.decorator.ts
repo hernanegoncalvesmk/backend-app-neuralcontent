@@ -3,7 +3,7 @@ import { UserRole } from '../guards/roles.guard';
 
 /**
  * Roles Decorator - Define roles necessários para acessar um endpoint
- * 
+ *
  * Usage:
  * ```typescript
  * @Roles(UserRole.ADMIN)
@@ -11,14 +11,14 @@ import { UserRole } from '../guards/roles.guard';
  * async adminOnly() {
  *   // Apenas admins podem acessar
  * }
- * 
+ *
  * @Roles(UserRole.ADMIN, UserRole.MODERATOR)
  * @Get('moderator-or-admin')
  * async moderatorOrAdmin() {
  *   // Moderators ou admins podem acessar
  * }
  * ```
- * 
+ *
  * Features:
  * - Suporte para múltiplos roles
  * - Hierarquia automática (admin > moderator > user)

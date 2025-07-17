@@ -19,7 +19,7 @@ describe('NeuralContent API (E2E)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
-    
+
     // Configurar pipes globais
     app.useGlobalPipes(
       new ValidationPipe({
@@ -171,9 +171,7 @@ describe('NeuralContent API (E2E)', () => {
 
   describe('CORS Configuration', () => {
     it.skip('Should handle CORS preflight requests', () => {
-      return request(app.getHttpServer())
-        .options('/health')
-        .expect(204);
+      return request(app.getHttpServer()).options('/health').expect(204);
     });
   });
 });

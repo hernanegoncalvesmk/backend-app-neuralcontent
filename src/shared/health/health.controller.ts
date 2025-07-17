@@ -62,12 +62,13 @@ export class HealthController {
   }
 
   @Get()
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Health Check Completo',
-    description: 'Retorna o status completo da aplicação incluindo todos os serviços e métricas'
+    description:
+      'Retorna o status completo da aplicação incluindo todos os serviços e métricas',
   })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: 'Aplicação saudável',
     schema: {
       example: {
@@ -77,22 +78,37 @@ export class HealthController {
         version: '1.0.0',
         environment: 'development',
         services: {
-          database: { status: 'healthy', response_time: 45, last_check: '2025-07-14T21:00:00.000Z' },
-          cache: { status: 'healthy', response_time: 12, last_check: '2025-07-14T21:00:00.000Z' },
+          database: {
+            status: 'healthy',
+            response_time: 45,
+            last_check: '2025-07-14T21:00:00.000Z',
+          },
+          cache: {
+            status: 'healthy',
+            response_time: 12,
+            last_check: '2025-07-14T21:00:00.000Z',
+          },
           memory: { status: 'healthy', last_check: '2025-07-14T21:00:00.000Z' },
-          disk: { status: 'healthy', last_check: '2025-07-14T21:00:00.000Z' }
+          disk: { status: 'healthy', last_check: '2025-07-14T21:00:00.000Z' },
         },
         metrics: {
           response_time: 123,
           requests_total: 1000,
           errors_total: 5,
           memory_usage: { used_mb: 256, total_mb: 1024, usage_percentage: 25 },
-          system_load: { cpu_count: 4, load_average: [0.1, 0.2, 0.3], uptime_seconds: 3600 }
-        }
-      }
-    }
+          system_load: {
+            cpu_count: 4,
+            load_average: [0.1, 0.2, 0.3],
+            uptime_seconds: 3600,
+          },
+        },
+      },
+    },
   })
-  @ApiResponse({ status: 503, description: 'Serviços degradados ou indisponíveis' })
+  @ApiResponse({
+    status: 503,
+    description: 'Serviços degradados ou indisponíveis',
+  })
   async getHealthStatus(): Promise<HealthStatus> {
     const startTime = Date.now();
     this.requestCount++;
@@ -101,19 +117,20 @@ export class HealthController {
       this.logger.log('Comprehensive health check started');
 
       // Verificar serviços em paralelo
-      const [databaseHealth, cacheHealth, memoryHealth, diskHealth] = await Promise.all([
-        this.checkDatabaseHealth(),
-        this.checkCacheHealth(),
-        this.checkMemoryHealth(),
-        this.checkDiskHealth()
-      ]);
+      const [databaseHealth, cacheHealth, memoryHealth, diskHealth] =
+        await Promise.all([
+          this.checkDatabaseHealth(),
+          this.checkCacheHealth(),
+          this.checkMemoryHealth(),
+          this.checkDiskHealth(),
+        ]);
 
       const responseTime = Date.now() - startTime;
       const overallStatus = this.determineOverallStatus([
         databaseHealth,
         cacheHealth,
         memoryHealth,
-        diskHealth
+        diskHealth,
       ]);
 
       const healthStatus: HealthStatus = {
@@ -126,27 +143,26 @@ export class HealthController {
           database: databaseHealth,
           cache: cacheHealth,
           memory: memoryHealth,
-          disk: diskHealth
+          disk: diskHealth,
         },
         metrics: {
           response_time: responseTime,
           requests_total: this.requestCount,
           errors_total: this.errorCount,
           memory_usage: this.getMemoryUsage(),
-          system_load: this.getSystemLoad()
-        }
+          system_load: this.getSystemLoad(),
+        },
       };
 
       this.logger.log('Comprehensive health check completed', {
         metadata: {
           overall_status: overallStatus,
           response_time: responseTime,
-          services_checked: 4
-        }
+          services_checked: 4,
+        },
       });
 
       return healthStatus;
-
     } catch (error) {
       this.errorCount++;
       this.logger.error('Health check failed', error.stack);
@@ -155,23 +171,24 @@ export class HealthController {
   }
 
   @Get('live')
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Liveness Probe',
-    description: 'Verifica se a aplicação está respondendo (para Kubernetes/Docker)'
+    description:
+      'Verifica se a aplicação está respondendo (para Kubernetes/Docker)',
   })
   @ApiResponse({ status: 200, description: 'Aplicação está viva' })
   getLiveness() {
     return {
       status: 'alive',
       timestamp: new Date().toISOString(),
-      uptime: process.uptime()
+      uptime: process.uptime(),
     };
   }
 
   @Get('ready')
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Readiness Probe',
-    description: 'Verifica se a aplicação está pronta para receber tráfego'
+    description: 'Verifica se a aplicação está pronta para receber tráfego',
   })
   @ApiResponse({ status: 200, description: 'Aplicação está pronta' })
   @ApiResponse({ status: 503, description: 'Aplicação não está pronta' })
@@ -180,10 +197,11 @@ export class HealthController {
       // Verificar serviços críticos
       const [dbHealth, cacheHealth] = await Promise.all([
         this.checkDatabaseHealth(),
-        this.checkCacheHealth()
+        this.checkCacheHealth(),
       ]);
 
-      const isReady = dbHealth.status === 'healthy' && cacheHealth.status !== 'unhealthy';
+      const isReady =
+        dbHealth.status === 'healthy' && cacheHealth.status !== 'unhealthy';
 
       if (!isReady) {
         return {
@@ -191,8 +209,8 @@ export class HealthController {
           timestamp: new Date().toISOString(),
           services: {
             database: dbHealth.status,
-            cache: cacheHealth.status
-          }
+            cache: cacheHealth.status,
+          },
         };
       }
 
@@ -201,24 +219,23 @@ export class HealthController {
         timestamp: new Date().toISOString(),
         services: {
           database: dbHealth.status,
-          cache: cacheHealth.status
-        }
+          cache: cacheHealth.status,
+        },
       };
-
     } catch (error) {
       this.logger.error('Readiness check failed', error.stack);
       return {
         status: 'not_ready',
         timestamp: new Date().toISOString(),
-        error: error.message
+        error: error.message,
       };
     }
   }
 
   @Get('metrics')
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Métricas da Aplicação',
-    description: 'Retorna métricas detalhadas de performance e uso'
+    description: 'Retorna métricas detalhadas de performance e uso',
   })
   @ApiResponse({ status: 200, description: 'Métricas coletadas com sucesso' })
   getMetrics() {
@@ -234,48 +251,53 @@ export class HealthController {
         environment: process.env.NODE_ENV || 'development',
         node_version: process.version,
         platform: process.platform,
-        arch: process.arch
+        arch: process.arch,
       },
       performance: {
         requests_total: this.requestCount,
         errors_total: this.errorCount,
-        error_rate: this.requestCount > 0 ? (this.errorCount / this.requestCount) * 100 : 0,
-        avg_response_time: this.calculateAverageResponseTime()
+        error_rate:
+          this.requestCount > 0
+            ? (this.errorCount / this.requestCount) * 100
+            : 0,
+        avg_response_time: this.calculateAverageResponseTime(),
       },
       memory: {
         rss_mb: Math.round(memoryUsage.rss / 1024 / 1024),
         heap_total_mb: Math.round(memoryUsage.heapTotal / 1024 / 1024),
         heap_used_mb: Math.round(memoryUsage.heapUsed / 1024 / 1024),
         external_mb: Math.round(memoryUsage.external / 1024 / 1024),
-        heap_usage_percentage: Math.round((memoryUsage.heapUsed / memoryUsage.heapTotal) * 100)
+        heap_usage_percentage: Math.round(
+          (memoryUsage.heapUsed / memoryUsage.heapTotal) * 100,
+        ),
       },
       cpu: {
         user_microseconds: cpuUsage.user,
         system_microseconds: cpuUsage.system,
-        total_microseconds: cpuUsage.user + cpuUsage.system
+        total_microseconds: cpuUsage.user + cpuUsage.system,
       },
       process: {
         pid: process.pid,
         ppid: process.ppid,
         title: process.title,
-        cwd: process.cwd()
-      }
+        cwd: process.cwd(),
+      },
     };
   }
 
   @Get('database')
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Health Check do Banco de Dados',
-    description: 'Verifica especificamente a saúde do banco de dados'
+    description: 'Verifica especificamente a saúde do banco de dados',
   })
   async getDatabaseHealth() {
     return await this.checkDatabaseHealth();
   }
 
   @Get('cache')
-  @ApiOperation({ 
+  @ApiOperation({
     summary: 'Health Check do Cache',
-    description: 'Verifica especificamente a saúde do Redis/Cache'
+    description: 'Verifica especificamente a saúde do Redis/Cache',
   })
   async getCacheHealth() {
     return await this.checkCacheHealth();
@@ -295,19 +317,19 @@ export class HealthController {
           connected: dbInfo.isConnected,
           database: dbInfo.database,
           entities_count: dbInfo.entities,
-          migrations_count: dbInfo.migrations
+          migrations_count: dbInfo.migrations,
         },
-        last_check: new Date().toISOString()
+        last_check: new Date().toISOString(),
       };
     } catch (error) {
       const responseTime = Date.now() - startTime;
       this.logger.error('Database health check failed', error.stack);
-      
+
       return {
         status: 'unhealthy',
         response_time: responseTime,
         details: { error: error.message },
-        last_check: new Date().toISOString()
+        last_check: new Date().toISOString(),
       };
     }
   }
@@ -324,19 +346,19 @@ export class HealthController {
         details: {
           connected: cacheHealth.isConnected,
           cache_response_time: cacheHealth.responseTime,
-          error: cacheHealth.error
+          error: cacheHealth.error,
         },
-        last_check: new Date().toISOString()
+        last_check: new Date().toISOString(),
       };
     } catch (error) {
       const responseTime = Date.now() - startTime;
       this.logger.error('Cache health check failed', error.stack);
-      
+
       return {
         status: 'unhealthy',
         response_time: responseTime,
         details: { error: error.message },
-        last_check: new Date().toISOString()
+        last_check: new Date().toISOString(),
       };
     }
   }
@@ -347,16 +369,20 @@ export class HealthController {
       const isHealthy = memoryUsage.usage_percentage < 85; // Considera saudável se usar menos de 85%
 
       return {
-        status: isHealthy ? 'healthy' : (memoryUsage.usage_percentage < 95 ? 'degraded' : 'unhealthy'),
+        status: isHealthy
+          ? 'healthy'
+          : memoryUsage.usage_percentage < 95
+            ? 'degraded'
+            : 'unhealthy',
         details: memoryUsage,
-        last_check: new Date().toISOString()
+        last_check: new Date().toISOString(),
       };
     } catch (error) {
       this.logger.error('Memory health check failed', error.stack);
       return {
         status: 'unhealthy',
         details: { error: error.message },
-        last_check: new Date().toISOString()
+        last_check: new Date().toISOString(),
       };
     }
   }
@@ -369,22 +395,28 @@ export class HealthController {
         details: {
           free_space_mb: 'N/A',
           total_space_mb: 'N/A',
-          usage_percentage: 'N/A'
+          usage_percentage: 'N/A',
         },
-        last_check: new Date().toISOString()
+        last_check: new Date().toISOString(),
       };
     } catch (error) {
       return {
         status: 'unhealthy',
         details: { error: error.message },
-        last_check: new Date().toISOString()
+        last_check: new Date().toISOString(),
       };
     }
   }
 
-  private determineOverallStatus(services: ServiceHealth[]): 'healthy' | 'degraded' | 'unhealthy' {
-    const unhealthyCount = services.filter(s => s.status === 'unhealthy').length;
-    const degradedCount = services.filter(s => s.status === 'degraded').length;
+  private determineOverallStatus(
+    services: ServiceHealth[],
+  ): 'healthy' | 'degraded' | 'unhealthy' {
+    const unhealthyCount = services.filter(
+      (s) => s.status === 'unhealthy',
+    ).length;
+    const degradedCount = services.filter(
+      (s) => s.status === 'degraded',
+    ).length;
 
     if (unhealthyCount > 0) return 'unhealthy';
     if (degradedCount > 0) return 'degraded';
@@ -401,7 +433,7 @@ export class HealthController {
       total_mb: totalMb,
       usage_percentage: Math.round((usedMb / totalMb) * 100),
       heap_used_mb: Math.round(memoryUsage.heapUsed / 1024 / 1024),
-      heap_total_mb: Math.round(memoryUsage.heapTotal / 1024 / 1024)
+      heap_total_mb: Math.round(memoryUsage.heapTotal / 1024 / 1024),
     };
   }
 
@@ -410,7 +442,7 @@ export class HealthController {
     return {
       cpu_count: os.cpus().length,
       load_average: os.loadavg(),
-      uptime_seconds: os.uptime()
+      uptime_seconds: os.uptime(),
     };
   }
 

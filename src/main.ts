@@ -9,7 +9,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule, {
     bufferLogs: true, // Buffer logs until custom logger is ready
   });
-  
+
   const configService = app.get(ConfigService);
   const logger = app.get(LoggerService);
   logger.setContext('Bootstrap');

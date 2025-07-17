@@ -19,7 +19,7 @@ export class LoggingInterceptor implements NestInterceptor {
 
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     const contextType = context.getType();
-    
+
     // Só processa requisições HTTP
     if (contextType !== 'http') {
       return next.handle();
@@ -40,14 +40,14 @@ export class LoggingInterceptor implements NestInterceptor {
           headers: this.sanitizeHeaders(request.headers),
           query: request.query,
           params: request.params,
-        }
+        },
       });
     }
 
     return next.handle().pipe(
       tap((data) => {
         const responseTime = Date.now() - startTime;
-        
+
         // Log de sucesso da requisição
         this.logger.logRequest(request, response, responseTime);
 
@@ -56,7 +56,7 @@ export class LoggingInterceptor implements NestInterceptor {
           this.logger.performance(
             `Slow request detected: ${request.method} ${request.url}`,
             responseTime,
-            requestContext
+            requestContext,
           );
         }
 
@@ -69,13 +69,13 @@ export class LoggingInterceptor implements NestInterceptor {
             metadata: {
               dataType: typeof data,
               dataSize: data ? JSON.stringify(data).length : 0,
-            }
+            },
           });
         }
       }),
       catchError((error) => {
         const responseTime = Date.now() - startTime;
-        
+
         // Log de erro da requisição
         this.logger.error(
           `Request failed: ${request.method} ${request.url}`,
@@ -89,23 +89,26 @@ export class LoggingInterceptor implements NestInterceptor {
               message: error.message,
               status: error.status,
             },
-          }
+          },
         );
 
         // Log de segurança para tentativas suspeitas
         if (this.isSuspiciousRequest(request, error)) {
-          this.logger.security(`Suspicious request detected: ${error.message}`, {
-            ...requestContext,
-            error: {
-              name: error.name,
-              message: error.message,
-              status: error.status,
+          this.logger.security(
+            `Suspicious request detected: ${error.message}`,
+            {
+              ...requestContext,
+              error: {
+                name: error.name,
+                message: error.message,
+                status: error.status,
+              },
             },
-          });
+          );
         }
 
         return throwError(() => error);
-      })
+      }),
     );
   }
 
@@ -114,7 +117,7 @@ export class LoggingInterceptor implements NestInterceptor {
    */
   private sanitizeHeaders(headers: any): any {
     const sanitized = { ...headers };
-    
+
     // Lista de headers que devem ser removidos ou mascarados
     const sensitiveHeaders = [
       'authorization',
@@ -124,7 +127,7 @@ export class LoggingInterceptor implements NestInterceptor {
       'x-auth-token',
     ];
 
-    sensitiveHeaders.forEach(header => {
+    sensitiveHeaders.forEach((header) => {
       if (sanitized[header]) {
         sanitized[header] = '[REDACTED]';
       }
@@ -148,8 +151,11 @@ export class LoggingInterceptor implements NestInterceptor {
     }
 
     // Requisições com payloads muito grandes
-    if (request.headers['content-length'] && 
-        parseInt(request.headers['content-length']) > 10 * 1024 * 1024) { // 10MB
+    if (
+      request.headers['content-length'] &&
+      parseInt(request.headers['content-length']) > 10 * 1024 * 1024
+    ) {
+      // 10MB
       return true;
     }
 
@@ -162,7 +168,7 @@ export class LoggingInterceptor implements NestInterceptor {
     ];
 
     const urlToCheck = `${request.url} ${JSON.stringify(request.query)} ${JSON.stringify(request.body)}`;
-    
-    return suspiciousPatterns.some(pattern => pattern.test(urlToCheck));
+
+    return suspiciousPatterns.some((pattern) => pattern.test(urlToCheck));
   }
 }

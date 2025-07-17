@@ -2,7 +2,7 @@ import { SetMetadata } from '@nestjs/common';
 
 /**
  * Public Decorator - Marca rotas como públicas (sem autenticação)
- * 
+ *
  * Usage:
  * ```typescript
  * @Public()
@@ -11,7 +11,7 @@ import { SetMetadata } from '@nestjs/common';
  *   // Esta rota não requer autenticação
  * }
  * ```
- * 
+ *
  * Features:
  * - Bypass do AuthGuard
  * - Usado para endpoints de login, registro, etc.

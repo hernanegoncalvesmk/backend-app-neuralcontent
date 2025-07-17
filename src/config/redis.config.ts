@@ -34,7 +34,10 @@ export default registerAs('redis', (): RedisConfig => {
     keyPrefix: process.env.REDIS_KEY_PREFIX || 'neuralcontent:',
     retryAttempts: parseIntSafe(process.env.REDIS_RETRY_ATTEMPTS, 3),
     retryDelay: parseIntSafe(process.env.REDIS_RETRY_DELAY, 1000),
-    maxRetriesPerRequest: parseIntSafe(process.env.REDIS_MAX_RETRIES_PER_REQUEST, 3),
+    maxRetriesPerRequest: parseIntSafe(
+      process.env.REDIS_MAX_RETRIES_PER_REQUEST,
+      3,
+    ),
     lazyConnect: process.env.REDIS_LAZY_CONNECT === 'true' || true,
     keepAlive: parseIntSafe(process.env.REDIS_KEEP_ALIVE, 30000),
     family: parseIntSafe(process.env.REDIS_FAMILY, 4),

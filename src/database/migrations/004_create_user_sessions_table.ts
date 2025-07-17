@@ -1,6 +1,14 @@
-import { MigrationInterface, QueryRunner, Table, TableIndex, TableForeignKey } from 'typeorm';
+import {
+  MigrationInterface,
+  QueryRunner,
+  Table,
+  TableIndex,
+  TableForeignKey,
+} from 'typeorm';
 
-export class CreateUserSessionsTable1705152700000 implements MigrationInterface {
+export class CreateUserSessionsTable1705152700000
+  implements MigrationInterface
+{
   name = 'CreateUserSessionsTable1705152700000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
@@ -133,7 +141,10 @@ export class CreateUserSessionsTable1705152700000 implements MigrationInterface 
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropForeignKey('user_sessions', 'FK_user_sessions_user_id');
+    await queryRunner.dropForeignKey(
+      'user_sessions',
+      'FK_user_sessions_user_id',
+    );
     await queryRunner.dropTable('user_sessions');
   }
 }

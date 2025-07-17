@@ -1,9 +1,21 @@
-import { Injectable, NotFoundException, ConflictException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, FindOptionsWhere } from 'typeorm';
 import { plainToClass } from 'class-transformer';
 import { Plan, PlanFeature, PlanPrice } from './entities';
-import { CreatePlanDto, UpdatePlanDto, PlanResponseDto, CreatePlanPriceDto, UpdatePlanPriceDto, PlanPriceResponseDto } from './dto';
+import {
+  CreatePlanDto,
+  UpdatePlanDto,
+  PlanResponseDto,
+  CreatePlanPriceDto,
+  UpdatePlanPriceDto,
+  PlanPriceResponseDto,
+} from './dto';
 
 @Injectable()
 export class PlansService {
@@ -26,7 +38,9 @@ export class PlansService {
     });
 
     if (existingPlan) {
-      throw new ConflictException(`Plano com slug '${createPlanDto.slug}' já existe`);
+      throw new ConflictException(
+        `Plano com slug '${createPlanDto.slug}' já existe`,
+      );
     }
 
     // Criar o plano
@@ -35,7 +49,8 @@ export class PlansService {
       monthlyPrice: createPlanDto.monthlyPrice || 0,
       annualPrice: createPlanDto.annualPrice || 0,
       monthlyCredits: createPlanDto.monthlyCredits || 0,
-      isActive: createPlanDto.isActive !== undefined ? createPlanDto.isActive : true,
+      isActive:
+        createPlanDto.isActive !== undefined ? createPlanDto.isActive : true,
       isFeatured: createPlanDto.isFeatured || false,
       sortOrder: createPlanDto.sortOrder || 0,
     });
@@ -49,7 +64,7 @@ export class PlansService {
    */
   async findAll(includeInactive = false): Promise<PlanResponseDto[]> {
     const whereCondition: FindOptionsWhere<Plan> = {};
-    
+
     if (!includeInactive) {
       whereCondition.isActive = true;
     }
@@ -63,7 +78,7 @@ export class PlansService {
       },
     });
 
-    return plans.map(plan => this.transformToDto(plan));
+    return plans.map((plan) => this.transformToDto(plan));
   }
 
   /**
@@ -101,7 +116,10 @@ export class PlansService {
   /**
    * Atualizar um plano
    */
-  async update(id: string, updatePlanDto: UpdatePlanDto): Promise<PlanResponseDto> {
+  async update(
+    id: string,
+    updatePlanDto: UpdatePlanDto,
+  ): Promise<PlanResponseDto> {
     const plan = await this.planRepository.findOne({
       where: { id },
       relations: ['features'],
@@ -148,7 +166,7 @@ export class PlansService {
 
     plan.isActive = !plan.isActive;
     const updatedPlan = await this.planRepository.save(plan);
-    
+
     return this.transformToDto(updatedPlan);
   }
 
@@ -167,7 +185,7 @@ export class PlansService {
 
     plan.isFeatured = featured;
     const updatedPlan = await this.planRepository.save(plan);
-    
+
     return this.transformToDto(updatedPlan);
   }
 
@@ -176,7 +194,7 @@ export class PlansService {
    */
   async findByType(type: string): Promise<PlanResponseDto[]> {
     const plans = await this.planRepository.find({
-      where: { 
+      where: {
         type: type as any,
         isActive: true,
       },
@@ -186,7 +204,7 @@ export class PlansService {
       },
     });
 
-    return plans.map(plan => this.transformToDto(plan));
+    return plans.map((plan) => this.transformToDto(plan));
   }
 
   /**
@@ -200,17 +218,17 @@ export class PlansService {
     byType: Record<string, number>;
   }> {
     const plans = await this.planRepository.find();
-    
+
     const stats = {
       total: plans.length,
-      active: plans.filter(p => p.isActive).length,
-      inactive: plans.filter(p => !p.isActive).length,
-      featured: plans.filter(p => p.isFeatured).length,
+      active: plans.filter((p) => p.isActive).length,
+      inactive: plans.filter((p) => !p.isActive).length,
+      featured: plans.filter((p) => p.isFeatured).length,
       byType: {} as Record<string, number>,
     };
 
     // Contar por tipo
-    plans.forEach(plan => {
+    plans.forEach((plan) => {
       stats.byType[plan.type] = (stats.byType[plan.type] || 0) + 1;
     });
 
@@ -232,16 +250,22 @@ export class PlansService {
   private validatePlanData(planData: Partial<Plan>): void {
     // Validar que preços sejam positivos
     if (planData.monthlyPrice && planData.monthlyPrice < 0) {
-      throw new BadRequestException('Preço mensal deve ser maior ou igual a zero');
+      throw new BadRequestException(
+        'Preço mensal deve ser maior ou igual a zero',
+      );
     }
 
     if (planData.annualPrice && planData.annualPrice < 0) {
-      throw new BadRequestException('Preço anual deve ser maior ou igual a zero');
+      throw new BadRequestException(
+        'Preço anual deve ser maior ou igual a zero',
+      );
     }
 
     // Validar que créditos sejam positivos
     if (planData.monthlyCredits && planData.monthlyCredits < 0) {
-      throw new BadRequestException('Créditos mensais deve ser maior ou igual a zero');
+      throw new BadRequestException(
+        'Créditos mensais deve ser maior ou igual a zero',
+      );
     }
 
     // Validar que ordem seja positiva
@@ -257,11 +281,15 @@ export class PlansService {
   /**
    * Criar novo preço para plano
    */
-  async createPlanPrice(createPlanPriceDto: CreatePlanPriceDto): Promise<PlanPriceResponseDto> {
+  async createPlanPrice(
+    createPlanPriceDto: CreatePlanPriceDto,
+  ): Promise<PlanPriceResponseDto> {
     // Verificar se o plano existe
     const plan = await this.findOne(createPlanPriceDto.planId);
     if (!plan) {
-      throw new NotFoundException(`Plano com ID '${createPlanPriceDto.planId}' não encontrado`);
+      throw new NotFoundException(
+        `Plano com ID '${createPlanPriceDto.planId}' não encontrado`,
+      );
     }
 
     // Verificar se já existe preço para essa combinação
@@ -276,7 +304,7 @@ export class PlansService {
     if (existingPrice) {
       throw new ConflictException(
         `Preço para plano '${createPlanPriceDto.planId}' com moeda '${createPlanPriceDto.currency}' ` +
-        `e período '${createPlanPriceDto.intervalType}' já existe`
+          `e período '${createPlanPriceDto.intervalType}' já existe`,
       );
     }
 
@@ -295,7 +323,7 @@ export class PlansService {
       order: { intervalType: 'ASC', currency: 'ASC' },
     });
 
-    return prices.map(price => plainToClass(PlanPriceResponseDto, price));
+    return prices.map((price) => plainToClass(PlanPriceResponseDto, price));
   }
 
   /**
@@ -316,7 +344,10 @@ export class PlansService {
   /**
    * Atualizar preço do plano
    */
-  async updatePlanPrice(id: string, updatePlanPriceDto: UpdatePlanPriceDto): Promise<PlanPriceResponseDto> {
+  async updatePlanPrice(
+    id: string,
+    updatePlanPriceDto: UpdatePlanPriceDto,
+  ): Promise<PlanPriceResponseDto> {
     const planPrice = await this.planPriceRepository.findOne({
       where: { id },
     });
@@ -326,10 +357,15 @@ export class PlansService {
     }
 
     // Se planId foi alterado, verificar se o novo plano existe
-    if (updatePlanPriceDto.planId && updatePlanPriceDto.planId !== planPrice.planId) {
+    if (
+      updatePlanPriceDto.planId &&
+      updatePlanPriceDto.planId !== planPrice.planId
+    ) {
       const plan = await this.findOne(updatePlanPriceDto.planId);
       if (!plan) {
-        throw new NotFoundException(`Plano com ID '${updatePlanPriceDto.planId}' não encontrado`);
+        throw new NotFoundException(
+          `Plano com ID '${updatePlanPriceDto.planId}' não encontrado`,
+        );
       }
     }
 
@@ -360,13 +396,13 @@ export class PlansService {
   async getPlanPriceByCriteria(
     planId: string,
     currency: any,
-    intervalType: any
+    intervalType: any,
   ): Promise<PlanPriceResponseDto | null> {
     const price = await this.planPriceRepository.findOne({
       where: {
         planId,
-        currency: currency as any,
-        intervalType: intervalType as any,
+        currency: currency,
+        intervalType: intervalType,
         isActive: true,
       },
     });

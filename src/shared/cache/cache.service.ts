@@ -4,7 +4,7 @@ import { Cache } from 'cache-manager';
 
 /**
  * Cache Service - Serviço para operações avançadas de cache
- * 
+ *
  * Funcionalidades:
  * - Get/Set com TTL customizável
  * - Operações batch
@@ -18,9 +18,7 @@ export class CacheService {
   private cacheHits = 0;
   private cacheMisses = 0;
 
-  constructor(
-    @Inject(CACHE_MANAGER) private cacheManager: Cache,
-  ) {}
+  constructor(@Inject(CACHE_MANAGER) private cacheManager: Cache) {}
 
   /**
    * Obter valor do cache
@@ -28,7 +26,7 @@ export class CacheService {
   async get<T>(key: string): Promise<T | null> {
     try {
       const value = await this.cacheManager.get<T>(key);
-      
+
       if (value !== null && value !== undefined) {
         this.cacheHits++;
         this.logger.debug(`Cache HIT for key: ${key}`);
@@ -50,7 +48,9 @@ export class CacheService {
   async set<T>(key: string, value: T, ttl?: number): Promise<void> {
     try {
       await this.cacheManager.set(key, value, ttl);
-      this.logger.debug(`Cache SET for key: ${key}${ttl ? ` (TTL: ${ttl}s)` : ''}`);
+      this.logger.debug(
+        `Cache SET for key: ${key}${ttl ? ` (TTL: ${ttl}s)` : ''}`,
+      );
     } catch (error) {
       this.logger.error(`Cache SET error for key ${key}:`, error);
     }
@@ -101,10 +101,10 @@ export class CacheService {
 
       // Se não existe, executar factory function
       const value = await factory();
-      
+
       // Salvar no cache
       await this.set(key, value, ttl);
-      
+
       return value;
     } catch (error) {
       this.logger.error(`Cache getOrSet error for key ${key}:`, error);
@@ -124,7 +124,10 @@ export class CacheService {
       // Implementação específica dependeria da versão do cache-manager-redis-store
       // Por enquanto, log de warning
     } catch (error) {
-      this.logger.error(`Cache pattern invalidation error for ${pattern}:`, error);
+      this.logger.error(
+        `Cache pattern invalidation error for ${pattern}:`,
+        error,
+      );
     }
   }
 
@@ -137,17 +140,17 @@ export class CacheService {
     error?: string;
   }> {
     const startTime = Date.now();
-    
+
     try {
       // Teste simples de conectividade
       const testKey = 'health_check_test';
       const testValue = Date.now().toString();
-      
+
       await this.set(testKey, testValue, 1); // TTL de 1 segundo
       const retrieved = await this.get(testKey);
-      
+
       const responseTime = Date.now() - startTime;
-      
+
       if (retrieved === testValue) {
         return {
           isConnected: true,

@@ -44,17 +44,11 @@ export class AddCreditsDto {
 
   @ApiProperty({
     description: 'Tipo da transação de adição',
-    enum: [
-      CreditTransactionType.GRANTED,
-      CreditTransactionType.REFUNDED,
-    ],
+    enum: [CreditTransactionType.GRANTED, CreditTransactionType.REFUNDED],
     example: CreditTransactionType.GRANTED,
   })
   @IsNotEmpty()
-  @IsEnum([
-    CreditTransactionType.GRANTED,
-    CreditTransactionType.REFUNDED,
-  ])
+  @IsEnum([CreditTransactionType.GRANTED, CreditTransactionType.REFUNDED])
   type: CreditTransactionType;
 
   @ApiProperty({

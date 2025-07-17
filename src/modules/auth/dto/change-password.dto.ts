@@ -1,9 +1,15 @@
-import { IsNotEmpty, IsString, MinLength, MaxLength, Matches } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsString,
+  MinLength,
+  MaxLength,
+  Matches,
+} from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
 /**
  * DTO para alteração de senha de usuário autenticado
- * 
+ *
  * @description Valida dados para mudança de senha por usuário logado
  * @author NeuralContent Team
  * @since 1.0.0
@@ -47,12 +53,10 @@ export class ChangePasswordDto {
   @MaxLength(50, {
     message: 'Nova senha deve ter no máximo 50 caracteres',
   })
-  @Matches(
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/, 
-    {
-      message: 'Nova senha deve conter pelo menos: 1 letra minúscula, 1 maiúscula, 1 número e 1 caractere especial',
-    }
-  )
+  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/, {
+    message:
+      'Nova senha deve conter pelo menos: 1 letra minúscula, 1 maiúscula, 1 número e 1 caractere especial',
+  })
   newPassword: string;
 
   @ApiProperty({

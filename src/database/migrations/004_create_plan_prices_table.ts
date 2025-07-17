@@ -1,4 +1,10 @@
-import { MigrationInterface, QueryRunner, Table, TableIndex, TableForeignKey } from 'typeorm';
+import {
+  MigrationInterface,
+  QueryRunner,
+  Table,
+  TableIndex,
+  TableForeignKey,
+} from 'typeorm';
 
 export class CreatePlanPricesTable1705152700000 implements MigrationInterface {
   name = 'CreatePlanPricesTable1705152700000';
@@ -107,7 +113,10 @@ export class CreatePlanPricesTable1705152700000 implements MigrationInterface {
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropForeignKey('pln_plan_prices', 'FK_pln_plan_prices_plan_id');
+    await queryRunner.dropForeignKey(
+      'pln_plan_prices',
+      'FK_pln_plan_prices_plan_id',
+    );
     await queryRunner.dropTable('pln_plan_prices');
   }
 }

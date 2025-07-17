@@ -11,27 +11,33 @@ const dataSourceOptions: DataSourceOptions = {
   username: process.env.DB_USERNAME || 'root',
   password: process.env.DB_PASSWORD || '',
   database: process.env.DB_NAME || 'neuralcontent',
-  
+
   // Entity and migration paths
   entities: [__dirname + '/../**/*.entity{.ts,.js}'],
   migrations: [__dirname + '/migrations/*{.ts,.js}'],
   subscribers: [__dirname + '/subscribers/*{.ts,.js}'],
-  
+
   // Development settings
   synchronize: process.env.NODE_ENV === 'development',
-  logging: process.env.NODE_ENV === 'development' ? ['query', 'error', 'schema'] : ['error'],
-  
+  logging:
+    process.env.NODE_ENV === 'development'
+      ? ['query', 'error', 'schema']
+      : ['error'],
+
   // Connection settings
   charset: 'utf8mb4',
   timezone: 'Z',
   supportBigNumbers: true,
   bigNumberStrings: false,
-  
+
   // SSL configuration for production
-  ssl: process.env.NODE_ENV === 'production' ? {
-    rejectUnauthorized: false
-  } : false,
-  
+  ssl:
+    process.env.NODE_ENV === 'production'
+      ? {
+          rejectUnauthorized: false,
+        }
+      : false,
+
   // Migration settings
   migrationsRun: false,
   migrationsTableName: 'migrations',

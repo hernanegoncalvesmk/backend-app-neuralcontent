@@ -42,7 +42,15 @@ export class ConsumeCreditsDto {
   @ApiProperty({
     description: 'Tipo de serviço que está consumindo os créditos',
     example: 'text_generation',
-    enum: ['text_generation', 'image_generation', 'translation', 'summarization', 'voice_synthesis', 'document_analysis', 'custom_service'],
+    enum: [
+      'text_generation',
+      'image_generation',
+      'translation',
+      'summarization',
+      'voice_synthesis',
+      'document_analysis',
+      'custom_service',
+    ],
   })
   @IsNotEmpty()
   @IsString()

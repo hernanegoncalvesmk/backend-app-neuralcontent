@@ -42,7 +42,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
       message,
       code,
       requestContext,
-      requestId
+      requestId,
     );
 
     // Log crítico do erro
@@ -55,7 +55,11 @@ export class AllExceptionsFilter implements ExceptionFilter {
   /**
    * Analisa a exceção para determinar status, mensagem e código
    */
-  private analyzeException(exception: unknown): { status: number; message: string; code: string } {
+  private analyzeException(exception: unknown): {
+    status: number;
+    message: string;
+    code: string;
+  } {
     // Erro de validação do class-validator
     if (this.isValidationError(exception)) {
       return {
@@ -131,7 +135,11 @@ export class AllExceptionsFilter implements ExceptionFilter {
   /**
    * Analisa erros específicos de banco de dados
    */
-  private analyzeDatabaseError(error: any): { status: number; message: string; code: string } {
+  private analyzeDatabaseError(error: any): {
+    status: number;
+    message: string;
+    code: string;
+  } {
     const errorCode = error.code || error.errno;
     const sqlState = error.sqlState;
 
@@ -206,7 +214,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
     message: string,
     code: string,
     requestContext: any,
-    requestId: string
+    requestId: string,
   ): ErrorResponse {
     const errorResponse: ErrorResponse = {
       success: false,
@@ -246,7 +254,11 @@ export class AllExceptionsFilter implements ExceptionFilter {
   /**
    * Faz log crítico do erro
    */
-  private logCriticalError(exception: unknown, errorResponse: ErrorResponse, requestContext: any) {
+  private logCriticalError(
+    exception: unknown,
+    errorResponse: ErrorResponse,
+    requestContext: any,
+  ) {
     const { statusCode, code, message, requestId } = errorResponse.error;
 
     const logContext = {
@@ -258,20 +270,25 @@ export class AllExceptionsFilter implements ExceptionFilter {
       userAgent: requestContext.userAgent,
       error: {
         name: exception instanceof Error ? exception.name : 'UnknownError',
-        message: exception instanceof Error ? exception.message : String(exception),
+        message:
+          exception instanceof Error ? exception.message : String(exception),
         stack: exception instanceof Error ? exception.stack : undefined,
       },
     };
 
     try {
       // Usar nosso logger customizado
-      this.logger.error(`Critical Error [${code}]: ${message}`, 
-        exception instanceof Error ? exception.stack : undefined, 
-        logContext
+      this.logger.error(
+        `Critical Error [${code}]: ${message}`,
+        exception instanceof Error ? exception.stack : undefined,
+        logContext,
       );
     } catch (loggerError) {
       // Fallback para o logger padrão do NestJS se nosso logger falhar
-      this.fallbackLogger.error(`Critical Error [${code}]: ${message}`, exception);
+      this.fallbackLogger.error(
+        `Critical Error [${code}]: ${message}`,
+        exception,
+      );
       this.fallbackLogger.error('Logger service failed:', loggerError);
     }
 
@@ -303,9 +320,11 @@ export class AllExceptionsFilter implements ExceptionFilter {
    * Verifica se é erro de validação
    */
   private isValidationError(exception: unknown): boolean {
-    return exception instanceof Error && 
-           (exception.name === 'ValidationError' || 
-            exception.message.includes('validation'));
+    return (
+      exception instanceof Error &&
+      (exception.name === 'ValidationError' ||
+        exception.message.includes('validation'))
+    );
   }
 
   /**
@@ -313,7 +332,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
    */
   private isDatabaseError(exception: unknown): boolean {
     if (!(exception instanceof Error)) return false;
-    
+
     const dbErrorIndicators = [
       'QueryFailedError',
       'ConnectionNotFoundError',
@@ -323,13 +342,14 @@ export class AllExceptionsFilter implements ExceptionFilter {
       'ETIMEDOUT',
       'ER_',
       'errno',
-      'sqlState'
+      'sqlState',
     ];
 
-    return dbErrorIndicators.some(indicator => 
-      exception.name.includes(indicator) || 
-      exception.message.includes(indicator) ||
-      (exception as any).code?.toString().includes(indicator)
+    return dbErrorIndicators.some(
+      (indicator) =>
+        exception.name.includes(indicator) ||
+        exception.message.includes(indicator) ||
+        (exception as any).code?.toString().includes(indicator),
     );
   }
 
@@ -337,26 +357,31 @@ export class AllExceptionsFilter implements ExceptionFilter {
    * Verifica se é erro de sintaxe JSON
    */
   private isJSONSyntaxError(exception: unknown): boolean {
-    return exception instanceof SyntaxError && 
-           exception.message.includes('JSON');
+    return (
+      exception instanceof SyntaxError && exception.message.includes('JSON')
+    );
   }
 
   /**
    * Verifica se é erro de timeout
    */
   private isTimeoutError(exception: unknown): boolean {
-    return exception instanceof Error && 
-           (exception.message.includes('timeout') || 
-            exception.message.includes('ETIMEDOUT'));
+    return (
+      exception instanceof Error &&
+      (exception.message.includes('timeout') ||
+        exception.message.includes('ETIMEDOUT'))
+    );
   }
 
   /**
    * Verifica se é erro de memória
    */
   private isOutOfMemoryError(exception: unknown): boolean {
-    return exception instanceof Error && 
-           (exception.message.includes('out of memory') || 
-            exception.message.includes('ENOMEM'));
+    return (
+      exception instanceof Error &&
+      (exception.message.includes('out of memory') ||
+        exception.message.includes('ENOMEM'))
+    );
   }
 
   /**

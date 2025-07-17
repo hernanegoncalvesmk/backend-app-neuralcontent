@@ -9,32 +9,32 @@ import { VerificationToken } from '../../auth/entities/verification-token.entity
  */
 export enum UserRole {
   SUPER_ADMIN = 'super-admin',
-  ADMIN = 'admin', 
+  ADMIN = 'admin',
   USER = 'user',
   GUEST = 'guest',
 }
 
 export enum UserStatus {
   ACTIVE = 'active',
-  INACTIVE = 'inactive', 
+  INACTIVE = 'inactive',
   PENDING = 'pending',
   SUSPENDED = 'suspended',
 }
 
 /**
  * Entidade User - Usuários do sistema NeuralContent
- * 
+ *
  * @description Representa um usuário no sistema com todas as funcionalidades
  * @author NeuralContent Team
  * @since 1.0.0
- * 
+ *
  * @features
  * - Autenticação e autorização
  * - Perfis de usuário
  * - Gestão de sessões
  * - Controle de acesso baseado em roles
  * - Auditoria completa
- * 
+ *
  * @table usr_users - Alinhado com migration 002
  */
 @Entity('usr_users')
@@ -63,7 +63,7 @@ export class User extends BaseEntity {
   @Column({
     type: 'varchar',
     length: 100,
-    name: 'last_name', 
+    name: 'last_name',
     comment: 'Sobrenome do usuário',
   })
   lastName: string;
@@ -141,7 +141,7 @@ export class User extends BaseEntity {
   preferences?: Record<string, any>;
 
   // Relacionamentos
-  @OneToMany(() => UserSession, session => session.user, {
+  @OneToMany(() => UserSession, (session) => session.user, {
     cascade: true,
   })
   sessions: UserSession[];
@@ -152,10 +152,14 @@ export class User extends BaseEntity {
   })
   creditBalance: CreditBalance;
 
-  @OneToMany(() => VerificationToken, (verificationToken) => verificationToken.user, {
-    cascade: true,
-    eager: false,
-  })
+  @OneToMany(
+    () => VerificationToken,
+    (verificationToken) => verificationToken.user,
+    {
+      cascade: true,
+      eager: false,
+    },
+  )
   verificationTokens: VerificationToken[];
 
   // Métodos de conveniência
@@ -209,10 +213,13 @@ export class User extends BaseEntity {
     if (this.avatar) {
       return this.avatar;
     }
-    
+
     // Fallback para Gravatar
     const crypto = require('crypto');
-    const hash = crypto.createHash('md5').update(this.email.toLowerCase()).digest('hex');
+    const hash = crypto
+      .createHash('md5')
+      .update(this.email.toLowerCase())
+      .digest('hex');
     return `https://www.gravatar.com/avatar/${hash}?d=identicon&s=200`;
   }
 

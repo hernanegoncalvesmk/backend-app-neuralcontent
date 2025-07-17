@@ -4,7 +4,7 @@ import { UserRole } from './create-user.dto';
 
 /**
  * DTO para resposta de usuário
- * 
+ *
  * @description Estrutura de retorno de dados do usuário (sem dados sensíveis)
  * @author NeuralContent Team
  * @since 1.0.0
@@ -123,7 +123,7 @@ export class UserResponseDto {
 
   constructor(partial: Partial<UserResponseDto>) {
     Object.assign(this, partial);
-    
+
     // Mapear o nome completo se não estiver presente
     if (!this.firstName && !this.lastName && (partial as any).name) {
       const nameParts = (partial as any).name.split(' ');
@@ -142,7 +142,7 @@ export class UserResponseDto {
 
 /**
  * DTO para lista paginada de usuários
- * 
+ *
  * @description Estrutura de retorno para listas paginadas
  * @author NeuralContent Team
  * @since 1.0.0
@@ -173,7 +173,7 @@ export class UserListResponseDto {
 
 /**
  * DTO para estatísticas de usuários
- * 
+ *
  * @description Estrutura para retorno de estatísticas
  * @author NeuralContent Team
  * @since 1.0.0

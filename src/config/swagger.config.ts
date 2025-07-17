@@ -4,7 +4,9 @@ import { INestApplication } from '@nestjs/common';
 export function setupSwagger(app: INestApplication): void {
   const config = new DocumentBuilder()
     .setTitle('🧠 NeuralContent API')
-    .setDescription('API completa para plataforma de geração de conteúdo com IA')
+    .setDescription(
+      'API completa para plataforma de geração de conteúdo com IA',
+    )
     .setVersion('1.0.0')
     .addBearerAuth(
       {
@@ -43,6 +45,7 @@ export function setupSwagger(app: INestApplication): void {
       validatorUrl: null,
     },
     customSiteTitle: '🧠 NeuralContent API Documentation',
-    customfavIcon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🧠</text></svg>',
+    customfavIcon:
+      'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🧠</text></svg>',
   });
 }

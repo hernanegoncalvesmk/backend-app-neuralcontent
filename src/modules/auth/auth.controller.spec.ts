@@ -5,18 +5,18 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { LoggerService } from '../../shared/logger/logger.service';
 import { AuthGuard } from '../../shared/guards/auth.guard';
-import { 
-  LoginDto, 
-  RegisterDto, 
-  RefreshTokenDto, 
+import {
+  LoginDto,
+  RegisterDto,
+  RefreshTokenDto,
   AuthResponseDto,
   LogoutDto,
-  UserRole 
+  UserRole,
 } from './dto';
 
 /**
  * Testes unitários para AuthController
- * 
+ *
  * @description Valida todos os endpoints de autenticação
  * @author NeuralContent Team
  * @since 1.0.0
@@ -70,7 +70,7 @@ describe('AuthController', () => {
       role: 'user' as UserRole,
       status: 'active',
       isEmailVerified: true,
-    }
+    },
   };
 
   beforeEach(async () => {
@@ -133,7 +133,7 @@ describe('AuthController', () => {
           name: 'Test User',
           role: 'user' as UserRole,
           isEmailVerified: true,
-        }
+        },
       };
 
       mockAuthService.login.mockResolvedValue(expectedResponse);
@@ -151,7 +151,7 @@ describe('AuthController', () => {
         {
           ip: '127.0.0.1',
           userAgent: 'Jest/Test Browser',
-        }
+        },
       );
     });
 
@@ -164,7 +164,8 @@ describe('AuthController', () => {
       const mobileRequest = {
         ...mockRequest,
         get: jest.fn((header: string) => {
-          if (header === 'User-Agent') return 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X)';
+          if (header === 'User-Agent')
+            return 'Mozilla/5.0 (iPhone; CPU iPhone OS 14_0 like Mac OS X)';
           return undefined;
         }),
       };
@@ -181,7 +182,7 @@ describe('AuthController', () => {
           name: 'Test User',
           role: 'user' as UserRole,
           isEmailVerified: true,
-        }
+        },
       };
 
       mockAuthService.login.mockResolvedValue(expectedResponse);
@@ -217,7 +218,7 @@ describe('AuthController', () => {
           name: 'New User',
           role: 'user' as UserRole,
           isEmailVerified: true,
-        }
+        },
       };
 
       mockAuthService.register.mockResolvedValue(expectedResponse);
@@ -231,7 +232,7 @@ describe('AuthController', () => {
         {
           ip: '127.0.0.1',
           userAgent: 'Jest/Test Browser',
-        }
+        },
       );
     });
   });
@@ -254,7 +255,7 @@ describe('AuthController', () => {
           name: 'Test User',
           role: 'user' as UserRole,
           isEmailVerified: true,
-        }
+        },
       };
 
       mockAuthService.refreshToken.mockResolvedValue(expectedResponse);
@@ -262,8 +263,12 @@ describe('AuthController', () => {
       const result = await controller.refreshToken(refreshTokenDto);
 
       expect(result).toEqual(expectedResponse);
-      expect(mockAuthService.refreshToken).toHaveBeenCalledWith(refreshTokenDto);
-      expect(mockLoggerService.log).toHaveBeenCalledWith('Token refresh attempt');
+      expect(mockAuthService.refreshToken).toHaveBeenCalledWith(
+        refreshTokenDto,
+      );
+      expect(mockLoggerService.log).toHaveBeenCalledWith(
+        'Token refresh attempt',
+      );
     });
   });
 
@@ -274,7 +279,7 @@ describe('AuthController', () => {
       };
 
       const expectedResponse = {
-        message: 'Logout realizado com sucesso'
+        message: 'Logout realizado com sucesso',
       };
 
       mockAuthService.logout.mockResolvedValue(expectedResponse);
@@ -301,7 +306,9 @@ describe('AuthController', () => {
         role: 'user',
         status: 'active',
       });
-      expect(mockLoggerService.log).toHaveBeenCalledWith('Profile access for user ID: 1');
+      expect(mockLoggerService.log).toHaveBeenCalledWith(
+        'Profile access for user ID: 1',
+      );
     });
   });
 
@@ -310,7 +317,8 @@ describe('AuthController', () => {
       const desktopRequest = {
         ip: '192.168.1.100',
         get: jest.fn((header: string) => {
-          if (header === 'User-Agent') return 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36';
+          if (header === 'User-Agent')
+            return 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36';
           return undefined;
         }),
       };
@@ -319,7 +327,8 @@ describe('AuthController', () => {
 
       expect(result).toEqual({
         ipAddress: '192.168.1.100',
-        userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+        userAgent:
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
         deviceType: 'desktop',
       });
     });
@@ -328,7 +337,8 @@ describe('AuthController', () => {
       const tabletRequest = {
         ip: '192.168.1.101',
         get: jest.fn((header: string) => {
-          if (header === 'User-Agent') return 'Mozilla/5.0 (iPad; CPU OS 14_0 like Mac OS X)';
+          if (header === 'User-Agent')
+            return 'Mozilla/5.0 (iPad; CPU OS 14_0 like Mac OS X)';
           return undefined;
         }),
       };

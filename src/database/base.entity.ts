@@ -9,7 +9,7 @@ import {
 
 /**
  * BaseEntity - Entidade base para todas as entidades do sistema
- * 
+ *
  * Fornece campos comuns para auditoria e controle de versão:
  * - id: Chave primária auto-incrementável
  * - createdAt: Data/hora de criação

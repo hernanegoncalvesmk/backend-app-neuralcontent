@@ -37,7 +37,8 @@ export class PlansController {
 
   @ApiOperation({
     summary: 'Criar novo plano',
-    description: 'Cria um novo plano no sistema. Requer permissões de administrador.',
+    description:
+      'Cria um novo plano no sistema. Requer permissões de administrador.',
   })
   @ApiResponse({
     status: 201,
@@ -71,7 +72,8 @@ export class PlansController {
 
   @ApiOperation({
     summary: 'Listar todos os planos',
-    description: 'Retorna lista de planos disponíveis. Por padrão, retorna apenas planos ativos.',
+    description:
+      'Retorna lista de planos disponíveis. Por padrão, retorna apenas planos ativos.',
   })
   @ApiQuery({
     name: 'includeInactive',
@@ -87,7 +89,8 @@ export class PlansController {
   @Get()
   @Public()
   async findAll(
-    @Query('includeInactive', new ParseBoolPipe({ optional: true })) includeInactive?: boolean,
+    @Query('includeInactive', new ParseBoolPipe({ optional: true }))
+    includeInactive?: boolean,
   ): Promise<PlanResponseDto[]> {
     return this.plansService.findAll(includeInactive || false);
   }
@@ -112,7 +115,9 @@ export class PlansController {
   })
   @Get(':id')
   @Public()
-  async findOne(@Param('id', ParseUUIDPipe) id: string): Promise<PlanResponseDto> {
+  async findOne(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<PlanResponseDto> {
     return this.plansService.findOne(id);
   }
 
@@ -163,7 +168,8 @@ export class PlansController {
 
   @ApiOperation({
     summary: 'Obter estatísticas dos planos',
-    description: 'Retorna estatísticas gerais dos planos cadastrados. Requer permissões de administrador.',
+    description:
+      'Retorna estatísticas gerais dos planos cadastrados. Requer permissões de administrador.',
   })
   @ApiResponse({
     status: 200,
@@ -200,7 +206,8 @@ export class PlansController {
 
   @ApiOperation({
     summary: 'Atualizar plano',
-    description: 'Atualiza dados de um plano existente. Requer permissões de administrador.',
+    description:
+      'Atualiza dados de um plano existente. Requer permissões de administrador.',
   })
   @ApiParam({
     name: 'id',
@@ -241,7 +248,8 @@ export class PlansController {
 
   @ApiOperation({
     summary: 'Ativar/Desativar plano',
-    description: 'Alterna o status ativo de um plano. Requer permissões de administrador.',
+    description:
+      'Alterna o status ativo de um plano. Requer permissões de administrador.',
   })
   @ApiParam({
     name: 'id',
@@ -270,13 +278,16 @@ export class PlansController {
   @Roles(UserRole.ADMIN)
   @ApiBearerAuth()
   @HttpCode(HttpStatus.OK)
-  async toggleActive(@Param('id', ParseUUIDPipe) id: string): Promise<PlanResponseDto> {
+  async toggleActive(
+    @Param('id', ParseUUIDPipe) id: string,
+  ): Promise<PlanResponseDto> {
     return this.plansService.toggleActive(id);
   }
 
   @ApiOperation({
     summary: 'Definir plano como destacado',
-    description: 'Define se um plano é destacado na listagem. Requer permissões de administrador.',
+    description:
+      'Define se um plano é destacado na listagem. Requer permissões de administrador.',
   })
   @ApiParam({
     name: 'id',
@@ -320,7 +331,8 @@ export class PlansController {
 
   @ApiOperation({
     summary: 'Remover plano',
-    description: 'Remove um plano do sistema (soft delete). Requer permissões de administrador.',
+    description:
+      'Remove um plano do sistema (soft delete). Requer permissões de administrador.',
   })
   @ApiParam({
     name: 'id',
@@ -356,7 +368,8 @@ export class PlansController {
 
   @ApiOperation({
     summary: 'Criar preço para um plano',
-    description: 'Cria um novo preço/período para um plano específico. Requer permissões de administrador.',
+    description:
+      'Cria um novo preço/período para um plano específico. Requer permissões de administrador.',
   })
   @ApiParam({
     name: 'planId',
@@ -370,15 +383,18 @@ export class PlansController {
       type: 'object',
       properties: {
         id: { type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' },
-        planId: { type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' },
+        planId: {
+          type: 'string',
+          example: '123e4567-e89b-12d3-a456-426614174000',
+        },
         period: { type: 'string', example: 'monthly' },
         price: { type: 'number', example: 29.99 },
         currency: { type: 'string', example: 'BRL' },
         isActive: { type: 'boolean', example: true },
         createdAt: { type: 'string', format: 'date-time' },
-        updatedAt: { type: 'string', format: 'date-time' }
-      }
-    }
+        updatedAt: { type: 'string', format: 'date-time' },
+      },
+    },
   })
   @ApiResponse({
     status: 400,
@@ -403,7 +419,7 @@ export class PlansController {
   @HttpCode(HttpStatus.CREATED)
   async createPlanPrice(
     @Param('planId', ParseUUIDPipe) planId: string,
-    @Body() createPlanPriceDto: CreatePlanPriceDto
+    @Body() createPlanPriceDto: CreatePlanPriceDto,
   ) {
     // Adiciona o planId ao DTO
     const createData = { ...createPlanPriceDto, planId };
@@ -427,17 +443,23 @@ export class PlansController {
       items: {
         type: 'object',
         properties: {
-          id: { type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' },
-          planId: { type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' },
+          id: {
+            type: 'string',
+            example: '123e4567-e89b-12d3-a456-426614174000',
+          },
+          planId: {
+            type: 'string',
+            example: '123e4567-e89b-12d3-a456-426614174000',
+          },
           period: { type: 'string', example: 'monthly' },
           price: { type: 'number', example: 29.99 },
           currency: { type: 'string', example: 'BRL' },
           isActive: { type: 'boolean', example: true },
           createdAt: { type: 'string', format: 'date-time' },
-          updatedAt: { type: 'string', format: 'date-time' }
-        }
-      }
-    }
+          updatedAt: { type: 'string', format: 'date-time' },
+        },
+      },
+    },
   })
   @ApiResponse({
     status: 404,
@@ -451,7 +473,8 @@ export class PlansController {
 
   @ApiOperation({
     summary: 'Atualizar preço de um plano',
-    description: 'Atualiza um preço específico de um plano. Requer permissões de administrador.',
+    description:
+      'Atualiza um preço específico de um plano. Requer permissões de administrador.',
   })
   @ApiParam({
     name: 'planId',
@@ -470,15 +493,18 @@ export class PlansController {
       type: 'object',
       properties: {
         id: { type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' },
-        planId: { type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' },
+        planId: {
+          type: 'string',
+          example: '123e4567-e89b-12d3-a456-426614174000',
+        },
         period: { type: 'string', example: 'monthly' },
         price: { type: 'number', example: 29.99 },
         currency: { type: 'string', example: 'BRL' },
         isActive: { type: 'boolean', example: true },
         createdAt: { type: 'string', format: 'date-time' },
-        updatedAt: { type: 'string', format: 'date-time' }
-      }
-    }
+        updatedAt: { type: 'string', format: 'date-time' },
+      },
+    },
   })
   @ApiResponse({
     status: 400,
@@ -504,14 +530,15 @@ export class PlansController {
   async updatePlanPrice(
     @Param('planId', ParseUUIDPipe) planId: string,
     @Param('priceId', ParseUUIDPipe) priceId: string,
-    @Body() updatePlanPriceDto: UpdatePlanPriceDto
+    @Body() updatePlanPriceDto: UpdatePlanPriceDto,
   ) {
     return this.plansService.updatePlanPrice(priceId, updatePlanPriceDto);
   }
 
   @ApiOperation({
     summary: 'Remover preço de um plano',
-    description: 'Remove um preço específico de um plano. Requer permissões de administrador.',
+    description:
+      'Remove um preço específico de um plano. Requer permissões de administrador.',
   })
   @ApiParam({
     name: 'planId',
@@ -546,7 +573,7 @@ export class PlansController {
   @HttpCode(HttpStatus.NO_CONTENT)
   async deletePlanPrice(
     @Param('planId', ParseUUIDPipe) planId: string,
-    @Param('priceId', ParseUUIDPipe) priceId: string
+    @Param('priceId', ParseUUIDPipe) priceId: string,
   ): Promise<void> {
     return this.plansService.deletePlanPrice(priceId);
   }

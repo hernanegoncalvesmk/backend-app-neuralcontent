@@ -1,6 +1,14 @@
-import { MigrationInterface, QueryRunner, Table, TableIndex, TableForeignKey } from 'typeorm';
+import {
+  MigrationInterface,
+  QueryRunner,
+  Table,
+  TableIndex,
+  TableForeignKey,
+} from 'typeorm';
 
-export class CreateCreditTransactionsTable1705153100000 implements MigrationInterface {
+export class CreateCreditTransactionsTable1705153100000
+  implements MigrationInterface
+{
   name = 'CreateCreditTransactionsTable1705153100000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
@@ -25,7 +33,15 @@ export class CreateCreditTransactionsTable1705153100000 implements MigrationInte
           {
             name: 'type',
             type: 'enum',
-            enum: ['grant', 'purchase', 'consume', 'expire', 'refund', 'bonus', 'transfer'],
+            enum: [
+              'grant',
+              'purchase',
+              'consume',
+              'expire',
+              'refund',
+              'bonus',
+              'transfer',
+            ],
             comment: 'Tipo da transação de crédito',
           },
           {
@@ -128,7 +144,10 @@ export class CreateCreditTransactionsTable1705153100000 implements MigrationInte
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropForeignKey('crd_credit_transactions', 'FK_crd_credit_transactions_user_id');
+    await queryRunner.dropForeignKey(
+      'crd_credit_transactions',
+      'FK_crd_credit_transactions_user_id',
+    );
     await queryRunner.dropTable('crd_credit_transactions');
   }
 }

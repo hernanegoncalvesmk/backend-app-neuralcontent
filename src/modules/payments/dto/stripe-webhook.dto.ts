@@ -15,19 +15,19 @@ export enum StripeEventType {
   PAYMENT_INTENT_CREATED = 'payment_intent.created',
   PAYMENT_INTENT_PROCESSING = 'payment_intent.processing',
   PAYMENT_INTENT_REQUIRES_ACTION = 'payment_intent.requires_action',
-  
+
   CHECKOUT_SESSION_COMPLETED = 'checkout.session.completed',
   CHECKOUT_SESSION_EXPIRED = 'checkout.session.expired',
-  
+
   INVOICE_PAYMENT_SUCCEEDED = 'invoice.payment_succeeded',
   INVOICE_PAYMENT_FAILED = 'invoice.payment_failed',
   INVOICE_FINALIZED = 'invoice.finalized',
-  
+
   CUSTOMER_SUBSCRIPTION_CREATED = 'customer.subscription.created',
   CUSTOMER_SUBSCRIPTION_UPDATED = 'customer.subscription.updated',
   CUSTOMER_SUBSCRIPTION_DELETED = 'customer.subscription.deleted',
   CUSTOMER_SUBSCRIPTION_TRIAL_WILL_END = 'customer.subscription.trial_will_end',
-  
+
   CUSTOMER_CREATED = 'customer.created',
   CUSTOMER_UPDATED = 'customer.updated',
   CUSTOMER_DELETED = 'customer.deleted',
@@ -69,8 +69,8 @@ export class StripeWebhookDto {
         id: 'pi_1234567890abcdef',
         amount: 2990,
         currency: 'brl',
-        status: 'succeeded'
-      }
+        status: 'succeeded',
+      },
     },
   })
   @IsObject()

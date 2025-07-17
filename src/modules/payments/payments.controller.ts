@@ -17,11 +17,20 @@ import {
   Logger,
   BadRequestException,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiQuery } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+  ApiQuery,
+} from '@nestjs/swagger';
 import { PaymentsService } from './services/payments.service';
 import { StripeService } from './services/stripe.service';
 import { PayPalService } from './services/paypal.service';
-import { CreatePaymentDto, CreatePaymentIntentDto } from './dto/create-payment.dto';
+import {
+  CreatePaymentDto,
+  CreatePaymentIntentDto,
+} from './dto/create-payment.dto';
 import { StripeWebhookDto } from './dto/stripe-webhook.dto';
 import { PayPalWebhookDto } from './dto/paypal-webhook.dto';
 import { Payment } from './entities/payment.entity';
@@ -40,47 +49,64 @@ export class PaymentsController {
 
   @Post()
   @ApiOperation({ summary: 'Criar um novo pagamento' })
-  @ApiResponse({ 
-    status: 201, 
+  @ApiResponse({
+    status: 201,
     description: 'Pagamento criado com sucesso',
     type: Payment,
   })
   @ApiResponse({ status: 400, description: 'Dados inválidos' })
   @ApiResponse({ status: 404, description: 'Usuário ou plano não encontrado' })
-  async createPayment(@Body() createPaymentDto: CreatePaymentDto): Promise<Payment> {
+  async createPayment(
+    @Body() createPaymentDto: CreatePaymentDto,
+  ): Promise<Payment> {
     this.logger.log(`Creating payment for user: ${createPaymentDto.userId}`);
     return await this.paymentsService.createPayment(createPaymentDto);
   }
 
   @Post('intent')
   @ApiOperation({ summary: 'Criar intenção de pagamento (Stripe/PayPal)' })
-  @ApiResponse({ 
-    status: 201, 
+  @ApiResponse({
+    status: 201,
     description: 'Intenção de pagamento criada com sucesso',
     schema: {
       type: 'object',
       properties: {
         payment: { $ref: '#/components/schemas/Payment' },
-        clientSecret: { type: 'string', description: 'Client secret do Stripe (se aplicável)' },
-        approvalUrl: { type: 'string', description: 'URL de aprovação do PayPal (se aplicável)' },
+        clientSecret: {
+          type: 'string',
+          description: 'Client secret do Stripe (se aplicável)',
+        },
+        approvalUrl: {
+          type: 'string',
+          description: 'URL de aprovação do PayPal (se aplicável)',
+        },
       },
     },
   })
   @ApiResponse({ status: 400, description: 'Dados inválidos' })
-  async createPaymentIntent(@Body() createPaymentIntentDto: CreatePaymentIntentDto) {
-    this.logger.log(`Creating payment intent for method: ${createPaymentIntentDto.paymentMethod}`);
-    return await this.paymentsService.createPaymentIntent(createPaymentIntentDto);
+  async createPaymentIntent(
+    @Body() createPaymentIntentDto: CreatePaymentIntentDto,
+  ) {
+    this.logger.log(
+      `Creating payment intent for method: ${createPaymentIntentDto.paymentMethod}`,
+    );
+    return await this.paymentsService.createPaymentIntent(
+      createPaymentIntentDto,
+    );
   }
 
   @Post(':id/confirm')
   @ApiOperation({ summary: 'Confirmar um pagamento' })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: 'Pagamento confirmado com sucesso',
     type: Payment,
   })
   @ApiResponse({ status: 404, description: 'Pagamento não encontrado' })
-  @ApiResponse({ status: 409, description: 'Pagamento não está em estado pendente' })
+  @ApiResponse({
+    status: 409,
+    description: 'Pagamento não está em estado pendente',
+  })
   async confirmPayment(
     @Param('id', ParseUUIDPipe) paymentId: string,
     @Body() confirmData?: any,
@@ -91,27 +117,35 @@ export class PaymentsController {
 
   @Post(':id/cancel')
   @ApiOperation({ summary: 'Cancelar um pagamento pendente' })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: 'Pagamento cancelado com sucesso',
     type: Payment,
   })
   @ApiResponse({ status: 404, description: 'Pagamento não encontrado' })
-  @ApiResponse({ status: 409, description: 'Apenas pagamentos pendentes podem ser cancelados' })
-  async cancelPayment(@Param('id', ParseUUIDPipe) paymentId: string): Promise<Payment> {
+  @ApiResponse({
+    status: 409,
+    description: 'Apenas pagamentos pendentes podem ser cancelados',
+  })
+  async cancelPayment(
+    @Param('id', ParseUUIDPipe) paymentId: string,
+  ): Promise<Payment> {
     this.logger.log(`Cancelling payment: ${paymentId}`);
     return await this.paymentsService.cancelPayment(paymentId);
   }
 
   @Post(':id/refund')
   @ApiOperation({ summary: 'Criar reembolso para um pagamento' })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: 'Reembolso criado com sucesso',
     type: Payment,
   })
   @ApiResponse({ status: 404, description: 'Pagamento não encontrado' })
-  @ApiResponse({ status: 409, description: 'Apenas pagamentos completos podem ser reembolsados' })
+  @ApiResponse({
+    status: 409,
+    description: 'Apenas pagamentos completos podem ser reembolsados',
+  })
   async createRefund(
     @Param('id', ParseUUIDPipe) paymentId: string,
     @Body() refundData: { amount?: number; reason?: string },
@@ -126,27 +160,42 @@ export class PaymentsController {
 
   @Get(':id')
   @ApiOperation({ summary: 'Buscar um pagamento por ID' })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: 'Pagamento encontrado',
     type: Payment,
   })
   @ApiResponse({ status: 404, description: 'Pagamento não encontrado' })
-  async getPaymentById(@Param('id', ParseUUIDPipe) paymentId: string): Promise<Payment> {
+  async getPaymentById(
+    @Param('id', ParseUUIDPipe) paymentId: string,
+  ): Promise<Payment> {
     return await this.paymentsService.getPaymentById(paymentId);
   }
 
   @Get('user/:userId')
   @ApiOperation({ summary: 'Listar pagamentos de um usuário' })
-  @ApiQuery({ name: 'limit', required: false, type: Number, description: 'Limite de resultados' })
-  @ApiQuery({ name: 'offset', required: false, type: Number, description: 'Offset para paginação' })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    type: Number,
+    description: 'Limite de resultados',
+  })
+  @ApiQuery({
+    name: 'offset',
+    required: false,
+    type: Number,
+    description: 'Offset para paginação',
+  })
+  @ApiResponse({
+    status: 200,
     description: 'Lista de pagamentos do usuário',
     schema: {
       type: 'object',
       properties: {
-        payments: { type: 'array', items: { $ref: '#/components/schemas/Payment' } },
+        payments: {
+          type: 'array',
+          items: { $ref: '#/components/schemas/Payment' },
+        },
         total: { type: 'number', description: 'Total de pagamentos' },
       },
     },
@@ -161,24 +210,28 @@ export class PaymentsController {
 
   @Get('subscriptions/user/:userId')
   @ApiOperation({ summary: 'Listar assinaturas de um usuário' })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: 'Lista de assinaturas do usuário',
     type: [UserSubscription],
   })
-  async getUserSubscriptions(@Param('userId') userId: string): Promise<UserSubscription[]> {
+  async getUserSubscriptions(
+    @Param('userId') userId: string,
+  ): Promise<UserSubscription[]> {
     return await this.paymentsService.getUserSubscriptions(userId);
   }
 
   @Get('subscriptions/user/:userId/active')
   @ApiOperation({ summary: 'Buscar assinatura ativa de um usuário' })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: 'Assinatura ativa do usuário',
     type: UserSubscription,
   })
   @ApiResponse({ status: 404, description: 'Assinatura ativa não encontrada' })
-  async getUserActiveSubscription(@Param('userId') userId: string): Promise<UserSubscription | null> {
+  async getUserActiveSubscription(
+    @Param('userId') userId: string,
+  ): Promise<UserSubscription | null> {
     return await this.paymentsService.getUserActiveSubscription(userId);
   }
 
@@ -199,7 +252,10 @@ export class PaymentsController {
       }
 
       const payload = rawBody.toString();
-      const event = this.stripeService.constructWebhookEvent(payload, signature);
+      const event = this.stripeService.constructWebhookEvent(
+        payload,
+        signature,
+      );
 
       this.logger.log(`Processing Stripe webhook: ${event.type}`);
 
@@ -259,7 +315,9 @@ export class PaymentsController {
           await this.handlePayPalPaymentFailed(webhookData);
           break;
         default:
-          this.logger.warn(`Unhandled PayPal event type: ${webhookData.event_type}`);
+          this.logger.warn(
+            `Unhandled PayPal event type: ${webhookData.event_type}`,
+          );
       }
 
       return { received: true };
@@ -271,7 +329,9 @@ export class PaymentsController {
 
   // Métodos auxiliares para processamento de webhooks
 
-  private async handleStripePaymentSucceeded(paymentIntent: any): Promise<void> {
+  private async handleStripePaymentSucceeded(
+    paymentIntent: any,
+  ): Promise<void> {
     try {
       const paymentId = paymentIntent.metadata?.paymentId;
       if (paymentId) {
@@ -308,7 +368,9 @@ export class PaymentsController {
     }
   }
 
-  private async handlePayPalOrderApproved(webhookData: PayPalWebhookDto): Promise<void> {
+  private async handlePayPalOrderApproved(
+    webhookData: PayPalWebhookDto,
+  ): Promise<void> {
     try {
       // Extrair informações do webhook e processar
       this.logger.log(`PayPal order approved: ${webhookData.resource?.id}`);
@@ -317,7 +379,9 @@ export class PaymentsController {
     }
   }
 
-  private async handlePayPalPaymentCompleted(webhookData: PayPalWebhookDto): Promise<void> {
+  private async handlePayPalPaymentCompleted(
+    webhookData: PayPalWebhookDto,
+  ): Promise<void> {
     try {
       const orderId = webhookData.resource?.id;
       // Buscar pagamento pelo orderId e confirmar
@@ -327,7 +391,9 @@ export class PaymentsController {
     }
   }
 
-  private async handlePayPalPaymentFailed(webhookData: PayPalWebhookDto): Promise<void> {
+  private async handlePayPalPaymentFailed(
+    webhookData: PayPalWebhookDto,
+  ): Promise<void> {
     try {
       const orderId = webhookData.resource?.id;
       // Buscar pagamento pelo orderId e marcar como falhou
@@ -375,9 +441,12 @@ export class PaymentsController {
   @UseGuards()
   async updateUserSubscription(
     @Param('subscriptionId', ParseUUIDPipe) subscriptionId: string,
-    @Body() updateSubscriptionDto: any
+    @Body() updateSubscriptionDto: any,
   ) {
-    return this.paymentsService.updateUserSubscription(subscriptionId, updateSubscriptionDto);
+    return this.paymentsService.updateUserSubscription(
+      subscriptionId,
+      updateSubscriptionDto,
+    );
   }
 
   @ApiOperation({
@@ -390,9 +459,12 @@ export class PaymentsController {
     schema: {
       type: 'object',
       properties: {
-        message: { type: 'string', example: 'Assinatura cancelada com sucesso' }
-      }
-    }
+        message: {
+          type: 'string',
+          example: 'Assinatura cancelada com sucesso',
+        },
+      },
+    },
   })
   @ApiResponse({
     status: 404,
@@ -401,7 +473,9 @@ export class PaymentsController {
   @Post('subscriptions/:subscriptionId/cancel')
   @UseGuards()
   @HttpCode(HttpStatus.OK)
-  async cancelUserSubscription(@Param('subscriptionId', ParseUUIDPipe) subscriptionId: string) {
+  async cancelUserSubscription(
+    @Param('subscriptionId', ParseUUIDPipe) subscriptionId: string,
+  ) {
     return this.paymentsService.cancelUserSubscription(subscriptionId);
   }
 }

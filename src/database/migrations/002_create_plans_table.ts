@@ -45,7 +45,14 @@ export class CreatePlansTable1705152500000 implements MigrationInterface {
           {
             name: 'billing_cycle',
             type: 'enum',
-            enum: ['daily', 'weekly', 'monthly', 'quarterly', 'yearly', 'lifetime'],
+            enum: [
+              'daily',
+              'weekly',
+              'monthly',
+              'quarterly',
+              'yearly',
+              'lifetime',
+            ],
             default: "'monthly'",
             comment: 'Ciclo de cobrança do plano',
           },

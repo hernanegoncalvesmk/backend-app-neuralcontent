@@ -1,4 +1,8 @@
-import { Injectable, UnauthorizedException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  UnauthorizedException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { JwtService } from '@nestjs/jwt';
@@ -6,21 +10,27 @@ import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { LoggerService } from '../../shared/logger/logger.service';
 import { CacheService } from '../../shared/cache/cache.service';
-import { User, UserRole as EntityUserRole } from '../users/entities/user.entity';
+import {
+  User,
+  UserRole as EntityUserRole,
+} from '../users/entities/user.entity';
 import { UserSession } from './entities/user-session.entity';
-import { VerificationToken, VerificationTokenType } from './entities/verification-token.entity';
-import { 
-  LoginDto, 
-  RegisterDto, 
-  RefreshTokenDto, 
+import {
+  VerificationToken,
+  VerificationTokenType,
+} from './entities/verification-token.entity';
+import {
+  LoginDto,
+  RegisterDto,
+  RefreshTokenDto,
   AuthResponseDto,
   LogoutDto,
-  UserRole 
+  UserRole,
 } from './dto';
-import { 
-  BusinessValidationException, 
+import {
+  BusinessValidationException,
   ResourceNotFoundException,
-  AuthenticationException 
+  AuthenticationException,
 } from '../../shared/exceptions/custom.exceptions';
 
 /**
@@ -36,7 +46,7 @@ interface JwtPayload {
 
 /**
  * Serviço de autenticação
- * 
+ *
  * @description Gerencia autenticação, autorização e sessões de usuário
  * @author NeuralContent Team
  * @since 1.0.0
@@ -50,13 +60,13 @@ export class AuthService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
-    
+
     @InjectRepository(UserSession)
     private readonly sessionRepository: Repository<UserSession>,
-    
+
     @InjectRepository(VerificationToken)
     private readonly verificationTokenRepository: Repository<VerificationToken>,
-    
+
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
     private readonly logger: LoggerService,
@@ -68,19 +78,30 @@ export class AuthService {
   /**
    * Realiza login do usuário
    */
-  async login(loginDto: LoginDto, clientInfo?: {
-    ipAddress?: string;
-    userAgent?: string;
-    location?: string;
-    deviceType?: string;
-  }): Promise<AuthResponseDto> {
+  async login(
+    loginDto: LoginDto,
+    clientInfo?: {
+      ipAddress?: string;
+      userAgent?: string;
+      location?: string;
+      deviceType?: string;
+    },
+  ): Promise<AuthResponseDto> {
     this.logger.log(`Tentativa de login para email: ${loginDto.email}`);
 
     try {
       // Buscar usuário com senha
       const user = await this.userRepository.findOne({
         where: { email: loginDto.email },
-        select: ['id', 'email', 'firstName', 'lastName', 'password', 'role', 'isActive'],
+        select: [
+          'id',
+          'email',
+          'firstName',
+          'lastName',
+          'password',
+          'role',
+          'isActive',
+        ],
       });
 
       if (!user) {
@@ -90,12 +111,19 @@ export class AuthService {
 
       // Verificar status do usuário
       if (!user.isActive) {
-        this.logger.warn(`Usuário inativo tentou fazer login: ${loginDto.email}`);
-        throw new AuthenticationException('Conta inativa. Entre em contato com o suporte.');
+        this.logger.warn(
+          `Usuário inativo tentou fazer login: ${loginDto.email}`,
+        );
+        throw new AuthenticationException(
+          'Conta inativa. Entre em contato com o suporte.',
+        );
       }
 
       // Verificar senha
-      const isPasswordValid = await bcrypt.compare(loginDto.password, user.password);
+      const isPasswordValid = await bcrypt.compare(
+        loginDto.password,
+        user.password,
+      );
       if (!isPasswordValid) {
         this.logger.warn(`Senha incorreta para usuário: ${loginDto.email}`);
         throw new AuthenticationException('Credenciais inválidas');
@@ -108,13 +136,17 @@ export class AuthService {
       await this.createSession(user.id, tokens.refreshToken, clientInfo);
 
       // Cache do usuário
-      await this.cacheService.set(`user:${user.id}`, {
-        id: user.id,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-        role: user.role,
-      }, 3600); // 1 hora
+      await this.cacheService.set(
+        `user:${user.id}`,
+        {
+          id: user.id,
+          email: user.email,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          role: user.role,
+        },
+        3600,
+      ); // 1 hora
 
       this.logger.log(`Login bem-sucedido para usuário: ${user.email}`);
 
@@ -133,14 +165,13 @@ export class AuthService {
           isEmailVerified: user.isEmailVerified,
         },
       };
-
     } catch (error) {
       this.logger.error(`Erro no login: ${error.message}`, error.stack);
-      
+
       if (error instanceof AuthenticationException) {
         throw error;
       }
-      
+
       throw new AuthenticationException('Erro interno de autenticação');
     }
   }
@@ -162,7 +193,10 @@ export class AuthService {
       }
 
       // Hash da senha
-      const hashedPassword = await bcrypt.hash(registerDto.password, this.BCRYPT_ROUNDS);
+      const hashedPassword = await bcrypt.hash(
+        registerDto.password,
+        this.BCRYPT_ROUNDS,
+      );
 
       // Criar usuário
       const user = this.userRepository.create({
@@ -201,14 +235,13 @@ export class AuthService {
           isEmailVerified: userResult.isEmailVerified,
         },
       };
-
     } catch (error) {
       this.logger.error(`Erro no registro: ${error.message}`, error.stack);
-      
+
       if (error instanceof BusinessValidationException) {
         throw error;
       }
-      
+
       throw new BusinessValidationException('Erro no registro do usuário');
     }
   }
@@ -216,7 +249,9 @@ export class AuthService {
   /**
    * Renova access token usando refresh token
    */
-  async refreshToken(refreshTokenDto: RefreshTokenDto): Promise<AuthResponseDto> {
+  async refreshToken(
+    refreshTokenDto: RefreshTokenDto,
+  ): Promise<AuthResponseDto> {
     this.logger.log('Tentativa de renovação de token');
 
     try {
@@ -227,7 +262,7 @@ export class AuthService {
 
       // Buscar sessão
       const session = await this.sessionRepository.findOne({
-        where: { 
+        where: {
           userId: payload.sub,
           isActive: true,
         },
@@ -240,8 +275,8 @@ export class AuthService {
 
       // Verificar hash do refresh token
       const isTokenValid = await bcrypt.compare(
-        refreshTokenDto.refreshToken, 
-        session.refreshToken
+        refreshTokenDto.refreshToken,
+        session.refreshToken,
       );
 
       if (!isTokenValid) {
@@ -254,7 +289,10 @@ export class AuthService {
       const tokens = await this.generateTokens(session.user);
 
       // Atualizar sessão
-      session.refreshToken = await bcrypt.hash(tokens.refreshToken, this.BCRYPT_ROUNDS);
+      session.refreshToken = await bcrypt.hash(
+        tokens.refreshToken,
+        this.BCRYPT_ROUNDS,
+      );
       await this.sessionRepository.save(session);
 
       this.logger.log(`Token renovado para usuário: ${session.user.email}`);
@@ -274,14 +312,16 @@ export class AuthService {
           isEmailVerified: session.user.isEmailVerified,
         },
       };
-
     } catch (error) {
-      this.logger.error(`Erro na renovação de token: ${error.message}`, error.stack);
-      
+      this.logger.error(
+        `Erro na renovação de token: ${error.message}`,
+        error.stack,
+      );
+
       if (error instanceof AuthenticationException) {
         throw error;
       }
-      
+
       throw new AuthenticationException('Erro na renovação do token');
     }
   }
@@ -294,22 +334,22 @@ export class AuthService {
 
     try {
       // Decodificar refresh token para obter user ID
-      const payload = this.jwtService.decode(logoutDto.refreshToken) as JwtPayload;
-      
+      const payload = this.jwtService.decode(logoutDto.refreshToken);
+
       if (!payload?.sub) {
         throw new AuthenticationException('Token inválido');
       }
 
       // Invalidar sessão
       await this.sessionRepository.update(
-        { 
+        {
           userId: payload.sub.toString(),
           isActive: true,
         },
-        { 
+        {
           isActive: false,
           updatedAt: new Date(),
-        }
+        },
       );
 
       // Limpar cache do usuário
@@ -318,7 +358,6 @@ export class AuthService {
       this.logger.log(`Logout realizado para usuário: ${payload.sub}`);
 
       return { message: 'Logout realizado com sucesso' };
-
     } catch (error) {
       this.logger.error(`Erro no logout: ${error.message}`, error.stack);
       throw new AuthenticationException('Erro no logout');
@@ -363,19 +402,22 @@ export class AuthService {
    * Cria nova sessão
    */
   private async createSession(
-    userId: number, 
-    refreshToken: string, 
+    userId: number,
+    refreshToken: string,
     clientInfo?: {
       ipAddress?: string;
       userAgent?: string;
       location?: string;
       deviceType?: string;
-    }
+    },
   ): Promise<UserSession> {
     // Limitar sessões ativas por usuário (máximo 5)
     await this.limitUserSessions(userId, 5);
 
-    const refreshTokenHash = await bcrypt.hash(refreshToken, this.BCRYPT_ROUNDS);
+    const refreshTokenHash = await bcrypt.hash(
+      refreshToken,
+      this.BCRYPT_ROUNDS,
+    );
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + 7); // 7 dias
 
@@ -395,19 +437,25 @@ export class AuthService {
   /**
    * Limita número de sessões ativas por usuário
    */
-  private async limitUserSessions(userId: number, maxSessions: number): Promise<void> {
+  private async limitUserSessions(
+    userId: number,
+    maxSessions: number,
+  ): Promise<void> {
     const activeSessions = await this.sessionRepository.find({
       where: { userId: userId.toString(), isActive: true },
       order: { createdAt: 'ASC' },
     });
 
     if (activeSessions.length >= maxSessions) {
-      const sessionsToDeactivate = activeSessions.slice(0, activeSessions.length - maxSessions + 1);
-      
+      const sessionsToDeactivate = activeSessions.slice(
+        0,
+        activeSessions.length - maxSessions + 1,
+      );
+
       for (const session of sessionsToDeactivate) {
         session.deactivate();
       }
-      
+
       await this.sessionRepository.save(sessionsToDeactivate);
     }
   }
@@ -423,7 +471,7 @@ export class AuthService {
   }
 
   // VerificationToken Management Methods
-  
+
   /**
    * Cria um token de verificação
    */
@@ -432,12 +480,14 @@ export class AuthService {
     type: VerificationTokenType,
     expiresInMinutes: number = 60,
   ): Promise<VerificationToken> {
-    this.logger.log(`Creating verification token for user ${userId}, type: ${type}`);
+    this.logger.log(
+      `Creating verification token for user ${userId}, type: ${type}`,
+    );
 
     try {
       // Convert userId to string for compatibility with VerificationToken entity
       const userIdString = userId.toString();
-      
+
       // Invalidate existing tokens of the same type for this user
       await this.invalidateUserVerificationTokens(userId, type);
 
@@ -452,7 +502,10 @@ export class AuthService {
 
       return savedToken;
     } catch (error) {
-      this.logger.error(`Error creating verification token: ${error.message}`, error.stack);
+      this.logger.error(
+        `Error creating verification token: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
@@ -464,7 +517,9 @@ export class AuthService {
     tokenValue: string,
     type: VerificationTokenType,
   ): Promise<VerificationToken> {
-    this.logger.log(`Validating verification token: ${tokenValue}, type: ${type}`);
+    this.logger.log(
+      `Validating verification token: ${tokenValue}, type: ${type}`,
+    );
 
     try {
       const token = await this.verificationTokenRepository.findOne({
@@ -486,7 +541,10 @@ export class AuthService {
 
       return token;
     } catch (error) {
-      this.logger.error(`Error validating verification token: ${error.message}`, error.stack);
+      this.logger.error(
+        `Error validating verification token: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
@@ -503,7 +561,10 @@ export class AuthService {
         usedAt: new Date(),
       });
     } catch (error) {
-      this.logger.error(`Error marking token as used: ${error.message}`, error.stack);
+      this.logger.error(
+        `Error marking token as used: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
@@ -515,7 +576,9 @@ export class AuthService {
     userId: number,
     type?: VerificationTokenType,
   ): Promise<void> {
-    this.logger.log(`Invalidating verification tokens for user ${userId}, type: ${type || 'all'}`);
+    this.logger.log(
+      `Invalidating verification tokens for user ${userId}, type: ${type || 'all'}`,
+    );
 
     try {
       const userIdString = userId.toString();
@@ -529,7 +592,10 @@ export class AuthService {
         usedAt: new Date(),
       });
     } catch (error) {
-      this.logger.error(`Error invalidating verification tokens: ${error.message}`, error.stack);
+      this.logger.error(
+        `Error invalidating verification tokens: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
@@ -542,7 +608,9 @@ export class AuthService {
     type?: VerificationTokenType,
     includeUsed: boolean = false,
   ): Promise<VerificationToken[]> {
-    this.logger.log(`Getting verification tokens for user ${userId}, type: ${type || 'all'}`);
+    this.logger.log(
+      `Getting verification tokens for user ${userId}, type: ${type || 'all'}`,
+    );
 
     try {
       const userIdString = userId.toString();
@@ -561,7 +629,10 @@ export class AuthService {
 
       return tokens;
     } catch (error) {
-      this.logger.error(`Error getting verification tokens: ${error.message}`, error.stack);
+      this.logger.error(
+        `Error getting verification tokens: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }

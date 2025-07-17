@@ -8,11 +8,11 @@ import { AuthModule } from '../auth/auth.module';
 
 /**
  * UsersModule - Módulo de gestão de usuários
- * 
+ *
  * @description Fornece funcionalidades completas de CRUD e gestão de usuários
  * @author NeuralContent Team
  * @since 1.0.0
- * 
+ *
  * @features
  * - CRUD completo de usuários
  * - Busca avançada com filtros

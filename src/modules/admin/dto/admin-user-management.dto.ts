@@ -1,5 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsOptional, IsEnum, IsString, IsEmail, IsBoolean, IsNumber, Min, Max } from 'class-validator';
+import {
+  IsOptional,
+  IsEnum,
+  IsString,
+  IsEmail,
+  IsBoolean,
+  IsNumber,
+  Min,
+  Max,
+} from 'class-validator';
 import { Type } from 'class-transformer';
 
 export enum UserStatus {
@@ -161,7 +170,10 @@ export class AdminUserResponseDto {
 }
 
 export class AdminUserListResponseDto {
-  @ApiProperty({ description: 'Lista de usuários', type: [AdminUserResponseDto] })
+  @ApiProperty({
+    description: 'Lista de usuários',
+    type: [AdminUserResponseDto],
+  })
   users: AdminUserResponseDto[];
 
   @ApiProperty({ description: 'Total de usuários encontrados' })

@@ -1,6 +1,8 @@
 import { MigrationInterface, QueryRunner, TableIndex } from 'typeorm';
 
-export class CreateAdditionalIndexes1705153100000 implements MigrationInterface {
+export class CreateAdditionalIndexes1705153100000
+  implements MigrationInterface
+{
   name = 'CreateAdditionalIndexes1705153100000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
@@ -89,12 +91,27 @@ export class CreateAdditionalIndexes1705153100000 implements MigrationInterface 
     // Remover índices compostos
     await queryRunner.dropIndex('users', 'IDX_users_status_email_verified');
     await queryRunner.dropIndex('users', 'IDX_users_role_status');
-    await queryRunner.dropIndex('user_sessions', 'IDX_user_sessions_expires_active');
-    await queryRunner.dropIndex('credit_transactions', 'IDX_credit_user_type_created');
+    await queryRunner.dropIndex(
+      'user_sessions',
+      'IDX_user_sessions_expires_active',
+    );
+    await queryRunner.dropIndex(
+      'credit_transactions',
+      'IDX_credit_user_type_created',
+    );
     await queryRunner.dropIndex('pay_payments', 'IDX_payments_status_created');
     await queryRunner.dropIndex('pay_payments', 'IDX_payments_user_status');
-    await queryRunner.dropIndex('pay_user_subscriptions', 'IDX_subscriptions_status_billing');
-    await queryRunner.dropIndex('pay_user_subscriptions', 'IDX_subscriptions_user_status');
-    await queryRunner.dropIndex('pln_plan_features', 'IDX_plan_features_plan_enabled_order');
+    await queryRunner.dropIndex(
+      'pay_user_subscriptions',
+      'IDX_subscriptions_status_billing',
+    );
+    await queryRunner.dropIndex(
+      'pay_user_subscriptions',
+      'IDX_subscriptions_user_status',
+    );
+    await queryRunner.dropIndex(
+      'pln_plan_features',
+      'IDX_plan_features_plan_enabled_order',
+    );
   }
 }

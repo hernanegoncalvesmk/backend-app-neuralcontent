@@ -1,4 +1,13 @@
-import { IsString, IsEnum, IsOptional, IsNumber, IsBoolean, MinLength, MaxLength, Min } from 'class-validator';
+import {
+  IsString,
+  IsEnum,
+  IsOptional,
+  IsNumber,
+  IsBoolean,
+  MinLength,
+  MaxLength,
+  Min,
+} from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { PlanType } from '../entities/plan.entity';

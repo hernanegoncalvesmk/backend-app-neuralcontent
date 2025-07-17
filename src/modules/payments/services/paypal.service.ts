@@ -8,7 +8,10 @@ export class PayPalService {
   constructor(private readonly configService: ConfigService) {
     const clientId = this.configService.get<string>('PAYPAL_CLIENT_ID');
     const clientSecret = this.configService.get<string>('PAYPAL_CLIENT_SECRET');
-    const environment = this.configService.get<string>('PAYPAL_ENVIRONMENT', 'sandbox');
+    const environment = this.configService.get<string>(
+      'PAYPAL_ENVIRONMENT',
+      'sandbox',
+    );
 
     if (!clientId || !clientSecret) {
       this.logger.error('PayPal configuration is missing');
@@ -30,7 +33,9 @@ export class PayPalService {
     metadata?: Record<string, string>;
   }): Promise<any> {
     try {
-      this.logger.log(`Creating PayPal order for amount: ${data.amount} ${data.currency || 'BRL'}`);
+      this.logger.log(
+        `Creating PayPal order for amount: ${data.amount} ${data.currency || 'BRL'}`,
+      );
 
       // Implementação simplificada - em produção você implementaria a chamada real à API do PayPal
       const mockOrder = {
@@ -177,16 +182,21 @@ export class PayPalService {
       const mockRefund = {
         id: 'refund_' + Date.now(),
         status: 'COMPLETED',
-        amount: amount ? {
-          value: amount.toFixed(2),
-          currency_code: currency?.toUpperCase() || 'BRL',
-        } : undefined,
+        amount: amount
+          ? {
+              value: amount.toFixed(2),
+              currency_code: currency?.toUpperCase() || 'BRL',
+            }
+          : undefined,
       };
 
       this.logger.log(`PayPal refund created for capture: ${captureId}`);
       return mockRefund;
     } catch (error) {
-      this.logger.error(`Error creating PayPal refund for ${captureId}:`, error);
+      this.logger.error(
+        `Error creating PayPal refund for ${captureId}:`,
+        error,
+      );
       throw new BadRequestException('Failed to create PayPal refund');
     }
   }
@@ -200,7 +210,7 @@ export class PayPalService {
   ): Promise<boolean> {
     try {
       const webhookId = this.configService.get<string>('PAYPAL_WEBHOOK_ID');
-      
+
       if (!webhookId) {
         this.logger.warn('PayPal webhook ID not configured');
         return false;
@@ -231,12 +241,12 @@ export class PayPalService {
    */
   mapPayPalStatus(paypalStatus: string): string {
     const statusMap: Record<string, string> = {
-      'CREATED': 'pending',
-      'SAVED': 'pending',
-      'APPROVED': 'processing',
-      'VOIDED': 'cancelled',
-      'COMPLETED': 'completed',
-      'PAYER_ACTION_REQUIRED': 'pending',
+      CREATED: 'pending',
+      SAVED: 'pending',
+      APPROVED: 'processing',
+      VOIDED: 'cancelled',
+      COMPLETED: 'completed',
+      PAYER_ACTION_REQUIRED: 'pending',
     };
 
     return statusMap[paypalStatus] || 'pending';
@@ -246,7 +256,7 @@ export class PayPalService {
    * Extrai URLs de aprovação dos links do PayPal
    */
   extractApprovalUrl(links: any[]): string | null {
-    const approvalLink = links?.find(link => link.rel === 'approve');
+    const approvalLink = links?.find((link) => link.rel === 'approve');
     return approvalLink?.href || null;
   }
 

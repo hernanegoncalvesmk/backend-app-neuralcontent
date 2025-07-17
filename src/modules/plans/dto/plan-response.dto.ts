@@ -111,7 +111,9 @@ export class PlanResponseDto {
   @Expose()
   @Transform(({ obj }) => {
     const price = obj.monthlyPrice || 0;
-    return price === 0 ? 'Gratuito' : `R$ ${(price / 100).toFixed(2).replace('.', ',')}`;
+    return price === 0
+      ? 'Gratuito'
+      : `R$ ${(price / 100).toFixed(2).replace('.', ',')}`;
   })
   monthlyPriceFormatted: string;
 
@@ -122,7 +124,9 @@ export class PlanResponseDto {
   @Expose()
   @Transform(({ obj }) => {
     const price = obj.annualPrice || 0;
-    return price === 0 ? 'Gratuito' : `R$ ${(price / 100).toFixed(2).replace('.', ',')}`;
+    return price === 0
+      ? 'Gratuito'
+      : `R$ ${(price / 100).toFixed(2).replace('.', ',')}`;
   })
   annualPriceFormatted: string;
 

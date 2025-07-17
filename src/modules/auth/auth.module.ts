@@ -16,11 +16,11 @@ import { CacheModule } from '../../shared/cache/cache.module';
 
 /**
  * Módulo de autenticação
- * 
+ *
  * @description Fornece funcionalidades completas de autenticação e autorização
  * @author NeuralContent Team
  * @since 1.0.0
- * 
+ *
  * @features
  * - Login/Logout de usuários
  * - Registro de novos usuários
@@ -32,11 +32,7 @@ import { CacheModule } from '../../shared/cache/cache.module';
 @Module({
   imports: [
     // TypeORM para entidades
-    TypeOrmModule.forFeature([
-      User,
-      UserSession,
-      VerificationToken,
-    ]),
+    TypeOrmModule.forFeature([User, UserSession, VerificationToken]),
 
     // JWT Module com configuração assíncrona
     JwtModule.registerAsync({
@@ -62,18 +58,10 @@ import { CacheModule } from '../../shared/cache/cache.module';
     CacheModule,
   ],
 
-  controllers: [
-    AuthController,
-  ],
+  controllers: [AuthController],
 
-  providers: [
-    AuthService,
-  ],
+  providers: [AuthService],
 
-  exports: [
-    AuthService,
-    JwtModule,
-    PassportModule,
-  ],
+  exports: [AuthService, JwtModule, PassportModule],
 })
 export class AuthModule {}

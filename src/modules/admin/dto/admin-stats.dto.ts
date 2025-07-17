@@ -97,7 +97,7 @@ export class SystemStatsDto {
   @ApiProperty({ description: 'Tempo médio de resposta (ms)' })
   averageResponseTime: number;
 
-  @ApiProperty({ description: 'Taxa de erro (%)', })
+  @ApiProperty({ description: 'Taxa de erro (%)' })
   errorRate: number;
 
   @ApiProperty({ description: 'Uptime do sistema (%)' })

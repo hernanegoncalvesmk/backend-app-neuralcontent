@@ -8,11 +8,15 @@ import { UsersService } from './users.service';
 import { User } from './entities/user.entity';
 import { CreateUserDto, UserRole, UserStatus } from './dto/create-user.dto';
 import { UpdateUserDto, ChangePasswordDto } from './dto/update-user.dto';
-import { 
+import {
   BusinessValidationException,
-  ResourceNotFoundException 
+  ResourceNotFoundException,
 } from '../../shared/exceptions/custom.exceptions';
-import { ConflictException, ForbiddenException, BadRequestException } from '@nestjs/common';
+import {
+  ConflictException,
+  ForbiddenException,
+  BadRequestException,
+} from '@nestjs/common';
 
 describe('UsersService', () => {
   let service: UsersService;
@@ -83,10 +87,12 @@ describe('UsersService', () => {
     configService = module.get<ConfigService>(ConfigService);
 
     // Setup ConfigService mocks
-    mockConfigService.get.mockImplementation((key: string, defaultValue?: any) => {
-      if (key === 'BCRYPT_ROUNDS') return 12;
-      return defaultValue;
-    });
+    mockConfigService.get.mockImplementation(
+      (key: string, defaultValue?: any) => {
+        if (key === 'BCRYPT_ROUNDS') return 12;
+        return defaultValue;
+      },
+    );
   });
 
   afterEach(() => {
@@ -110,9 +116,9 @@ describe('UsersService', () => {
       // Assert
       expect(result).toEqual(mockUser);
       expect(mockUserRepository.findOne).toHaveBeenCalledWith({
-        where: { 
+        where: {
           email: mockCreateUserDto.email.toLowerCase().trim(),
-          deletedAt: expect.anything()
+          deletedAt: expect.anything(),
         },
       });
       expect(mockUserRepository.create).toHaveBeenCalled();
@@ -124,7 +130,9 @@ describe('UsersService', () => {
       mockUserRepository.findOne.mockResolvedValue(mockUser);
 
       // Act & Assert
-      await expect(service.create(mockCreateUserDto)).rejects.toThrow(ConflictException);
+      await expect(service.create(mockCreateUserDto)).rejects.toThrow(
+        ConflictException,
+      );
     });
 
     it('should throw ForbiddenException when trying to create admin user', async () => {
@@ -133,7 +141,9 @@ describe('UsersService', () => {
       mockUserRepository.findOne.mockResolvedValue(null);
 
       // Act & Assert
-      await expect(service.create(adminUserDto)).rejects.toThrow(ForbiddenException);
+      await expect(service.create(adminUserDto)).rejects.toThrow(
+        ForbiddenException,
+      );
     });
 
     it('should validate password strength', async () => {
@@ -142,7 +152,9 @@ describe('UsersService', () => {
       mockUserRepository.findOne.mockResolvedValue(null);
 
       // Act & Assert
-      await expect(service.create(weakPasswordDto)).rejects.toThrow(BusinessValidationException);
+      await expect(service.create(weakPasswordDto)).rejects.toThrow(
+        BusinessValidationException,
+      );
     });
   });
 
@@ -166,7 +178,9 @@ describe('UsersService', () => {
       expect(result).toHaveProperty('data');
       expect(result).toHaveProperty('meta');
       expect(result.meta.total).toBe(1);
-      expect(mockQueryBuilder.where).toHaveBeenCalledWith('user.deletedAt IS NULL');
+      expect(mockQueryBuilder.where).toHaveBeenCalledWith(
+        'user.deletedAt IS NULL',
+      );
     });
 
     it('should apply search filters correctly', async () => {
@@ -182,21 +196,27 @@ describe('UsersService', () => {
       mockUserRepository.createQueryBuilder.mockReturnValue(mockQueryBuilder);
 
       // Act
-      await service.findAll({ 
-        page: 1, 
-        limit: 10, 
+      await service.findAll({
+        page: 1,
+        limit: 10,
         search: 'test',
         role: UserRole.USER,
-        status: UserStatus.ACTIVE 
+        status: UserStatus.ACTIVE,
       });
 
       // Assert
       expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
         '(user.name ILIKE :search OR user.email ILIKE :search)',
-        { search: '%test%' }
+        { search: '%test%' },
       );
-      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith('user.role = :role', { role: UserRole.USER });
-      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith('user.status = :status', { status: UserStatus.ACTIVE });
+      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
+        'user.role = :role',
+        { role: UserRole.USER },
+      );
+      expect(mockQueryBuilder.andWhere).toHaveBeenCalledWith(
+        'user.status = :status',
+        { status: UserStatus.ACTIVE },
+      );
     });
   });
 
@@ -220,7 +240,9 @@ describe('UsersService', () => {
       mockUserRepository.findOne.mockResolvedValue(null);
 
       // Act & Assert
-      await expect(service.findOne(999)).rejects.toThrow(ResourceNotFoundException);
+      await expect(service.findOne(999)).rejects.toThrow(
+        ResourceNotFoundException,
+      );
     });
   });
 
@@ -235,9 +257,9 @@ describe('UsersService', () => {
       // Assert
       expect(result).toEqual(mockUser);
       expect(mockUserRepository.findOne).toHaveBeenCalledWith({
-        where: { 
+        where: {
           email: 'test@example.com',
-          deletedAt: expect.anything() 
+          deletedAt: expect.anything(),
         },
         select: ['id', 'email', 'name', 'role', 'status', 'password'],
       });
@@ -248,7 +270,9 @@ describe('UsersService', () => {
       mockUserRepository.findOne.mockResolvedValue(null);
 
       // Act & Assert
-      await expect(service.findByEmail('notfound@example.com')).rejects.toThrow(ResourceNotFoundException);
+      await expect(service.findByEmail('notfound@example.com')).rejects.toThrow(
+        ResourceNotFoundException,
+      );
     });
   });
 
@@ -261,7 +285,11 @@ describe('UsersService', () => {
     it('should update user successfully', async () => {
       // Arrange
       mockUserRepository.findOne.mockResolvedValue(mockUser);
-      const updatedUser = { ...mockUser, ...updateUserDto, updatedAt: new Date() };
+      const updatedUser = {
+        ...mockUser,
+        ...updateUserDto,
+        updatedAt: new Date(),
+      };
       mockUserRepository.save.mockResolvedValue(updatedUser);
 
       // Act
@@ -275,11 +303,18 @@ describe('UsersService', () => {
 
     it('should validate email uniqueness when updating email', async () => {
       // Arrange
-      const updateWithEmail: UpdateUserDto = { ...updateUserDto, email: 'newemail@example.com' };
+      const updateWithEmail: UpdateUserDto = {
+        ...updateUserDto,
+        email: 'newemail@example.com',
+      };
       mockUserRepository.findOne
         .mockResolvedValueOnce(mockUser) // findOne para buscar usuário
         .mockResolvedValueOnce(null); // validateEmailUniqueness
-      const updatedUser = { ...mockUser, ...updateWithEmail, updatedAt: new Date() };
+      const updatedUser = {
+        ...mockUser,
+        ...updateWithEmail,
+        updatedAt: new Date(),
+      };
       mockUserRepository.save.mockResolvedValue(updatedUser);
 
       // Act
@@ -293,15 +328,20 @@ describe('UsersService', () => {
 
     it('should throw ConflictException when updating to existing email', async () => {
       // Arrange
-      const updateWithEmail: UpdateUserDto = { ...updateUserDto, email: 'existing@example.com' };
+      const updateWithEmail: UpdateUserDto = {
+        ...updateUserDto,
+        email: 'existing@example.com',
+      };
       const otherUser = { ...mockUser, id: 2, email: 'existing@example.com' };
-      
+
       mockUserRepository.findOne
         .mockResolvedValueOnce(mockUser) // findOne para buscar usuário
         .mockResolvedValueOnce(otherUser); // validateEmailUniqueness
 
       // Act & Assert
-      await expect(service.update(1, updateWithEmail)).rejects.toThrow(ConflictException);
+      await expect(service.update(1, updateWithEmail)).rejects.toThrow(
+        ConflictException,
+      );
     });
   });
 
@@ -321,14 +361,19 @@ describe('UsersService', () => {
 
       // Mock bcrypt
       jest.spyOn(bcrypt, 'compare').mockResolvedValue(true as never);
-      jest.spyOn(bcrypt, 'hash').mockResolvedValue('newHashedPassword' as never);
+      jest
+        .spyOn(bcrypt, 'hash')
+        .mockResolvedValue('newHashedPassword' as never);
 
       // Act
       await service.changePassword(1, changePasswordDto);
 
       // Assert
       expect(mockUserRepository.save).toHaveBeenCalled();
-      expect(bcrypt.compare).toHaveBeenCalledWith('OldPassword123', currentPasswordHash);
+      expect(bcrypt.compare).toHaveBeenCalledWith(
+        'OldPassword123',
+        currentPasswordHash,
+      );
       expect(bcrypt.hash).toHaveBeenCalledWith('NewPassword123', 12);
     });
 
@@ -338,18 +383,25 @@ describe('UsersService', () => {
       jest.spyOn(bcrypt, 'compare').mockResolvedValue(false as never);
 
       // Act & Assert
-      await expect(service.changePassword(1, changePasswordDto)).rejects.toThrow(BadRequestException);
+      await expect(
+        service.changePassword(1, changePasswordDto),
+      ).rejects.toThrow(BadRequestException);
     });
 
     it('should validate new password strength', async () => {
       // Arrange
       const weakPasswordDto = { ...changePasswordDto, newPassword: '123' };
-      const userWithPassword = { ...mockUser, password: await bcrypt.hash('OldPassword123', 12) };
+      const userWithPassword = {
+        ...mockUser,
+        password: await bcrypt.hash('OldPassword123', 12),
+      };
       mockUserRepository.findOne.mockResolvedValue(userWithPassword);
       jest.spyOn(bcrypt, 'compare').mockResolvedValue(true as never);
 
       // Act & Assert
-      await expect(service.changePassword(1, weakPasswordDto)).rejects.toThrow(BusinessValidationException);
+      await expect(service.changePassword(1, weakPasswordDto)).rejects.toThrow(
+        BusinessValidationException,
+      );
     });
   });
 
@@ -357,7 +409,10 @@ describe('UsersService', () => {
     it('should soft delete user successfully', async () => {
       // Arrange
       mockUserRepository.findOne.mockResolvedValue(mockUser);
-      mockUserRepository.save.mockResolvedValue({ ...mockUser, deletedAt: new Date() });
+      mockUserRepository.save.mockResolvedValue({
+        ...mockUser,
+        deletedAt: new Date(),
+      });
 
       // Act
       await service.remove(1);
@@ -381,11 +436,11 @@ describe('UsersService', () => {
       // Arrange
       mockUserRepository.count
         .mockResolvedValueOnce(100) // totalUsers
-        .mockResolvedValueOnce(80)  // activeUsers
-        .mockResolvedValueOnce(10)  // pendingUsers
-        .mockResolvedValueOnce(5)   // suspendedUsers
-        .mockResolvedValueOnce(2)   // newUsersToday
-        .mockResolvedValueOnce(15)  // newUsersThisWeek
+        .mockResolvedValueOnce(80) // activeUsers
+        .mockResolvedValueOnce(10) // pendingUsers
+        .mockResolvedValueOnce(5) // suspendedUsers
+        .mockResolvedValueOnce(2) // newUsersToday
+        .mockResolvedValueOnce(15) // newUsersThisWeek
         .mockResolvedValueOnce(25); // newUsersThisMonth
 
       // Act
@@ -432,7 +487,10 @@ describe('UsersService', () => {
     it('should update user status successfully', async () => {
       // Arrange
       mockUserRepository.findOne.mockResolvedValue(mockUser);
-      mockUserRepository.save.mockResolvedValue({ ...mockUser, status: UserStatus.SUSPENDED });
+      mockUserRepository.save.mockResolvedValue({
+        ...mockUser,
+        status: UserStatus.SUSPENDED,
+      });
 
       // Act
       const result = await service.updateStatus(1, UserStatus.SUSPENDED);
@@ -446,16 +504,16 @@ describe('UsersService', () => {
   describe('unlockAccount', () => {
     it('should unlock user account successfully', async () => {
       // Arrange
-      const lockedUser = { 
-        ...mockUser, 
+      const lockedUser = {
+        ...mockUser,
         lockedUntil: new Date(),
-        failedLoginAttempts: 5 
+        failedLoginAttempts: 5,
       };
       mockUserRepository.findOne.mockResolvedValue(lockedUser);
       mockUserRepository.save.mockResolvedValue({
         ...lockedUser,
         lockedUntil: undefined,
-        failedLoginAttempts: 0
+        failedLoginAttempts: 0,
       });
 
       // Act

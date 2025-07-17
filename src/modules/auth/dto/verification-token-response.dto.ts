@@ -4,7 +4,7 @@ import { VerificationTokenType } from '../entities/verification-token.entity';
 
 /**
  * DTO de resposta para token de verificação
- * 
+ *
  * @description Formata dados de token de verificação para resposta da API
  * @author NeuralContent Team
  * @since 1.0.0
@@ -25,7 +25,8 @@ export class VerificationTokenResponseDto {
   userId: string;
 
   @ApiProperty({
-    description: 'Token de verificação único (parcialmente oculto por segurança)',
+    description:
+      'Token de verificação único (parcialmente oculto por segurança)',
     example: 'unique-hash-***',
   })
   @Expose()
@@ -49,7 +50,9 @@ export class VerificationTokenResponseDto {
     example: '2025-01-14T12:00:00Z',
   })
   @Expose()
-  @Transform(({ value }) => value instanceof Date ? value.toISOString() : value)
+  @Transform(({ value }) =>
+    value instanceof Date ? value.toISOString() : value,
+  )
   expiresAt: Date;
 
   @ApiProperty({
@@ -66,7 +69,9 @@ export class VerificationTokenResponseDto {
     required: false,
   })
   @Expose()
-  @Transform(({ value }) => value instanceof Date ? value.toISOString() : value)
+  @Transform(({ value }) =>
+    value instanceof Date ? value.toISOString() : value,
+  )
   usedAt?: Date;
 
   @ApiProperty({
@@ -74,7 +79,9 @@ export class VerificationTokenResponseDto {
     example: '2025-01-13T12:00:00Z',
   })
   @Expose()
-  @Transform(({ value }) => value instanceof Date ? value.toISOString() : value)
+  @Transform(({ value }) =>
+    value instanceof Date ? value.toISOString() : value,
+  )
   createdAt: Date;
 
   @ApiProperty({
@@ -84,10 +91,10 @@ export class VerificationTokenResponseDto {
   @Expose()
   @Transform(({ obj }) => {
     if (obj.usedAt) return 'used';
-    
+
     const now = new Date();
     const expirationDate = new Date(obj.expiresAt);
-    
+
     if (expirationDate < now) return 'expired';
     return 'valid';
   })
@@ -101,12 +108,12 @@ export class VerificationTokenResponseDto {
   @Expose()
   @Transform(({ obj }) => {
     if (obj.usedAt) return 0;
-    
+
     const now = new Date();
     const expirationDate = new Date(obj.expiresAt);
-    
+
     if (expirationDate < now) return 0;
-    
+
     const diffTime = expirationDate.getTime() - now.getTime();
     return Math.floor(diffTime / (1000 * 60)); // em minutos
   })
@@ -134,10 +141,10 @@ export class VerificationTokenResponseDto {
   @Expose()
   @Transform(({ obj }) => {
     if (obj.usedAt) return false;
-    
+
     const now = new Date();
     const expirationDate = new Date(obj.expiresAt);
-    
+
     return expirationDate > now;
   })
   isValid: boolean;

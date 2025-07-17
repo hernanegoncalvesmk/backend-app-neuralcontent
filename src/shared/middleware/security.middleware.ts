@@ -3,7 +3,7 @@ import { Request, Response, NextFunction } from 'express';
 
 /**
  * Security Middleware - Implementa middlewares de segurança base
- * 
+ *
  * Features:
  * - Security headers customizados
  * - Rate limiting headers
@@ -18,10 +18,10 @@ export class SecurityMiddleware implements NestMiddleware {
   use(req: Request, res: Response, next: NextFunction) {
     // 1. Headers customizados de segurança
     this.setCustomSecurityHeaders(res);
-    
+
     // 2. Log de segurança
     this.logSecurityInfo(req);
-    
+
     next();
   }
 
@@ -31,20 +31,20 @@ export class SecurityMiddleware implements NestMiddleware {
   private setCustomSecurityHeaders(res: Response): void {
     // API Version
     res.setHeader('X-API-Version', '1.0.0');
-    
+
     // Powered By (esconder tecnologia)
     res.removeHeader('X-Powered-By');
     res.setHeader('X-Powered-By', 'NeuralContent');
-    
+
     // Rate Limiting Info
     res.setHeader('X-RateLimit-Limit', '1000');
     res.setHeader('X-RateLimit-Window', '15m');
-    
+
     // CORS Headers customizados
     res.setHeader('X-Content-Type-Options', 'nosniff');
     res.setHeader('X-Frame-Options', 'DENY');
     res.setHeader('X-XSS-Protection', '1; mode=block');
-    
+
     // Cache Control para APIs
     res.setHeader('Cache-Control', 'no-cache, no-store, must-revalidate');
     res.setHeader('Pragma', 'no-cache');
@@ -86,9 +86,9 @@ export class SecurityMiddleware implements NestMiddleware {
 
     const url = req.originalUrl.toLowerCase();
     const userAgent = (req.get('User-Agent') || '').toLowerCase();
-    
-    return suspiciousPatterns.some(pattern => 
-      pattern.test(url) || pattern.test(userAgent)
+
+    return suspiciousPatterns.some(
+      (pattern) => pattern.test(url) || pattern.test(userAgent),
     );
   }
 }

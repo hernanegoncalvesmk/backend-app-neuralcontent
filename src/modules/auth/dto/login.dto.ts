@@ -1,10 +1,18 @@
-import { IsEmail, IsNotEmpty, IsString, MinLength, MaxLength, IsOptional, IsBoolean } from 'class-validator';
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsString,
+  MinLength,
+  MaxLength,
+  IsOptional,
+  IsBoolean,
+} from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 
 /**
  * DTO para login de usuário
- * 
+ *
  * @description Valida os dados de entrada para autenticação de usuário
  * @author NeuralContent Team
  * @since 1.0.0
@@ -15,9 +23,12 @@ export class LoginDto {
     example: 'usuario@neuralcontent.com',
     format: 'email',
   })
-  @IsEmail({}, {
-    message: 'Email deve ter um formato válido',
-  })
+  @IsEmail(
+    {},
+    {
+      message: 'Email deve ter um formato válido',
+    },
+  )
   @IsNotEmpty({
     message: 'Email é obrigatório',
   })

@@ -1,10 +1,10 @@
-import { 
-  Injectable, 
-  NotFoundException, 
-  ConflictException, 
+import {
+  Injectable,
+  NotFoundException,
+  ConflictException,
   BadRequestException,
   ForbiddenException,
-  Logger 
+  Logger,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, MoreThanOrEqual, Like, In, IsNull, Not } from 'typeorm';
@@ -27,9 +27,9 @@ import { CreditBalance } from '../credits/entities/credit-balance.entity';
 import { VerificationToken } from '../auth/entities/verification-token.entity';
 
 // Custom Exceptions
-import { 
+import {
   BusinessValidationException,
-  ResourceNotFoundException 
+  ResourceNotFoundException,
 } from '../../shared/exceptions/custom.exceptions';
 
 export interface FindAllUsersOptions {
@@ -44,13 +44,13 @@ export interface FindAllUsersOptions {
 
 /**
  * UsersService - Serviço de gestão de usuários
- * 
- * @description Implementa todas as operações CRUD e lógica de negócio 
+ *
+ * @description Implementa todas as operações CRUD e lógica de negócio
  * relacionadas aos usuários do sistema NeuralContent
- * 
+ *
  * @author NeuralContent Team
  * @since 1.0.0
- * 
+ *
  * @features
  * - CRUD completo de usuários
  * - Validação de regras de negócio
@@ -80,7 +80,7 @@ export class UsersService {
 
   /**
    * Criar novo usuário
-   * 
+   *
    * @param createUserDto - Dados para criar o usuário
    * @returns User criado
    * @throws ConflictException se email já existir
@@ -111,14 +111,13 @@ export class UsersService {
       });
 
       const result = await this.userRepository.save(newUser);
-      
+
       // TypeORM save pode retornar User ou User[] dependendo do input
       // Como estamos passando uma entidade única, fazemos cast para User
       const savedUser = result as unknown as User;
-      
+
       this.logger.log(`User created successfully with ID: ${savedUser.id}`);
       return savedUser;
-
     } catch (error) {
       this.logger.error(`Failed to create user: ${error.message}`, error.stack);
       throw error;
@@ -127,11 +126,13 @@ export class UsersService {
 
   /**
    * Buscar todos os usuários com filtros e paginação
-   * 
+   *
    * @param options - Opções de busca e filtros
    * @returns Lista paginada de usuários
    */
-  async findAll(options: FindAllUsersOptions = {}): Promise<UserListResponseDto> {
+  async findAll(
+    options: FindAllUsersOptions = {},
+  ): Promise<UserListResponseDto> {
     this.logger.log('Fetching users with options:', JSON.stringify(options));
 
     const {
@@ -145,7 +146,8 @@ export class UsersService {
     } = options;
 
     try {
-      const queryBuilder = this.userRepository.createQueryBuilder('user')
+      const queryBuilder = this.userRepository
+        .createQueryBuilder('user')
         .where('user.deletedAt IS NULL'); // Apenas usuários não deletados
 
       // Aplicar filtros
@@ -162,7 +164,7 @@ export class UsersService {
       const [users, total] = await queryBuilder.getManyAndCount();
 
       const result: UserListResponseDto = {
-        data: users.map(user => new UserResponseDto(user)),
+        data: users.map((user) => new UserResponseDto(user)),
         meta: {
           page,
           limit,
@@ -171,9 +173,10 @@ export class UsersService {
         },
       };
 
-      this.logger.log(`Found ${total} users (page ${page}/${result.meta.totalPages})`);
+      this.logger.log(
+        `Found ${total} users (page ${page}/${result.meta.totalPages})`,
+      );
       return result;
-
     } catch (error) {
       this.logger.error('Failed to fetch users:', error.message);
       throw new BusinessValidationException('Failed to fetch users');
@@ -197,7 +200,7 @@ export class UsersService {
 
   /**
    * Buscar usuário por email
-   * 
+   *
    * @param email - Email do usuário
    * @returns User encontrado
    * @throws ResourceNotFoundException se não encontrado
@@ -206,11 +209,19 @@ export class UsersService {
     this.logger.log(`Finding user with email: ${email}`);
 
     const user = await this.userRepository.findOne({
-      where: { 
+      where: {
         email: email.toLowerCase().trim(),
-        deletedAt: IsNull() 
+        deletedAt: IsNull(),
       },
-      select: ['id', 'email', 'firstName', 'lastName', 'role', 'isActive', 'password'], // Incluir password quando necessário
+      select: [
+        'id',
+        'email',
+        'firstName',
+        'lastName',
+        'role',
+        'isActive',
+        'password',
+      ], // Incluir password quando necessário
     });
 
     if (!user) {
@@ -222,15 +233,15 @@ export class UsersService {
 
   /**
    * Buscar usuários por role
-   * 
+   *
    * @param role - Role dos usuários
    * @returns Array de usuários
    */
   async findByRole(role: UserRole): Promise<User[]> {
     return this.userRepository.find({
-      where: { 
+      where: {
         role,
-        deletedAt: IsNull() 
+        deletedAt: IsNull(),
       },
       order: { createdAt: 'DESC' },
     });
@@ -238,14 +249,14 @@ export class UsersService {
 
   /**
    * Buscar usuários ativos
-   * 
+   *
    * @returns Array de usuários ativos
    */
   async findActiveUsers(): Promise<User[]> {
     return this.userRepository.find({
-      where: { 
+      where: {
         isActive: true,
-        deletedAt: IsNull() 
+        deletedAt: IsNull(),
       },
       order: { lastLoginAt: 'DESC' },
     });
@@ -253,7 +264,7 @@ export class UsersService {
 
   /**
    * Atualizar usuário
-   * 
+   *
    * @param id - ID do usuário
    * @param updateUserDto - Dados para atualização
    * @returns User atualizado
@@ -280,25 +291,30 @@ export class UsersService {
       user.updatedAt = new Date();
 
       const updatedUser = await this.userRepository.save(user);
-      
+
       this.logger.log(`User updated successfully with ID: ${id}`);
       return updatedUser;
-
     } catch (error) {
-      this.logger.error(`Failed to update user ${id}: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to update user ${id}: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
 
   /**
    * Alterar senha do usuário
-   * 
+   *
    * @param id - ID do usuário
    * @param changePasswordDto - Dados da alteração
    * @throws BadRequestException se senha atual incorreta
    * @throws ResourceNotFoundException se usuário não encontrado
    */
-  async changePassword(id: number, changePasswordDto: ChangePasswordDto): Promise<void> {
+  async changePassword(
+    id: number,
+    changePasswordDto: ChangePasswordDto,
+  ): Promise<void> {
     this.logger.log(`Changing password for user ID: ${id}`);
 
     try {
@@ -326,25 +342,29 @@ export class UsersService {
       this.validatePasswordStrength(changePasswordDto.newPassword);
 
       // Hash da nova senha
-      const hashedPassword = await this.hashPassword(changePasswordDto.newPassword);
+      const hashedPassword = await this.hashPassword(
+        changePasswordDto.newPassword,
+      );
 
       // Atualizar a senha
       user.password = hashedPassword;
       user.updatedAt = new Date();
 
       await this.userRepository.save(user);
-      
-      this.logger.log(`Password changed successfully for user ID: ${id}`);
 
+      this.logger.log(`Password changed successfully for user ID: ${id}`);
     } catch (error) {
-      this.logger.error(`Failed to change password for user ${id}: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to change password for user ${id}: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
 
   /**
    * Remover usuário (soft delete)
-   * 
+   *
    * @param id - ID do usuário
    * @throws ResourceNotFoundException se usuário não encontrado
    * @throws ForbiddenException se tentar deletar admin
@@ -365,18 +385,20 @@ export class UsersService {
       user.isActive = false;
 
       await this.userRepository.save(user);
-      
-      this.logger.log(`User removed successfully with ID: ${id}`);
 
+      this.logger.log(`User removed successfully with ID: ${id}`);
     } catch (error) {
-      this.logger.error(`Failed to remove user ${id}: ${error.message}`, error.stack);
+      this.logger.error(
+        `Failed to remove user ${id}: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
 
   /**
    * Obter estatísticas detalhadas dos usuários
-   * 
+   *
    * @returns Estatísticas completas
    */
   async getStats(): Promise<UserStatsResponseDto> {
@@ -386,7 +408,11 @@ export class UsersService {
       const now = new Date();
       const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
       const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1000);
-      const monthAgo = new Date(today.getFullYear(), today.getMonth() - 1, today.getDate());
+      const monthAgo = new Date(
+        today.getFullYear(),
+        today.getMonth() - 1,
+        today.getDate(),
+      );
 
       const [
         totalUsers,
@@ -397,11 +423,21 @@ export class UsersService {
         newUsersThisMonth,
       ] = await Promise.all([
         this.userRepository.count({ where: { deletedAt: IsNull() } }),
-        this.userRepository.count({ where: { isActive: true, deletedAt: IsNull() } }),
-        this.userRepository.count({ where: { isActive: false, deletedAt: IsNull() } }),
-        this.userRepository.count({ where: { createdAt: MoreThanOrEqual(today), deletedAt: IsNull() } }),
-        this.userRepository.count({ where: { createdAt: MoreThanOrEqual(weekAgo), deletedAt: IsNull() } }),
-        this.userRepository.count({ where: { createdAt: MoreThanOrEqual(monthAgo), deletedAt: IsNull() } }),
+        this.userRepository.count({
+          where: { isActive: true, deletedAt: IsNull() },
+        }),
+        this.userRepository.count({
+          where: { isActive: false, deletedAt: IsNull() },
+        }),
+        this.userRepository.count({
+          where: { createdAt: MoreThanOrEqual(today), deletedAt: IsNull() },
+        }),
+        this.userRepository.count({
+          where: { createdAt: MoreThanOrEqual(weekAgo), deletedAt: IsNull() },
+        }),
+        this.userRepository.count({
+          where: { createdAt: MoreThanOrEqual(monthAgo), deletedAt: IsNull() },
+        }),
       ]);
 
       const stats = {
@@ -413,12 +449,16 @@ export class UsersService {
         newUsersThisMonth,
       };
 
-      this.logger.log('User statistics generated successfully', JSON.stringify(stats));
+      this.logger.log(
+        'User statistics generated successfully',
+        JSON.stringify(stats),
+      );
       return stats;
-
     } catch (error) {
       this.logger.error('Failed to generate user statistics:', error.message);
-      throw new BusinessValidationException('Failed to generate user statistics');
+      throw new BusinessValidationException(
+        'Failed to generate user statistics',
+      );
     }
   }
 
@@ -435,7 +475,7 @@ export class UsersService {
 
   async unlockAccount(id: number): Promise<void> {
     const user = await this.findOne(id);
-    
+
     user.isActive = true;
     user.updatedAt = new Date();
 
@@ -444,15 +484,15 @@ export class UsersService {
 
   /**
    * Verificar se usuário existe por email
-   * 
+   *
    * @param email - Email do usuário
    * @returns boolean indicando se existe
    */
   async existsByEmail(email: string): Promise<boolean> {
     const count = await this.userRepository.count({
-      where: { 
+      where: {
         email: email.toLowerCase().trim(),
-        deletedAt: IsNull() 
+        deletedAt: IsNull(),
       },
     });
     return count > 0;
@@ -460,22 +500,22 @@ export class UsersService {
 
   /**
    * Contar usuários por status ativo/inativo
-   * 
+   *
    * @param isActive - Status ativo dos usuários
    * @returns Número de usuários
    */
   async countByActiveStatus(isActive: boolean): Promise<number> {
     return this.userRepository.count({
-      where: { 
+      where: {
         isActive,
-        deletedAt: IsNull() 
+        deletedAt: IsNull(),
       },
     });
   }
 
   /**
    * Buscar usuários criados em período
-   * 
+   *
    * @param startDate - Data inicial
    * @param endDate - Data final (opcional)
    * @returns Array de usuários
@@ -503,14 +543,17 @@ export class UsersService {
 
   /**
    * Validar unicidade do email
-   * 
+   *
    * @param email - Email a ser validado
    * @param excludeId - ID para excluir da validação (para updates)
    * @throws ConflictException se email já existir
    */
-  private async validateEmailUniqueness(email: string, excludeId?: number): Promise<void> {
+  private async validateEmailUniqueness(
+    email: string,
+    excludeId?: number,
+  ): Promise<void> {
     const normalizedEmail = email.toLowerCase().trim();
-    
+
     const query: any = {
       email: normalizedEmail,
       deletedAt: IsNull(),
@@ -531,11 +574,13 @@ export class UsersService {
 
   /**
    * Validar regras de negócio para criação
-   * 
+   *
    * @param createUserDto - Dados para validação
    * @throws BusinessValidationException se regras violadas
    */
-  private async validateBusinessRules(createUserDto: CreateUserDto): Promise<void> {
+  private async validateBusinessRules(
+    createUserDto: CreateUserDto,
+  ): Promise<void> {
     // Validar força da senha
     this.validatePasswordStrength(createUserDto.password);
 
@@ -550,14 +595,21 @@ export class UsersService {
 
   /**
    * Validar regras para atualização
-   * 
+   *
    * @param user - Usuário atual
    * @param updateUserDto - Dados para atualização
    * @throws BusinessValidationException se regras violadas
    */
-  private async validateUpdateRules(user: User, updateUserDto: UpdateUserDto): Promise<void> {
+  private async validateUpdateRules(
+    user: User,
+    updateUserDto: UpdateUserDto,
+  ): Promise<void> {
     // Não permitir alteração de role de admin
-    if (user.role === UserRole.ADMIN && updateUserDto.role && updateUserDto.role !== UserRole.ADMIN) {
+    if (
+      user.role === UserRole.ADMIN &&
+      updateUserDto.role &&
+      updateUserDto.role !== UserRole.ADMIN
+    ) {
       throw new ForbiddenException('Cannot change admin user role');
     }
 
@@ -569,11 +621,13 @@ export class UsersService {
 
   /**
    * Sanitizar dados do usuário
-   * 
+   *
    * @param userData - Dados a serem sanitizados
    * @returns Dados sanitizados
    */
-  private sanitizeUserData(userData: Partial<CreateUserDto | UpdateUserDto>): any {
+  private sanitizeUserData(
+    userData: Partial<CreateUserDto | UpdateUserDto>,
+  ): any {
     const sanitized: any = { ...userData };
 
     // Normalizar email
@@ -596,7 +650,7 @@ export class UsersService {
 
   /**
    * Aplicar filtros de busca na query
-   * 
+   *
    * @param queryBuilder - Query builder do TypeORM
    * @param filters - Filtros a serem aplicados
    */
@@ -621,7 +675,7 @@ export class UsersService {
 
   /**
    * Hash da senha com bcrypt
-   * 
+   *
    * @param password - Senha em texto plano
    * @returns Hash da senha
    */
@@ -631,7 +685,7 @@ export class UsersService {
 
   /**
    * Criar saldo de créditos inicial para novo usuário
-   * 
+   *
    * @param userId - ID do usuário
    * @returns CreditBalance criado
    */
@@ -653,7 +707,7 @@ export class UsersService {
 
   /**
    * Buscar saldo de créditos do usuário
-   * 
+   *
    * @param userId - ID do usuário
    * @returns CreditBalance ou null
    */
@@ -665,13 +719,16 @@ export class UsersService {
 
   /**
    * Buscar tokens de verificação ativos do usuário
-   * 
+   *
    * @param userId - ID do usuário
    * @param type - Tipo do token (opcional)
    * @returns Lista de tokens
    */
-  async getUserVerificationTokens(userId: string, type?: string): Promise<VerificationToken[]> {
-    const whereCondition: any = { 
+  async getUserVerificationTokens(
+    userId: string,
+    type?: string,
+  ): Promise<VerificationToken[]> {
+    const whereCondition: any = {
       userId,
       usedAt: IsNull(),
       expiresAt: MoreThanOrEqual(new Date()),
@@ -689,12 +746,15 @@ export class UsersService {
 
   /**
    * Invalidar tokens de verificação do usuário
-   * 
+   *
    * @param userId - ID do usuário
    * @param type - Tipo do token (opcional)
    */
-  async invalidateUserVerificationTokens(userId: string, type?: string): Promise<void> {
-    const whereCondition: any = { 
+  async invalidateUserVerificationTokens(
+    userId: string,
+    type?: string,
+  ): Promise<void> {
+    const whereCondition: any = {
       userId,
       usedAt: IsNull(),
     };
@@ -707,29 +767,32 @@ export class UsersService {
       usedAt: new Date(),
     });
 
-    this.logger.log(`Invalidated verification tokens for user ${userId}${type ? ` of type ${type}` : ''}`);
+    this.logger.log(
+      `Invalidated verification tokens for user ${userId}${type ? ` of type ${type}` : ''}`,
+    );
   }
 
   /**
    * Validar força da senha
-   * 
+   *
    * @param password - Senha a ser validada
    * @throws BusinessValidationException se senha fraca
    */
   private validatePasswordStrength(password: string): void {
     // Mínimo 8 caracteres, pelo menos 1 maiúscula, 1 minúscula, 1 número
-    const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d@$!%*?&]{8,}$/;
-    
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[A-Za-z\d@$!%*?&]{8,}$/;
+
     if (!passwordRegex.test(password)) {
       throw new BusinessValidationException(
-        'Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, and one number'
+        'Password must be at least 8 characters long and contain at least one uppercase letter, one lowercase letter, and one number',
       );
     }
   }
 
   /**
    * Validar domínio do email
-   * 
+   *
    * @param email - Email a ser validado
    * @throws BusinessValidationException se domínio inválido
    */

@@ -1,4 +1,10 @@
-import { MigrationInterface, QueryRunner, Table, TableIndex, TableForeignKey } from 'typeorm';
+import {
+  MigrationInterface,
+  QueryRunner,
+  Table,
+  TableIndex,
+  TableForeignKey,
+} from 'typeorm';
 
 export class CreatePaymentsTable1705153000000 implements MigrationInterface {
   name = 'CreatePaymentsTable1705153000000';
@@ -44,7 +50,14 @@ export class CreatePaymentsTable1705153000000 implements MigrationInterface {
           {
             name: 'status',
             type: 'enum',
-            enum: ['pending', 'completed', 'failed', 'cancelled', 'refunded', 'processing'],
+            enum: [
+              'pending',
+              'completed',
+              'failed',
+              'cancelled',
+              'refunded',
+              'processing',
+            ],
             default: "'pending'",
             comment: 'Status do pagamento',
           },

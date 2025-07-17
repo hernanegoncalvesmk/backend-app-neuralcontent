@@ -1,4 +1,10 @@
-import { MigrationInterface, QueryRunner, Table, TableIndex, TableForeignKey } from 'typeorm';
+import {
+  MigrationInterface,
+  QueryRunner,
+  Table,
+  TableIndex,
+  TableForeignKey,
+} from 'typeorm';
 
 export class CreatePaymentsTable1705152900000 implements MigrationInterface {
   name = 'CreatePaymentsTable1705152900000';
@@ -53,7 +59,14 @@ export class CreatePaymentsTable1705152900000 implements MigrationInterface {
           {
             name: 'status',
             type: 'enum',
-            enum: ['pending', 'processing', 'completed', 'failed', 'refunded', 'cancelled'],
+            enum: [
+              'pending',
+              'processing',
+              'completed',
+              'failed',
+              'refunded',
+              'cancelled',
+            ],
             default: "'pending'",
             comment: 'Status do pagamento',
           },
@@ -158,7 +171,10 @@ export class CreatePaymentsTable1705152900000 implements MigrationInterface {
 
   public async down(queryRunner: QueryRunner): Promise<void> {
     await queryRunner.dropForeignKey('pay_payments', 'FK_pay_payments_user_id');
-    await queryRunner.dropForeignKey('pay_payments', 'FK_pay_payments_subscription_id');
+    await queryRunner.dropForeignKey(
+      'pay_payments',
+      'FK_pay_payments_subscription_id',
+    );
     await queryRunner.dropTable('pay_payments');
   }
 }

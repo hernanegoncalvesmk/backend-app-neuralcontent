@@ -1,8 +1,16 @@
-import { Injectable, BadRequestException, NotFoundException, ConflictException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+  ConflictException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import { LoggerService } from '../../shared/logger/logger.service';
-import { CreditTransaction, CreditTransactionType } from './entities/credit-transaction.entity';
+import {
+  CreditTransaction,
+  CreditTransactionType,
+} from './entities/credit-transaction.entity';
 import { CreditBalance } from './entities/credit-balance.entity';
 import { User } from '../users/entities/user.entity';
 import {
@@ -42,18 +50,20 @@ export class CreditsService {
     try {
       // Convert userId string to number for compatibility with User entity
       const userIdNumber = parseInt(userId, 10);
-      const user = await this.userRepository.findOne({ where: { id: userIdNumber } });
+      const user = await this.userRepository.findOne({
+        where: { id: userIdNumber },
+      });
       if (!user) {
         throw new NotFoundException(`User with ID ${userId} not found`);
       }
 
       const existingBalance = await this.creditBalanceRepository.findOne({
-        where: { userId }
+        where: { userId },
       });
 
       if (existingBalance) {
         throw new ConflictException(
-          `Credit balance already exists for user ${userId}`
+          `Credit balance already exists for user ${userId}`,
         );
       }
 
@@ -61,7 +71,8 @@ export class CreditsService {
         ...createCreditBalanceDto,
       });
 
-      const savedBalance = await this.creditBalanceRepository.save(creditBalance);
+      const savedBalance =
+        await this.creditBalanceRepository.save(creditBalance);
 
       return {
         id: savedBalance.id,
@@ -82,7 +93,10 @@ export class CreditsService {
         balanceStatus: 'low', // will be calculated by transform
       };
     } catch (error) {
-      this.logger.error(`Error creating credit balance: ${error.message}`, error.stack);
+      this.logger.error(
+        `Error creating credit balance: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
@@ -95,17 +109,18 @@ export class CreditsService {
 
     try {
       const creditBalance = await this.creditBalanceRepository.findOne({
-        where: { userId }
+        where: { userId },
       });
 
       if (!creditBalance) {
         throw new NotFoundException(
-          `Credit balance not found for user ${userId}`
+          `Credit balance not found for user ${userId}`,
         );
       }
 
       Object.assign(creditBalance, updateCreditBalanceDto);
-      const savedBalance = await this.creditBalanceRepository.save(creditBalance);
+      const savedBalance =
+        await this.creditBalanceRepository.save(creditBalance);
 
       return {
         id: savedBalance.id,
@@ -126,7 +141,10 @@ export class CreditsService {
         balanceStatus: 'low', // will be calculated by transform
       };
     } catch (error) {
-      this.logger.error(`Error updating credit balance: ${error.message}`, error.stack);
+      this.logger.error(
+        `Error updating credit balance: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
@@ -136,12 +154,12 @@ export class CreditsService {
 
     try {
       const creditBalance = await this.creditBalanceRepository.findOne({
-        where: { userId }
+        where: { userId },
       });
 
       if (!creditBalance) {
         throw new NotFoundException(
-          `Credit balance not found for user ${userId}`
+          `Credit balance not found for user ${userId}`,
         );
       }
 
@@ -164,7 +182,10 @@ export class CreditsService {
         balanceStatus: 'low', // will be calculated by transform
       };
     } catch (error) {
-      this.logger.error(`Error getting credit balance: ${error.message}`, error.stack);
+      this.logger.error(
+        `Error getting credit balance: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
@@ -174,18 +195,21 @@ export class CreditsService {
 
     try {
       const creditBalance = await this.creditBalanceRepository.findOne({
-        where: { userId }
+        where: { userId },
       });
 
       if (!creditBalance) {
         throw new NotFoundException(
-          `Credit balance not found for user ${userId}`
+          `Credit balance not found for user ${userId}`,
         );
       }
 
       await this.creditBalanceRepository.remove(creditBalance);
     } catch (error) {
-      this.logger.error(`Error deleting credit balance: ${error.message}`, error.stack);
+      this.logger.error(
+        `Error deleting credit balance: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
@@ -200,7 +224,9 @@ export class CreditsService {
     try {
       // Convert userId string to number for compatibility with User entity
       const userIdNumber = parseInt(userId, 10);
-      const user = await this.userRepository.findOne({ where: { id: userIdNumber } });
+      const user = await this.userRepository.findOne({
+        where: { id: userIdNumber },
+      });
       if (!user) {
         throw new NotFoundException('Usuário não encontrado');
       }
@@ -209,7 +235,7 @@ export class CreditsService {
       let userCredits = 0;
       try {
         const creditBalance = await this.creditBalanceRepository.findOne({
-          where: { userId }
+          where: { userId },
         });
         userCredits = creditBalance ? creditBalance.availableCredits : 0;
       } catch {
@@ -228,12 +254,15 @@ export class CreditsService {
         requiredAmount: requiredCredits,
         serviceCost: requiredCredits,
         remaining: Math.max(0, userCredits - requiredCredits),
-        message: hasEnoughCredits 
-          ? 'Créditos suficientes' 
+        message: hasEnoughCredits
+          ? 'Créditos suficientes'
           : `Créditos insuficientes. Necessário: ${requiredCredits}, Disponível: ${userCredits}`,
       };
     } catch (error) {
-      this.logger.error(`Error validating credits: ${error.message}`, error.stack);
+      this.logger.error(
+        `Error validating credits: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
@@ -251,7 +280,10 @@ export class CreditsService {
     try {
       // Verificar se o usuário existe
       const userIdNum = parseInt(userId, 10);
-      const user = await queryRunner.manager.findOne(User, { where: { id: userIdNum }, relations: ['creditBalance'] });
+      const user = await queryRunner.manager.findOne(User, {
+        where: { id: userIdNum },
+        relations: ['creditBalance'],
+      });
       if (!user) {
         throw new NotFoundException('Usuário não encontrado');
       }
@@ -266,10 +298,14 @@ export class CreditsService {
 
       // Atualizar o saldo do usuário
       const newBalance = currentCredits - requiredCredits;
-      
+
       // Atualizar saldo via CreditBalance relation se existir
       if (user.creditBalance) {
-        await queryRunner.manager.update('crd_credit_balances', { userId: userIdNum }, { availableCredits: newBalance });
+        await queryRunner.manager.update(
+          'crd_credit_balances',
+          { userId: userIdNum },
+          { availableCredits: newBalance },
+        );
       }
 
       // Criar registro da transação
@@ -298,7 +334,10 @@ export class CreditsService {
       };
     } catch (error) {
       await queryRunner.rollbackTransaction();
-      this.logger.error(`Error consuming credits: ${error.message}`, error.stack);
+      this.logger.error(
+        `Error consuming credits: ${error.message}`,
+        error.stack,
+      );
       throw error;
     } finally {
       await queryRunner.release();
@@ -318,7 +357,10 @@ export class CreditsService {
     try {
       // Verificar se o usuário existe
       const userIdNum = parseInt(userId, 10);
-      const user = await queryRunner.manager.findOne(User, { where: { id: userIdNum }, relations: ['creditBalance'] });
+      const user = await queryRunner.manager.findOne(User, {
+        where: { id: userIdNum },
+        relations: ['creditBalance'],
+      });
       if (!user) {
         throw new NotFoundException('Usuário não encontrado');
       }
@@ -329,7 +371,11 @@ export class CreditsService {
 
       // Atualizar o saldo do usuário via CreditBalance relation se existir
       if (user.creditBalance) {
-        await queryRunner.manager.update('crd_credit_balances', { userId: userIdNum }, { availableCredits: newBalance });
+        await queryRunner.manager.update(
+          'crd_credit_balances',
+          { userId: userIdNum },
+          { availableCredits: newBalance },
+        );
       }
 
       // Criar registro da transação
@@ -377,14 +423,19 @@ export class CreditsService {
 
     try {
       const userIdNum = parseInt(userId, 10);
-      const user = await this.userRepository.findOne({ where: { id: userIdNum } });
+      const user = await this.userRepository.findOne({
+        where: { id: userIdNum },
+      });
       if (!user) {
         throw new NotFoundException('Usuário não encontrado');
       }
 
       return user.creditBalance?.availableCredits || 0;
     } catch (error) {
-      this.logger.error(`Error getting user credit balance: ${error.message}`, error.stack);
+      this.logger.error(
+        `Error getting user credit balance: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }
@@ -408,7 +459,10 @@ export class CreditsService {
 
       return transactions;
     } catch (error) {
-      this.logger.error(`Error getting credit transaction history: ${error.message}`, error.stack);
+      this.logger.error(
+        `Error getting credit transaction history: ${error.message}`,
+        error.stack,
+      );
       throw error;
     }
   }

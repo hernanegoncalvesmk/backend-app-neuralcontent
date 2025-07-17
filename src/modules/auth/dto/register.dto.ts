@@ -1,13 +1,13 @@
-import { 
-  IsEmail, 
-  IsNotEmpty, 
-  IsString, 
-  MinLength, 
-  MaxLength, 
-  Matches, 
+import {
+  IsEmail,
+  IsNotEmpty,
+  IsString,
+  MinLength,
+  MaxLength,
+  Matches,
   IsOptional,
   IsEnum,
-  IsBoolean 
+  IsBoolean,
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
@@ -18,12 +18,12 @@ import { Transform } from 'class-transformer';
 export enum UserRole {
   USER = 'user',
   ADMIN = 'admin',
-  MODERATOR = 'moderator'
+  MODERATOR = 'moderator',
 }
 
 /**
  * DTO para registro de novo usuário
- * 
+ *
  * @description Valida os dados de entrada para criação de nova conta
  * @author NeuralContent Team
  * @since 1.0.0
@@ -82,9 +82,12 @@ export class RegisterDto {
     example: 'joao.silva@neuralcontent.com',
     format: 'email',
   })
-  @IsEmail({}, {
-    message: 'Email deve ter um formato válido',
-  })
+  @IsEmail(
+    {},
+    {
+      message: 'Email deve ter um formato válido',
+    },
+  )
   @IsNotEmpty({
     message: 'Email é obrigatório',
   })
@@ -112,12 +115,10 @@ export class RegisterDto {
   @MaxLength(50, {
     message: 'Senha deve ter no máximo 50 caracteres',
   })
-  @Matches(
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/, 
-    {
-      message: 'Senha deve conter pelo menos: 1 letra minúscula, 1 maiúscula, 1 número e 1 caractere especial',
-    }
-  )
+  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/, {
+    message:
+      'Senha deve conter pelo menos: 1 letra minúscula, 1 maiúscula, 1 número e 1 caractere especial',
+  })
   password: string;
 
   @ApiPropertyOptional({

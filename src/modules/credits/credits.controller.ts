@@ -10,7 +10,14 @@ import {
   ParseIntPipe,
   DefaultValuePipe,
 } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse, ApiBearerAuth, ApiParam, ApiQuery } from '@nestjs/swagger';
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
+  ApiBearerAuth,
+  ApiParam,
+  ApiQuery,
+} from '@nestjs/swagger';
 import { Request as ExpressRequest } from 'express';
 import { CreditsService } from './credits.service';
 import { AuthGuard } from '../../shared/guards/auth.guard';
@@ -30,7 +37,7 @@ import { CreditTransaction } from './entities/credit-transaction.entity';
 
 /**
  * Controller para gerenciamento de créditos
- * 
+ *
  * @description Fornece endpoints para operações de créditos incluindo:
  * - Validação de saldo
  * - Consumo de créditos
@@ -52,7 +59,8 @@ export class CreditsController {
   @Post('validate')
   @ApiOperation({
     summary: 'Validar créditos suficientes',
-    description: 'Verifica se o usuário possui créditos suficientes para uma operação específica',
+    description:
+      'Verifica se o usuário possui créditos suficientes para uma operação específica',
   })
   @ApiResponse({
     status: 200,
@@ -63,7 +71,9 @@ export class CreditsController {
     status: 404,
     description: 'Usuário não encontrado',
   })
-  async validateCredits(@Body() dto: ValidateCreditsDto): Promise<ValidateCreditsResponseDto> {
+  async validateCredits(
+    @Body() dto: ValidateCreditsDto,
+  ): Promise<ValidateCreditsResponseDto> {
     return this.creditsService.validateCredits(dto.userId, dto);
   }
 
@@ -73,7 +83,8 @@ export class CreditsController {
   @Post('consume')
   @ApiOperation({
     summary: 'Consumir créditos',
-    description: 'Consome uma quantidade específica de créditos do usuário para um serviço',
+    description:
+      'Consome uma quantidade específica de créditos do usuário para um serviço',
   })
   @ApiResponse({
     status: 201,
@@ -88,7 +99,9 @@ export class CreditsController {
     status: 404,
     description: 'Usuário não encontrado',
   })
-  async consumeCredits(@Body() dto: ConsumeCreditsDto): Promise<ConsumeCreditsResponseDto> {
+  async consumeCredits(
+    @Body() dto: ConsumeCreditsDto,
+  ): Promise<ConsumeCreditsResponseDto> {
     return this.creditsService.consumeCredits(dto.userId, dto);
   }
 
@@ -144,7 +157,9 @@ export class CreditsController {
     status: 404,
     description: 'Usuário origem ou destino não encontrado',
   })
-  async transferCredits(@Body() dto: TransferCreditsDto): Promise<TransferCreditsResponseDto> {
+  async transferCredits(
+    @Body() dto: TransferCreditsDto,
+  ): Promise<TransferCreditsResponseDto> {
     return this.creditsService.transferCredits(dto.fromUserId, dto);
   }
 
@@ -169,7 +184,11 @@ export class CreditsController {
       properties: {
         userId: { type: 'string', example: '123' },
         balance: { type: 'number', example: 1500 },
-        timestamp: { type: 'string', format: 'date-time', example: '2025-07-14T10:15:00.000Z' },
+        timestamp: {
+          type: 'string',
+          format: 'date-time',
+          example: '2025-07-14T10:15:00.000Z',
+        },
       },
     },
   })
@@ -221,7 +240,11 @@ export class CreditsController {
     @Query('limit', new DefaultValuePipe(50), ParseIntPipe) limit: number,
     @Query('offset', new DefaultValuePipe(0), ParseIntPipe) offset: number,
   ): Promise<CreditTransaction[]> {
-    return this.creditsService.getCreditTransactionHistory(userId, limit, offset);
+    return this.creditsService.getCreditTransactionHistory(
+      userId,
+      limit,
+      offset,
+    );
   }
 
   /**
@@ -240,11 +263,17 @@ export class CreditsController {
       properties: {
         userId: { type: 'string', example: '123' },
         balance: { type: 'number', example: 1500 },
-        timestamp: { type: 'string', format: 'date-time', example: '2025-07-14T10:15:00.000Z' },
+        timestamp: {
+          type: 'string',
+          format: 'date-time',
+          example: '2025-07-14T10:15:00.000Z',
+        },
       },
     },
   })
-  async getMyBalance(@Request() req: ExpressRequest & { user: { sub: number } }) {
+  async getMyBalance(
+    @Request() req: ExpressRequest & { user: { sub: number } },
+  ) {
     const userId = req.user.sub.toString();
     const balance = await this.creditsService.getUserCreditBalance(userId);
     return {
@@ -260,7 +289,8 @@ export class CreditsController {
   @Get('my-history')
   @ApiOperation({
     summary: 'Meu histórico de transações',
-    description: 'Obtém o histórico de transações de créditos do usuário autenticado',
+    description:
+      'Obtém o histórico de transações de créditos do usuário autenticado',
   })
   @ApiQuery({
     name: 'limit',
@@ -285,7 +315,11 @@ export class CreditsController {
     @Query('offset', new DefaultValuePipe(0), ParseIntPipe) offset: number,
   ): Promise<CreditTransaction[]> {
     const userId = req.user.sub.toString();
-    return this.creditsService.getCreditTransactionHistory(userId, limit, offset);
+    return this.creditsService.getCreditTransactionHistory(
+      userId,
+      limit,
+      offset,
+    );
   }
 
   /**
@@ -322,7 +356,8 @@ export class CreditsController {
   @Post('my-validate')
   @ApiOperation({
     summary: 'Validar meus créditos',
-    description: 'Verifica se o usuário autenticado possui créditos suficientes',
+    description:
+      'Verifica se o usuário autenticado possui créditos suficientes',
   })
   @ApiResponse({
     status: 200,
@@ -344,7 +379,8 @@ export class CreditsController {
 
   @ApiOperation({
     summary: 'Obter saldo de créditos de um usuário',
-    description: 'Retorna o saldo atual de créditos de um usuário específico. Requer permissões de administrador.',
+    description:
+      'Retorna o saldo atual de créditos de um usuário específico. Requer permissões de administrador.',
   })
   @ApiParam({
     name: 'userId',
@@ -361,9 +397,9 @@ export class CreditsController {
         userId: { type: 'string', example: '123' },
         balance: { type: 'number', example: 100 },
         createdAt: { type: 'string', format: 'date-time' },
-        updatedAt: { type: 'string', format: 'date-time' }
-      }
-    }
+        updatedAt: { type: 'string', format: 'date-time' },
+      },
+    },
   })
   @ApiResponse({
     status: 404,
@@ -378,7 +414,8 @@ export class CreditsController {
 
   @ApiOperation({
     summary: 'Criar saldo inicial de créditos',
-    description: 'Cria um saldo inicial de créditos para um usuário. Requer permissões de administrador.',
+    description:
+      'Cria um saldo inicial de créditos para um usuário. Requer permissões de administrador.',
   })
   @ApiParam({
     name: 'userId',
@@ -395,9 +432,9 @@ export class CreditsController {
         userId: { type: 'string', example: '123' },
         balance: { type: 'number', example: 0 },
         createdAt: { type: 'string', format: 'date-time' },
-        updatedAt: { type: 'string', format: 'date-time' }
-      }
-    }
+        updatedAt: { type: 'string', format: 'date-time' },
+      },
+    },
   })
   @ApiResponse({
     status: 400,
@@ -412,7 +449,7 @@ export class CreditsController {
   @Roles(UserRole.ADMIN)
   async createInitialCreditBalance(
     @Param('userId') userId: string,
-    @Body() createData: any
+    @Body() createData: any,
   ) {
     return this.creditsService.createCreditBalance(userId, createData);
   }
@@ -431,12 +468,14 @@ export class CreditsController {
         userId: { type: 'string', example: '123' },
         balance: { type: 'number', example: 100 },
         createdAt: { type: 'string', format: 'date-time' },
-        updatedAt: { type: 'string', format: 'date-time' }
-      }
-    }
+        updatedAt: { type: 'string', format: 'date-time' },
+      },
+    },
   })
   @Get('my-balance')
-  async getMyCreditBalance(@Request() req: ExpressRequest & { user: { sub: number } }) {
+  async getMyCreditBalance(
+    @Request() req: ExpressRequest & { user: { sub: number } },
+  ) {
     const userId = req.user.sub.toString();
     return this.creditsService.getUserCreditBalance(userId);
   }

@@ -1,19 +1,19 @@
-import { 
-  Entity, 
-  PrimaryGeneratedColumn, 
-  Column, 
-  ManyToOne, 
-  JoinColumn, 
-  CreateDateColumn, 
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  JoinColumn,
+  CreateDateColumn,
   UpdateDateColumn,
-  Index 
+  Index,
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { User } from '../../users/entities/user.entity';
 
 /**
  * Entidade para controle de sessões de usuário
- * 
+ *
  * @description Gerencia sessões ativas, refresh tokens e controle de segurança
  * Alinhada com migration usr_sessions para compatibilidade completa
  * @author NeuralContent Team

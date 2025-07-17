@@ -1,6 +1,14 @@
-import { MigrationInterface, QueryRunner, Table, TableIndex, TableForeignKey } from 'typeorm';
+import {
+  MigrationInterface,
+  QueryRunner,
+  Table,
+  TableIndex,
+  TableForeignKey,
+} from 'typeorm';
 
-export class CreateUserSubscriptionsTable1705152700000 implements MigrationInterface {
+export class CreateUserSubscriptionsTable1705152700000
+  implements MigrationInterface
+{
   name = 'CreateUserSubscriptionsTable1705152700000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
@@ -31,7 +39,14 @@ export class CreateUserSubscriptionsTable1705152700000 implements MigrationInter
           {
             name: 'status',
             type: 'enum',
-            enum: ['trial', 'active', 'cancelled', 'expired', 'suspended', 'pending'],
+            enum: [
+              'trial',
+              'active',
+              'cancelled',
+              'expired',
+              'suspended',
+              'pending',
+            ],
             default: "'pending'",
             comment: 'Status da assinatura',
           },
@@ -52,7 +67,14 @@ export class CreateUserSubscriptionsTable1705152700000 implements MigrationInter
           {
             name: 'payment_method',
             type: 'enum',
-            enum: ['stripe', 'paypal', 'pix', 'boleto', 'credit_card', 'bank_transfer'],
+            enum: [
+              'stripe',
+              'paypal',
+              'pix',
+              'boleto',
+              'credit_card',
+              'bank_transfer',
+            ],
             isNullable: true,
             comment: 'Método de pagamento utilizado',
           },

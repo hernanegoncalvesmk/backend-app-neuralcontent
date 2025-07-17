@@ -1,10 +1,21 @@
-import { IsNotEmpty, IsString, IsJWT, IsOptional, IsInt, Min, IsEmail, MinLength, MaxLength, Matches } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsString,
+  IsJWT,
+  IsOptional,
+  IsInt,
+  Min,
+  IsEmail,
+  MinLength,
+  MaxLength,
+  Matches,
+} from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 
 /**
  * DTO para renovação de token de acesso
- * 
+ *
  * @description Valida o refresh token para geração de novo access token
  * @author NeuralContent Team
  * @since 1.0.0
@@ -28,7 +39,7 @@ export class RefreshTokenDto {
 
 /**
  * DTO para resposta de autenticação bem-sucedida
- * 
+ *
  * @description Estrutura de retorno após login ou refresh token
  * @author NeuralContent Team
  * @since 1.0.0
@@ -73,8 +84,8 @@ export class AuthResponseDto {
       firstName: 'João',
       lastName: 'Silva Santos',
       role: 'user',
-      isEmailVerified: true
-    }
+      isEmailVerified: true,
+    },
   })
   user: {
     id: number;
@@ -87,20 +98,20 @@ export class AuthResponseDto {
 
   @ApiPropertyOptional({
     description: 'Permissões específicas do usuário',
-    example: ['read_profile', 'write_content', 'manage_credits']
+    example: ['read_profile', 'write_content', 'manage_credits'],
   })
   permissions?: string[];
 
   @ApiPropertyOptional({
     description: 'ID da sessão para controle',
-    example: 'uuid-v4-generated'
+    example: 'uuid-v4-generated',
   })
   sessionId?: string;
 }
 
 /**
  * DTO para logout do usuário
- * 
+ *
  * @description Valida dados para invalidação de sessão
  * @author NeuralContent Team
  * @since 1.0.0
@@ -130,7 +141,7 @@ export class LogoutDto {
 
 /**
  * DTO para validação de token
- * 
+ *
  * @description Valida se um token JWT está válido e ativo
  * @author NeuralContent Team
  * @since 1.0.0
@@ -154,7 +165,7 @@ export class ValidateTokenDto {
 
 /**
  * DTO para solicitação de redefinição de senha
- * 
+ *
  * @description Dados para iniciar processo de reset de senha
  * @author NeuralContent Team
  * @since 1.0.0
@@ -165,9 +176,12 @@ export class ForgotPasswordDto {
     example: 'usuario@neuralcontent.com',
     format: 'email',
   })
-  @IsEmail({}, {
-    message: 'Email deve ter um formato válido',
-  })
+  @IsEmail(
+    {},
+    {
+      message: 'Email deve ter um formato válido',
+    },
+  )
   @IsString({
     message: 'Email deve ser uma string',
   })
@@ -180,7 +194,7 @@ export class ForgotPasswordDto {
 
 /**
  * DTO para redefinição de senha
- * 
+ *
  * @description Valida dados para nova senha com token de reset
  * @author NeuralContent Team
  * @since 1.0.0
@@ -216,11 +230,9 @@ export class ResetPasswordDto {
   @MaxLength(50, {
     message: 'Nova senha deve ter no máximo 50 caracteres',
   })
-  @Matches(
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/, 
-    {
-      message: 'Nova senha deve conter pelo menos: 1 letra minúscula, 1 maiúscula, 1 número e 1 caractere especial',
-    }
-  )
+  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/, {
+    message:
+      'Nova senha deve conter pelo menos: 1 letra minúscula, 1 maiúscula, 1 número e 1 caractere especial',
+  })
   newPassword: string;
 }

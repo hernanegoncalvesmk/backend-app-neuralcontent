@@ -4,7 +4,11 @@ import { JwtService } from '@nestjs/jwt';
 import { Reflector } from '@nestjs/core';
 import { UsersController } from './users.controller';
 import { UsersService } from './users.service';
-import { CreateUserDto, UserRole as DtoUserRole, UserStatus } from './dto/create-user.dto';
+import {
+  CreateUserDto,
+  UserRole as DtoUserRole,
+  UserStatus,
+} from './dto/create-user.dto';
 import { UpdateUserDto, ChangePasswordDto } from './dto/update-user.dto';
 import { UserResponseDto } from './dto/user-response.dto';
 import { AuthGuard } from '../../shared/guards/auth.guard';
@@ -12,7 +16,7 @@ import { RolesGuard } from '../../shared/guards/roles.guard';
 
 /**
  * Test Suite para UsersController
- * 
+ *
  * @description Testa todos os endpoints do controller de usuários
  * @author NeuralContent Team
  * @since 1.0.0
@@ -164,7 +168,13 @@ describe('UsersController', () => {
 
       mockUsersService.findAll.mockResolvedValue(mockResult);
 
-      await controller.findAll(1, 200, 'search', DtoUserRole.USER, UserStatus.ACTIVE);
+      await controller.findAll(
+        1,
+        200,
+        'search',
+        DtoUserRole.USER,
+        UserStatus.ACTIVE,
+      );
 
       expect(service.findAll).toHaveBeenCalledWith({
         page: 1,
@@ -310,7 +320,10 @@ describe('UsersController', () => {
 
       const result = await controller.updateStatus(1, UserStatus.SUSPENDED);
 
-      expect(service.updateStatus).toHaveBeenCalledWith(1, UserStatus.SUSPENDED);
+      expect(service.updateStatus).toHaveBeenCalledWith(
+        1,
+        UserStatus.SUSPENDED,
+      );
       expect(result).toBeInstanceOf(UserResponseDto);
     });
   });

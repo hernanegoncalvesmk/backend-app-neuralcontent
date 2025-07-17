@@ -1,6 +1,14 @@
-import { MigrationInterface, QueryRunner, Table, TableIndex, TableForeignKey } from 'typeorm';
+import {
+  MigrationInterface,
+  QueryRunner,
+  Table,
+  TableIndex,
+  TableForeignKey,
+} from 'typeorm';
 
-export class CreateCreditBalancesTable1705153000000 implements MigrationInterface {
+export class CreateCreditBalancesTable1705153000000
+  implements MigrationInterface
+{
   name = 'CreateCreditBalancesTable1705153000000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
@@ -106,7 +114,10 @@ export class CreateCreditBalancesTable1705153000000 implements MigrationInterfac
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropForeignKey('crd_credit_balances', 'FK_crd_credit_balances_user_id');
+    await queryRunner.dropForeignKey(
+      'crd_credit_balances',
+      'FK_crd_credit_balances_user_id',
+    );
     await queryRunner.dropTable('crd_credit_balances');
   }
 }

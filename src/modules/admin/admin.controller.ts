@@ -30,7 +30,7 @@ import {
 
 /**
  * Controller para funcionalidades administrativas
- * 
+ *
  * @description Endpoints protegidos para administradores do sistema
  * @author NeuralContent Team
  * @since 1.0.0
@@ -49,7 +49,8 @@ export class AdminController {
   @Get('stats')
   @ApiOperation({
     summary: 'Obter estatísticas do sistema',
-    description: 'Retorna estatísticas detalhadas do sistema incluindo usuários, receita, créditos e performance',
+    description:
+      'Retorna estatísticas detalhadas do sistema incluindo usuários, receita, créditos e performance',
   })
   @ApiResponse({
     status: HttpStatus.OK,
@@ -84,15 +85,29 @@ export class AdminController {
     description: 'Lista de usuários obtida com sucesso',
     type: AdminUserListResponseDto,
   })
-  @ApiQuery({ name: 'status', required: false, description: 'Filtrar por status' })
+  @ApiQuery({
+    name: 'status',
+    required: false,
+    description: 'Filtrar por status',
+  })
   @ApiQuery({ name: 'role', required: false, description: 'Filtrar por role' })
-  @ApiQuery({ name: 'search', required: false, description: 'Buscar por nome ou email' })
-  @ApiQuery({ name: 'page', required: false, description: 'Página da listagem' })
+  @ApiQuery({
+    name: 'search',
+    required: false,
+    description: 'Buscar por nome ou email',
+  })
+  @ApiQuery({
+    name: 'page',
+    required: false,
+    description: 'Página da listagem',
+  })
   @ApiQuery({ name: 'limit', required: false, description: 'Itens por página' })
   async getUsers(
     @Query() filters: AdminUserFilterDto,
   ): Promise<AdminUserListResponseDto> {
-    this.logger.log(`Listando usuários com filtros: ${JSON.stringify(filters)}`);
+    this.logger.log(
+      `Listando usuários com filtros: ${JSON.stringify(filters)}`,
+    );
     return this.adminService.getUsers(filters);
   }
 
@@ -182,9 +197,11 @@ export class AdminController {
     description: 'Ação inválida ou dados incorretos',
   })
   async bulkAction(@Body() bulkAction: AdminBulkActionDto) {
-    this.logger.log(`Executando ação em lote: ${bulkAction.action} para ${bulkAction.userIds.length} usuários`);
+    this.logger.log(
+      `Executando ação em lote: ${bulkAction.action} para ${bulkAction.userIds.length} usuários`,
+    );
     const result = await this.adminService.bulkAction(bulkAction);
-    
+
     return {
       ...result,
       message: `Ação '${bulkAction.action}' executada com sucesso em ${result.affected} usuários`,
@@ -242,7 +259,7 @@ export class AdminController {
   })
   async getDashboard() {
     this.logger.log('Carregando dashboard administrativo');
-    
+
     // Obter estatísticas do último mês
     const stats = await this.adminService.getAdminStats({
       period: 'monthly' as any,
@@ -283,7 +300,11 @@ export class AdminController {
     summary: 'Exportar usuários',
     description: 'Exporta dados de usuários em formato CSV',
   })
-  @ApiQuery({ name: 'format', required: false, description: 'Formato do export (csv, xlsx)' })
+  @ApiQuery({
+    name: 'format',
+    required: false,
+    description: 'Formato do export (csv, xlsx)',
+  })
   @ApiResponse({
     status: HttpStatus.OK,
     description: 'Export iniciado com sucesso',
@@ -298,7 +319,7 @@ export class AdminController {
   })
   async exportUsers(@Query('format') format: string = 'csv') {
     this.logger.log(`Iniciando export de usuários em formato: ${format}`);
-    
+
     // TODO: Implementar export real
     return {
       success: true,
@@ -315,7 +336,11 @@ export class AdminController {
     summary: 'Obter logs do sistema',
     description: 'Retorna logs do sistema com filtros opcionais',
   })
-  @ApiQuery({ name: 'level', required: false, description: 'Nível do log (error, warn, info)' })
+  @ApiQuery({
+    name: 'level',
+    required: false,
+    description: 'Nível do log (error, warn, info)',
+  })
   @ApiQuery({ name: 'limit', required: false, description: 'Limite de logs' })
   @ApiResponse({
     status: HttpStatus.OK,
@@ -344,8 +369,10 @@ export class AdminController {
     @Query('level') level?: string,
     @Query('limit') limit: number = 100,
   ) {
-    this.logger.log(`Obtendo logs do sistema. Level: ${level}, Limit: ${limit}`);
-    
+    this.logger.log(
+      `Obtendo logs do sistema. Level: ${level}, Limit: ${limit}`,
+    );
+
     // TODO: Implementar busca real nos logs
     return {
       logs: [

@@ -1,6 +1,14 @@
-import { MigrationInterface, QueryRunner, Table, TableIndex, TableForeignKey } from 'typeorm';
+import {
+  MigrationInterface,
+  QueryRunner,
+  Table,
+  TableIndex,
+  TableForeignKey,
+} from 'typeorm';
 
-export class CreateCreditTransactionsTable1705152900000 implements MigrationInterface {
+export class CreateCreditTransactionsTable1705152900000
+  implements MigrationInterface
+{
   name = 'CreateCreditTransactionsTable1705152900000';
 
   public async up(queryRunner: QueryRunner): Promise<void> {
@@ -24,7 +32,14 @@ export class CreateCreditTransactionsTable1705152900000 implements MigrationInte
           {
             name: 'type',
             type: 'enum',
-            enum: ['credit', 'debit', 'bonus', 'refund', 'purchase', 'subscription'],
+            enum: [
+              'credit',
+              'debit',
+              'bonus',
+              'refund',
+              'purchase',
+              'subscription',
+            ],
             comment: 'Tipo da transação de crédito',
           },
           {
@@ -51,7 +66,14 @@ export class CreateCreditTransactionsTable1705152900000 implements MigrationInte
           {
             name: 'reference_type',
             type: 'enum',
-            enum: ['payment', 'subscription', 'bonus', 'admin', 'api_usage', 'refund'],
+            enum: [
+              'payment',
+              'subscription',
+              'bonus',
+              'admin',
+              'api_usage',
+              'refund',
+            ],
             isNullable: true,
             comment: 'Tipo de referência da transação',
           },
@@ -144,7 +166,10 @@ export class CreateCreditTransactionsTable1705152900000 implements MigrationInte
   }
 
   public async down(queryRunner: QueryRunner): Promise<void> {
-    await queryRunner.dropForeignKey('credit_transactions', 'FK_credit_transactions_user_id');
+    await queryRunner.dropForeignKey(
+      'credit_transactions',
+      'FK_credit_transactions_user_id',
+    );
     await queryRunner.dropTable('credit_transactions');
   }
 }

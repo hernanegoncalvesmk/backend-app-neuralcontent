@@ -164,15 +164,15 @@ export class UserSubscription {
 
   @ApiProperty({
     description: 'Preço pago pela assinatura',
-    example: 29.90,
+    example: 29.9,
     minimum: 0,
   })
-  @Column({ 
-    type: 'decimal', 
-    precision: 10, 
-    scale: 2, 
+  @Column({
+    type: 'decimal',
+    precision: 10,
+    scale: 2,
     name: 'price_paid',
-    nullable: true 
+    nullable: true,
   })
   pricePaid?: number;
 
@@ -237,7 +237,7 @@ export class UserSubscription {
   @JoinColumn({ name: 'user_id' })
   user: User;
 
-  @ManyToOne(() => Plan, { 
+  @ManyToOne(() => Plan, {
     onDelete: 'RESTRICT',
     onUpdate: 'CASCADE',
   })
@@ -267,9 +267,9 @@ export class UserSubscription {
   })
   get isInTrial(): boolean {
     return Boolean(
-      this.status === SubscriptionStatus.TRIAL && 
-      this.trialEndDate && 
-      new Date() < this.trialEndDate
+      this.status === SubscriptionStatus.TRIAL &&
+        this.trialEndDate &&
+        new Date() < this.trialEndDate,
     );
   }
 }

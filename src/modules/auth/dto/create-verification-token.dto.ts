@@ -1,11 +1,17 @@
-import { IsNotEmpty, IsString, IsEnum, IsDateString, IsOptional } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsString,
+  IsEnum,
+  IsDateString,
+  IsOptional,
+} from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { VerificationTokenType } from '../entities/verification-token.entity';
 
 /**
  * DTO para criação de token de verificação
- * 
+ *
  * @description Valida dados para criação de novos tokens de verificação
  * @author NeuralContent Team
  * @since 1.0.0
@@ -42,7 +48,8 @@ export class CreateVerificationTokenDto {
     example: VerificationTokenType.EMAIL_VERIFICATION,
   })
   @IsEnum(VerificationTokenType, {
-    message: 'Tipo do token deve ser: email_verification, password_reset ou phone_verification',
+    message:
+      'Tipo do token deve ser: email_verification, password_reset ou phone_verification',
   })
   type: VerificationTokenType;
 
@@ -50,9 +57,12 @@ export class CreateVerificationTokenDto {
     description: 'Data e hora de expiração do token',
     example: '2025-01-14T12:00:00Z',
   })
-  @IsDateString({}, {
-    message: 'Data de expiração deve ser uma data válida no formato ISO',
-  })
+  @IsDateString(
+    {},
+    {
+      message: 'Data de expiração deve ser uma data válida no formato ISO',
+    },
+  )
   expiresAt: string;
 
   @ApiPropertyOptional({

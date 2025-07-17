@@ -1,28 +1,28 @@
-import { 
-  Controller, 
-  Post, 
-  Body, 
-  HttpCode, 
-  HttpStatus, 
-  Req, 
+import {
+  Controller,
+  Post,
+  Body,
+  HttpCode,
+  HttpStatus,
+  Req,
   UseGuards,
-  Get 
+  Get,
 } from '@nestjs/common';
-import { 
-  ApiTags, 
-  ApiOperation, 
-  ApiResponse, 
+import {
+  ApiTags,
+  ApiOperation,
+  ApiResponse,
   ApiBearerAuth,
-  ApiBody 
+  ApiBody,
 } from '@nestjs/swagger';
 import { Request } from 'express';
 import { AuthService } from './auth.service';
-import { 
-  LoginDto, 
-  RegisterDto, 
-  RefreshTokenDto, 
+import {
+  LoginDto,
+  RegisterDto,
+  RefreshTokenDto,
   AuthResponseDto,
-  LogoutDto 
+  LogoutDto,
 } from './dto';
 import { Public } from '../../shared/decorators/public.decorator';
 import { AuthGuard } from '../../shared/guards/auth.guard';
@@ -30,7 +30,7 @@ import { LoggerService } from '../../shared/logger/logger.service';
 
 /**
  * Controlador de autenticação
- * 
+ *
  * @description Gerencia endpoints de autenticação e autorização
  * @author NeuralContent Team
  * @since 1.0.0
@@ -51,23 +51,23 @@ export class AuthController {
   @Public()
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ 
-    summary: 'Login do usuário', 
-    description: 'Autentica usuário e retorna tokens de acesso' 
+  @ApiOperation({
+    summary: 'Login do usuário',
+    description: 'Autentica usuário e retorna tokens de acesso',
   })
   @ApiBody({ type: LoginDto })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: 'Login realizado com sucesso',
-    type: AuthResponseDto 
+    type: AuthResponseDto,
   })
-  @ApiResponse({ 
-    status: 401, 
-    description: 'Credenciais inválidas ou usuário inativo' 
+  @ApiResponse({
+    status: 401,
+    description: 'Credenciais inválidas ou usuário inativo',
   })
-  @ApiResponse({ 
-    status: 422, 
-    description: 'Dados de entrada inválidos' 
+  @ApiResponse({
+    status: 422,
+    description: 'Dados de entrada inválidos',
   })
   async login(
     @Body() loginDto: LoginDto,
@@ -79,11 +79,11 @@ export class AuthController {
     });
 
     const clientInfo = this.extractClientInfo(request);
-    
+
     const result = await this.authService.login(loginDto, clientInfo);
 
     this.logger.log(`Login successful for user ID: ${result.user.id}`);
-    
+
     return result;
   }
 
@@ -93,23 +93,23 @@ export class AuthController {
   @Public()
   @Post('register')
   @HttpCode(HttpStatus.CREATED)
-  @ApiOperation({ 
-    summary: 'Registro de usuário', 
-    description: 'Cria nova conta de usuário' 
+  @ApiOperation({
+    summary: 'Registro de usuário',
+    description: 'Cria nova conta de usuário',
   })
   @ApiBody({ type: RegisterDto })
-  @ApiResponse({ 
-    status: 201, 
+  @ApiResponse({
+    status: 201,
     description: 'Usuário criado com sucesso',
-    type: AuthResponseDto 
+    type: AuthResponseDto,
   })
-  @ApiResponse({ 
-    status: 400, 
-    description: 'Email já está em uso' 
+  @ApiResponse({
+    status: 400,
+    description: 'Email já está em uso',
   })
-  @ApiResponse({ 
-    status: 422, 
-    description: 'Dados de entrada inválidos' 
+  @ApiResponse({
+    status: 422,
+    description: 'Dados de entrada inválidos',
   })
   async register(
     @Body() registerDto: RegisterDto,
@@ -123,7 +123,7 @@ export class AuthController {
     const result = await this.authService.register(registerDto);
 
     this.logger.log(`Registration successful for user ID: ${result.user.id}`);
-    
+
     return result;
   }
 
@@ -133,19 +133,19 @@ export class AuthController {
   @Public()
   @Post('refresh')
   @HttpCode(HttpStatus.OK)
-  @ApiOperation({ 
-    summary: 'Renovar token de acesso', 
-    description: 'Gera novo access token usando refresh token válido' 
+  @ApiOperation({
+    summary: 'Renovar token de acesso',
+    description: 'Gera novo access token usando refresh token válido',
   })
   @ApiBody({ type: RefreshTokenDto })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: 'Token renovado com sucesso',
-    type: AuthResponseDto 
+    type: AuthResponseDto,
   })
-  @ApiResponse({ 
-    status: 401, 
-    description: 'Refresh token inválido ou expirado' 
+  @ApiResponse({
+    status: 401,
+    description: 'Refresh token inválido ou expirado',
   })
   async refreshToken(
     @Body() refreshTokenDto: RefreshTokenDto,
@@ -155,7 +155,7 @@ export class AuthController {
     const result = await this.authService.refreshToken(refreshTokenDto);
 
     this.logger.log(`Token refresh successful for user ID: ${result.user.id}`);
-    
+
     return result;
   }
 
@@ -166,27 +166,27 @@ export class AuthController {
   @UseGuards(AuthGuard)
   @HttpCode(HttpStatus.OK)
   @ApiBearerAuth()
-  @ApiOperation({ 
-    summary: 'Logout do usuário', 
-    description: 'Invalida refresh token e encerra sessão' 
+  @ApiOperation({
+    summary: 'Logout do usuário',
+    description: 'Invalida refresh token e encerra sessão',
   })
   @ApiBody({ type: LogoutDto })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: 'Logout realizado com sucesso',
     schema: {
       type: 'object',
       properties: {
         message: {
           type: 'string',
-          example: 'Logout realizado com sucesso'
-        }
-      }
-    }
+          example: 'Logout realizado com sucesso',
+        },
+      },
+    },
   })
-  @ApiResponse({ 
-    status: 401, 
-    description: 'Token de acesso inválido' 
+  @ApiResponse({
+    status: 401,
+    description: 'Token de acesso inválido',
   })
   async logout(
     @Body() logoutDto: LogoutDto,
@@ -200,7 +200,7 @@ export class AuthController {
     const result = await this.authService.logout(logoutDto);
 
     this.logger.log('Logout successful');
-    
+
     return result;
   }
 
@@ -210,12 +210,12 @@ export class AuthController {
   @Get('me')
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
-  @ApiOperation({ 
-    summary: 'Dados do usuário autenticado', 
-    description: 'Retorna informações do usuário logado' 
+  @ApiOperation({
+    summary: 'Dados do usuário autenticado',
+    description: 'Retorna informações do usuário logado',
   })
-  @ApiResponse({ 
-    status: 200, 
+  @ApiResponse({
+    status: 200,
     description: 'Dados do usuário',
     schema: {
       type: 'object',
@@ -224,13 +224,13 @@ export class AuthController {
         email: { type: 'string', example: 'usuario@neuralcontent.com' },
         name: { type: 'string', example: 'João Silva Santos' },
         role: { type: 'string', example: 'user' },
-        status: { type: 'string', example: 'active' }
-      }
-    }
+        status: { type: 'string', example: 'active' },
+      },
+    },
   })
-  @ApiResponse({ 
-    status: 401, 
-    description: 'Token de acesso inválido' 
+  @ApiResponse({
+    status: 401,
+    description: 'Token de acesso inválido',
   })
   async getProfile(@Req() request: any) {
     const user = request.user;
@@ -250,7 +250,8 @@ export class AuthController {
 
   @ApiOperation({
     summary: 'Obter tokens de verificação de um usuário',
-    description: 'Retorna todos os tokens de verificação válidos de um usuário.',
+    description:
+      'Retorna todos os tokens de verificação válidos de um usuário.',
   })
   @ApiResponse({
     status: 200,
@@ -260,17 +261,20 @@ export class AuthController {
       items: {
         type: 'object',
         properties: {
-          id: { type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' },
+          id: {
+            type: 'string',
+            example: '123e4567-e89b-12d3-a456-426614174000',
+          },
           userId: { type: 'string', example: '123' },
           token: { type: 'string', example: 'verification_token_hash' },
           type: { type: 'string', example: 'email_verification' },
           expiresAt: { type: 'string', format: 'date-time' },
           isUsed: { type: 'boolean', example: false },
           createdAt: { type: 'string', format: 'date-time' },
-          updatedAt: { type: 'string', format: 'date-time' }
-        }
-      }
-    }
+          updatedAt: { type: 'string', format: 'date-time' },
+        },
+      },
+    },
   })
   @ApiResponse({
     status: 401,
@@ -286,7 +290,8 @@ export class AuthController {
 
   @ApiOperation({
     summary: 'Invalidar tokens de verificação de um usuário',
-    description: 'Invalida todos os tokens de verificação de um usuário específico.',
+    description:
+      'Invalida todos os tokens de verificação de um usuário específico.',
   })
   @ApiResponse({
     status: 200,
@@ -295,9 +300,9 @@ export class AuthController {
       type: 'object',
       properties: {
         affected: { type: 'number', example: 3 },
-        message: { type: 'string', example: 'Tokens invalidados com sucesso' }
-      }
-    }
+        message: { type: 'string', example: 'Tokens invalidados com sucesso' },
+      },
+    },
   })
   @ApiResponse({
     status: 401,
@@ -309,7 +314,9 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async invalidateMyVerificationTokens(@Req() request: any) {
     const user = request.user;
-    return this.authService.invalidateUserVerificationTokens(user.sub.toString());
+    return this.authService.invalidateUserVerificationTokens(
+      user.sub.toString(),
+    );
   }
 
   /**
@@ -317,7 +324,7 @@ export class AuthController {
    */
   private extractClientInfo(request: Request) {
     const userAgent = request.get('User-Agent') || '';
-    
+
     // Detectar tipo de dispositivo básico - iPad primeiro para não ser capturado como mobile
     let deviceType = 'desktop';
     if (/Tablet|iPad/i.test(userAgent)) {

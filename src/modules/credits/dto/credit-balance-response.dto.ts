@@ -3,7 +3,7 @@ import { Expose, Transform } from 'class-transformer';
 
 /**
  * DTO de resposta para saldo de créditos
- * 
+ *
  * @description Formata dados de saldo de créditos para resposta da API
  * @author NeuralContent Team
  * @since 1.0.0
@@ -44,7 +44,9 @@ export class CreditBalanceResponseDto {
     example: '2025-08-13T12:00:00Z',
   })
   @Expose()
-  @Transform(({ value }) => value instanceof Date ? value.toISOString() : value)
+  @Transform(({ value }) =>
+    value instanceof Date ? value.toISOString() : value,
+  )
   monthlyResetAt: Date;
 
   @ApiProperty({
@@ -77,7 +79,9 @@ export class CreditBalanceResponseDto {
     required: false,
   })
   @Expose()
-  @Transform(({ value }) => value instanceof Date ? value.toISOString() : value)
+  @Transform(({ value }) =>
+    value instanceof Date ? value.toISOString() : value,
+  )
   lastSyncAt?: Date;
 
   @ApiProperty({
@@ -85,7 +89,9 @@ export class CreditBalanceResponseDto {
     example: '2025-01-13T12:00:00Z',
   })
   @Expose()
-  @Transform(({ value }) => value instanceof Date ? value.toISOString() : value)
+  @Transform(({ value }) =>
+    value instanceof Date ? value.toISOString() : value,
+  )
   createdAt: Date;
 
   @ApiProperty({
@@ -93,7 +99,9 @@ export class CreditBalanceResponseDto {
     example: '2025-01-13T12:00:00Z',
   })
   @Expose()
-  @Transform(({ value }) => value instanceof Date ? value.toISOString() : value)
+  @Transform(({ value }) =>
+    value instanceof Date ? value.toISOString() : value,
+  )
   updatedAt: Date;
 
   @ApiProperty({
@@ -102,7 +110,8 @@ export class CreditBalanceResponseDto {
   })
   @Expose()
   @Transform(({ obj }) => {
-    const monthlyAvailable = parseInt(obj.monthlyCredits) - parseInt(obj.monthlyUsed);
+    const monthlyAvailable =
+      parseInt(obj.monthlyCredits) - parseInt(obj.monthlyUsed);
     return Math.max(0, monthlyAvailable);
   })
   monthlyAvailable: number;
@@ -124,8 +133,14 @@ export class CreditBalanceResponseDto {
   })
   @Expose()
   @Transform(({ obj }) => {
-    const monthlyAvailable = Math.max(0, parseInt(obj.monthlyCredits) - parseInt(obj.monthlyUsed));
-    const extraAvailable = Math.max(0, parseInt(obj.extraCredits) - parseInt(obj.extraUsed));
+    const monthlyAvailable = Math.max(
+      0,
+      parseInt(obj.monthlyCredits) - parseInt(obj.monthlyUsed),
+    );
+    const extraAvailable = Math.max(
+      0,
+      parseInt(obj.extraCredits) - parseInt(obj.extraUsed),
+    );
     return monthlyAvailable + extraAvailable;
   })
   totalAvailable: number;
@@ -163,9 +178,12 @@ export class CreditBalanceResponseDto {
   })
   @Expose()
   @Transform(({ obj }) => {
-    const totalAvailable = parseInt(obj.monthlyCredits) - parseInt(obj.monthlyUsed) + 
-                           parseInt(obj.extraCredits) - parseInt(obj.extraUsed);
-    
+    const totalAvailable =
+      parseInt(obj.monthlyCredits) -
+      parseInt(obj.monthlyUsed) +
+      parseInt(obj.extraCredits) -
+      parseInt(obj.extraUsed);
+
     if (totalAvailable <= 100) return 'low';
     if (totalAvailable <= 500) return 'medium';
     return 'high';

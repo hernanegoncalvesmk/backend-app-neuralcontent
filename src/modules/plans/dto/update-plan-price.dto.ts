@@ -5,7 +5,7 @@ import { ApiPropertyOptional } from '@nestjs/swagger';
 
 /**
  * DTO para atualização de preço de plano
- * 
+ *
  * @description Valida dados para atualização de preços de planos existentes.
  * Herda todas as propriedades de CreatePlanPriceDto como opcionais.
  * @author NeuralContent Team

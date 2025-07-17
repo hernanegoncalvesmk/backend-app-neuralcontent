@@ -5,11 +5,7 @@ import { CacheModule } from '../cache/cache.module';
 import { LoggerModule } from '../logger/logger.module';
 
 @Module({
-  imports: [
-    DatabaseModule,
-    CacheModule,
-    LoggerModule,
-  ],
+  imports: [DatabaseModule, CacheModule, LoggerModule],
   controllers: [HealthController],
   providers: [],
   exports: [],

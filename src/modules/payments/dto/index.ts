@@ -1,7 +1,15 @@
+export { CreatePaymentDto, CreatePaymentIntentDto } from './create-payment.dto';
+
+// DTOs de assinatura de usuário
+export { CreateUserSubscriptionDto } from './create-user-subscription.dto';
+
+export { UpdateUserSubscriptionDto } from './update-user-subscription.dto';
+
 export {
-  CreatePaymentDto,
-  CreatePaymentIntentDto,
-} from './create-payment.dto';
+  CancelSubscriptionDto,
+  CancelSubscriptionResponseDto,
+  CancellationReason,
+} from './cancel-subscription.dto';
 
 export {
   StripeWebhookDto,

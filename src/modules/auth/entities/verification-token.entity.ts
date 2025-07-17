@@ -21,26 +21,26 @@ export enum VerificationTokenType {
 
 /**
  * Entidade VerificationToken - Tokens de verificação para diferentes processos
- * 
+ *
  * @description Gerencia tokens únicos para verificação de email, reset de senha e verificação de telefone
  * Alinhada com migration usr_verification_tokens (010) para compatibilidade completa
- * 
+ *
  * @author NeuralContent Team
  * @since 1.0.0
- * 
+ *
  * @features
  * - Tokens únicos com hash seguro
  * - Controle de expiração automática
  * - Suporte a múltiplos tipos de verificação
  * - Invalidação após uso (usedAt)
  * - Relacionamento Many-to-One com User
- * 
+ *
  * @security
  * - Tokens únicos (hash) para prevenir duplicação
  * - Expiração obrigatória para limitar janela de uso
  * - Cascade deletion quando usuário é removido
  * - Índices para performance em consultas frequentes
- * 
+ *
  * @types_supported
  * - email_verification: verificação de email após cadastro
  * - password_reset: reset de senha via email
@@ -155,7 +155,10 @@ export class VerificationToken {
   })
   get timeToExpiry(): number {
     if (this.isExpired) return 0;
-    return Math.max(0, Math.floor((this.expiresAt.getTime() - Date.now()) / (1000 * 60)));
+    return Math.max(
+      0,
+      Math.floor((this.expiresAt.getTime() - Date.now()) / (1000 * 60)),
+    );
   }
 
   // =====================

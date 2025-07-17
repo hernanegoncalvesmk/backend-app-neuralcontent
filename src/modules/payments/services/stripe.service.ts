@@ -11,7 +11,7 @@ export class StripeService {
 
   constructor(private readonly configService: ConfigService) {
     const secretKey = this.configService.get<string>('STRIPE_SECRET_KEY');
-    
+
     if (!secretKey) {
       this.logger.error('STRIPE_SECRET_KEY not found in environment variables');
       throw new Error('Stripe configuration is missing');
@@ -34,7 +34,9 @@ export class StripeService {
     metadata: Record<string, string> = {},
   ): Promise<Stripe.PaymentIntent> {
     try {
-      this.logger.log(`Creating payment intent for amount: ${amount} ${currency.toUpperCase()}`);
+      this.logger.log(
+        `Creating payment intent for amount: ${amount} ${currency.toUpperCase()}`,
+      );
 
       const paymentIntent = await this.stripe.paymentIntents.create({
         amount,
@@ -45,7 +47,9 @@ export class StripeService {
         metadata,
       });
 
-      this.logger.log(`Payment intent created successfully: ${paymentIntent.id}`);
+      this.logger.log(
+        `Payment intent created successfully: ${paymentIntent.id}`,
+      );
       return paymentIntent;
     } catch (error) {
       this.logger.error('Error creating payment intent:', error);
@@ -108,7 +112,9 @@ export class StripeService {
     trialPeriodDays?: number;
   }): Promise<Stripe.Checkout.Session> {
     try {
-      this.logger.log(`Creating subscription checkout session for price: ${data.priceId}`);
+      this.logger.log(
+        `Creating subscription checkout session for price: ${data.priceId}`,
+      );
 
       const sessionData: Stripe.Checkout.SessionCreateParams = {
         payment_method_types: ['card'],
@@ -133,22 +139,31 @@ export class StripeService {
 
       const session = await this.stripe.checkout.sessions.create(sessionData);
 
-      this.logger.log(`Subscription checkout session created successfully: ${session.id}`);
+      this.logger.log(
+        `Subscription checkout session created successfully: ${session.id}`,
+      );
       return session;
     } catch (error) {
       this.logger.error('Error creating subscription checkout session:', error);
-      throw new BadRequestException('Failed to create subscription checkout session');
+      throw new BadRequestException(
+        'Failed to create subscription checkout session',
+      );
     }
   }
 
   /**
    * Recupera um Payment Intent
    */
-  async retrievePaymentIntent(paymentIntentId: string): Promise<Stripe.PaymentIntent> {
+  async retrievePaymentIntent(
+    paymentIntentId: string,
+  ): Promise<Stripe.PaymentIntent> {
     try {
       return await this.stripe.paymentIntents.retrieve(paymentIntentId);
     } catch (error) {
-      this.logger.error(`Error retrieving payment intent ${paymentIntentId}:`, error);
+      this.logger.error(
+        `Error retrieving payment intent ${paymentIntentId}:`,
+        error,
+      );
       throw new BadRequestException('Failed to retrieve payment intent');
     }
   }
@@ -156,11 +171,16 @@ export class StripeService {
   /**
    * Recupera uma sessão de checkout
    */
-  async retrieveCheckoutSession(sessionId: string): Promise<Stripe.Checkout.Session> {
+  async retrieveCheckoutSession(
+    sessionId: string,
+  ): Promise<Stripe.Checkout.Session> {
     try {
       return await this.stripe.checkout.sessions.retrieve(sessionId);
     } catch (error) {
-      this.logger.error(`Error retrieving checkout session ${sessionId}:`, error);
+      this.logger.error(
+        `Error retrieving checkout session ${sessionId}:`,
+        error,
+      );
       throw new BadRequestException('Failed to retrieve checkout session');
     }
   }
@@ -168,12 +188,17 @@ export class StripeService {
   /**
    * Cancela um Payment Intent
    */
-  async cancelPaymentIntent(paymentIntentId: string): Promise<Stripe.PaymentIntent> {
+  async cancelPaymentIntent(
+    paymentIntentId: string,
+  ): Promise<Stripe.PaymentIntent> {
     try {
       this.logger.log(`Canceling payment intent: ${paymentIntentId}`);
       return await this.stripe.paymentIntents.cancel(paymentIntentId);
     } catch (error) {
-      this.logger.error(`Error canceling payment intent ${paymentIntentId}:`, error);
+      this.logger.error(
+        `Error canceling payment intent ${paymentIntentId}:`,
+        error,
+      );
       throw new BadRequestException('Failed to cancel payment intent');
     }
   }
@@ -208,13 +233,19 @@ export class StripeService {
    */
   constructWebhookEvent(payload: string, signature: string): Stripe.Event {
     try {
-      const webhookSecret = this.configService.get<string>('STRIPE_WEBHOOK_SECRET');
-      
+      const webhookSecret = this.configService.get<string>(
+        'STRIPE_WEBHOOK_SECRET',
+      );
+
       if (!webhookSecret) {
         throw new Error('Stripe webhook secret not configured');
       }
 
-      return this.stripe.webhooks.constructEvent(payload, signature, webhookSecret);
+      return this.stripe.webhooks.constructEvent(
+        payload,
+        signature,
+        webhookSecret,
+      );
     } catch (error) {
       this.logger.error('Error constructing webhook event:', error);
       throw new BadRequestException('Invalid webhook signature');
@@ -241,7 +272,9 @@ export class StripeService {
         });
       } else {
         // Criar novo cliente
-        this.logger.log(`Creating new Stripe customer for email: ${data.email}`);
+        this.logger.log(
+          `Creating new Stripe customer for email: ${data.email}`,
+        );
         return await this.stripe.customers.create({
           email: data.email,
           name: data.name,
@@ -269,7 +302,10 @@ export class StripeService {
 
       return paymentMethods.data;
     } catch (error) {
-      this.logger.error(`Error listing payment methods for customer ${customerId}:`, error);
+      this.logger.error(
+        `Error listing payment methods for customer ${customerId}:`,
+        error,
+      );
       throw new BadRequestException('Failed to list payment methods');
     }
   }

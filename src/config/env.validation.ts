@@ -1,4 +1,14 @@
-import { IsEnum, IsNotEmpty, IsNumber, IsOptional, IsString, IsUrl, IsIn, Min, Max } from 'class-validator';
+import {
+  IsEnum,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  IsUrl,
+  IsIn,
+  Min,
+  Max,
+} from 'class-validator';
 import { Transform } from 'class-transformer';
 
 export enum Environment {
@@ -73,7 +83,7 @@ export class EnvironmentVariables {
   @IsNumber()
   @Min(0)
   @Max(15)
-  @Transform(({ value }) => value ? parseInt(value, 10) : 0)
+  @Transform(({ value }) => (value ? parseInt(value, 10) : 0))
   REDIS_DB?: number;
 
   @IsOptional()

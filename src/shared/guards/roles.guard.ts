@@ -9,7 +9,7 @@ import { ROLES_KEY } from '../decorators/roles.decorator';
 
 /**
  * Roles Guard - Guard de autorização baseado em roles
- * 
+ *
  * Features:
  * - Verificação de roles do usuário
  * - Suporte para múltiplos roles por endpoint
@@ -50,7 +50,7 @@ export class RolesGuard implements CanActivate {
 
     // 3. Obter usuário do request
     const { user } = context.switchToHttp().getRequest();
-    
+
     if (!user) {
       this.logAccessDenied(context, 'No user in request');
       throw new ForbiddenException('Usuário não autenticado');
@@ -60,8 +60,13 @@ export class RolesGuard implements CanActivate {
     const hasRequiredRole = this.checkUserRoles(user.role, requiredRoles);
 
     if (!hasRequiredRole) {
-      this.logAccessDenied(context, `User role ${user.role} insufficient for required roles: ${requiredRoles.join(', ')}`);
-      throw new ForbiddenException('Permissões insuficientes para acessar este recurso');
+      this.logAccessDenied(
+        context,
+        `User role ${user.role} insufficient for required roles: ${requiredRoles.join(', ')}`,
+      );
+      throw new ForbiddenException(
+        'Permissões insuficientes para acessar este recurso',
+      );
     }
 
     // 5. Log acesso autorizado
@@ -76,13 +81,13 @@ export class RolesGuard implements CanActivate {
    */
   private checkUserRoles(userRole: string, requiredRoles: UserRole[]): boolean {
     const userRoleLevel = ROLE_HIERARCHY[userRole as UserRole];
-    
+
     if (!userRoleLevel) {
       return false;
     }
 
     // Verificar se o nível do usuário é suficiente para qualquer um dos roles requeridos
-    return requiredRoles.some(requiredRole => {
+    return requiredRoles.some((requiredRole) => {
       const requiredLevel = ROLE_HIERARCHY[requiredRole];
       return userRoleLevel >= requiredLevel;
     });
@@ -109,7 +114,11 @@ export class RolesGuard implements CanActivate {
   /**
    * Log acesso autorizado
    */
-  private logAuthorizedAccess(context: ExecutionContext, userId: string, userRole: string): void {
+  private logAuthorizedAccess(
+    context: ExecutionContext,
+    userId: string,
+    userRole: string,
+  ): void {
     const request = context.switchToHttp().getRequest();
     const logData = {
       userId,

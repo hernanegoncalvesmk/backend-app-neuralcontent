@@ -1,11 +1,19 @@
-import { IsNotEmpty, IsString, IsEnum, IsNumber, Min, IsOptional, IsBoolean } from 'class-validator';
+import {
+  IsNotEmpty,
+  IsString,
+  IsEnum,
+  IsNumber,
+  Min,
+  IsOptional,
+  IsBoolean,
+} from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
 import { BillingPeriod, Currency } from '../entities/plan-price.entity';
 
 /**
  * DTO para criação de preço de plano
- * 
+ *
  * @description Valida dados para criação de novos preços de planos
  * @author NeuralContent Team
  * @since 1.0.0
@@ -42,7 +50,7 @@ export class CreatePlanPriceDto {
     { maxDecimalPlaces: 2 },
     {
       message: 'Valor deve ser um número com no máximo 2 casas decimais',
-    }
+    },
   )
   @Min(0, {
     message: 'Valor deve ser maior ou igual a zero',
@@ -82,13 +90,14 @@ export class CreatePlanPriceDto {
   @IsNumber(
     { maxDecimalPlaces: 2 },
     {
-      message: 'Percentual de desconto deve ser um número com no máximo 2 casas decimais',
-    }
+      message:
+        'Percentual de desconto deve ser um número com no máximo 2 casas decimais',
+    },
   )
   @Min(0, {
     message: 'Percentual de desconto deve ser maior ou igual a zero',
   })
-  @Transform(({ value }) => value ? parseFloat(value) : undefined)
+  @Transform(({ value }) => (value ? parseFloat(value) : undefined))
   discountPercent?: number;
 
   @ApiPropertyOptional({
@@ -131,13 +140,16 @@ export class CreatePlanPriceDto {
     minimum: 0,
   })
   @IsOptional()
-  @IsNumber({}, {
-    message: 'Ordem de exibição deve ser um número',
-  })
+  @IsNumber(
+    {},
+    {
+      message: 'Ordem de exibição deve ser um número',
+    },
+  )
   @Min(0, {
     message: 'Ordem de exibição deve ser maior ou igual a zero',
   })
-  @Transform(({ value }) => value ? parseInt(value) : undefined)
+  @Transform(({ value }) => (value ? parseInt(value) : undefined))
   displayOrder?: number;
 
   @ApiPropertyOptional({

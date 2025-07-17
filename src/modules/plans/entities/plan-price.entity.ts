@@ -158,8 +158,9 @@ export class PlanPrice {
       [BillingPeriod.YEARLY]: 'Anual',
     };
 
-    const baseDescription = descriptions[this.intervalType] || this.intervalType;
-    
+    const baseDescription =
+      descriptions[this.intervalType] || this.intervalType;
+
     if (this.intervalCount > 1) {
       return `${this.intervalCount}x ${baseDescription}`;
     }
@@ -183,7 +184,7 @@ export class PlanPrice {
     if (this.intervalType === BillingPeriod.MONTHLY) {
       return Number(this.amount);
     }
-    
+
     if (this.intervalType === BillingPeriod.YEARLY) {
       return Number(this.amount) / 12;
     }

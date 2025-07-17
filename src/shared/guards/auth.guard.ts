@@ -11,7 +11,7 @@ import { IS_PUBLIC_KEY } from '../decorators/public.decorator';
 
 /**
  * Authentication Guard - Guard de autenticação JWT
- * 
+ *
  * Features:
  * - Verificação de token JWT
  * - Suporte para rotas públicas (@Public decorator)
@@ -74,16 +74,19 @@ export class AuthGuard implements CanActivate {
 
       return true;
     } catch (error) {
-      this.logFailedAttempt(request, `Token verification failed: ${error.message}`);
-      
+      this.logFailedAttempt(
+        request,
+        `Token verification failed: ${error.message}`,
+      );
+
       if (error.name === 'TokenExpiredError') {
         throw new UnauthorizedException('Token expirado');
       }
-      
+
       if (error.name === 'JsonWebTokenError') {
         throw new UnauthorizedException('Token malformado');
       }
-      
+
       throw new UnauthorizedException('Token inválido');
     }
   }

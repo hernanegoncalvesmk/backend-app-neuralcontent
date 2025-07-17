@@ -15,10 +15,10 @@ export enum PayPalEventType {
   PAYMENT_CAPTURE_PENDING = 'PAYMENT.CAPTURE.PENDING',
   PAYMENT_CAPTURE_REFUNDED = 'PAYMENT.CAPTURE.REFUNDED',
   PAYMENT_CAPTURE_REVERSED = 'PAYMENT.CAPTURE.REVERSED',
-  
+
   CHECKOUT_ORDER_APPROVED = 'CHECKOUT.ORDER.APPROVED',
   CHECKOUT_ORDER_COMPLETED = 'CHECKOUT.ORDER.COMPLETED',
-  
+
   BILLING_SUBSCRIPTION_CREATED = 'BILLING.SUBSCRIPTION.CREATED',
   BILLING_SUBSCRIPTION_ACTIVATED = 'BILLING.SUBSCRIPTION.ACTIVATED',
   BILLING_SUBSCRIPTION_UPDATED = 'BILLING.SUBSCRIPTION.UPDATED',
@@ -26,7 +26,7 @@ export enum PayPalEventType {
   BILLING_SUBSCRIPTION_CANCELLED = 'BILLING.SUBSCRIPTION.CANCELLED',
   BILLING_SUBSCRIPTION_SUSPENDED = 'BILLING.SUBSCRIPTION.SUSPENDED',
   BILLING_SUBSCRIPTION_PAYMENT_FAILED = 'BILLING.SUBSCRIPTION.PAYMENT.FAILED',
-  
+
   INVOICING_INVOICE_PAID = 'INVOICING.INVOICE.PAID',
   INVOICING_INVOICE_CANCELLED = 'INVOICING.INVOICE.CANCELLED',
 }
@@ -67,9 +67,9 @@ export class PayPalWebhookDto {
       id: '5O190127TN364715T',
       amount: {
         currency_code: 'BRL',
-        value: '29.90'
+        value: '29.90',
       },
-      status: 'COMPLETED'
+      status: 'COMPLETED',
     },
   })
   @IsObject()
@@ -97,8 +97,8 @@ export class PayPalWebhookDto {
       {
         href: 'https://api.paypal.com/v2/payments/captures/5O190127TN364715T',
         rel: 'self',
-        method: 'GET'
-      }
+        method: 'GET',
+      },
     ],
     required: false,
   })
@@ -123,7 +123,7 @@ export class PayPalCaptureData {
     description: 'Valor da captura',
     example: {
       currency_code: 'BRL',
-      value: '29.90'
+      value: '29.90',
     },
   })
   @IsObject()
@@ -137,7 +137,12 @@ export class PayPalCaptureData {
     example: 'COMPLETED',
   })
   @IsString()
-  status: 'COMPLETED' | 'DECLINED' | 'PARTIALLY_REFUNDED' | 'REFUNDED' | 'PENDING';
+  status:
+    | 'COMPLETED'
+    | 'DECLINED'
+    | 'PARTIALLY_REFUNDED'
+    | 'REFUNDED'
+    | 'PENDING';
 
   @ApiProperty({
     description: 'ID da invoice no PayPal',
@@ -217,7 +222,13 @@ export class PayPalOrderData {
     example: 'COMPLETED',
   })
   @IsString()
-  status: 'CREATED' | 'SAVED' | 'APPROVED' | 'VOIDED' | 'COMPLETED' | 'PAYER_ACTION_REQUIRED';
+  status:
+    | 'CREATED'
+    | 'SAVED'
+    | 'APPROVED'
+    | 'VOIDED'
+    | 'COMPLETED'
+    | 'PAYER_ACTION_REQUIRED';
 
   @ApiProperty({
     description: 'Intenção do pedido',
@@ -232,10 +243,10 @@ export class PayPalOrderData {
       {
         amount: {
           currency_code: 'BRL',
-          value: '29.90'
+          value: '29.90',
         },
-        reference_id: 'default'
-      }
+        reference_id: 'default',
+      },
     ],
   })
   @IsArray()

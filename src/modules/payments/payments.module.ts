@@ -9,23 +9,11 @@ import { UserSubscription } from './entities/user-subscription.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([
-      Payment,
-      UserSubscription,
-    ]),
+    TypeOrmModule.forFeature([Payment, UserSubscription]),
     ConfigModule,
   ],
   controllers: [PaymentsController],
-  providers: [
-    PaymentsService,
-    StripeService,
-    PayPalService,
-  ],
-  exports: [
-    PaymentsService,
-    StripeService,
-    PayPalService,
-    TypeOrmModule,
-  ],
+  providers: [PaymentsService, StripeService, PayPalService],
+  exports: [PaymentsService, StripeService, PayPalService, TypeOrmModule],
 })
 export class PaymentsModule {}

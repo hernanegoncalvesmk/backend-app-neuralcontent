@@ -59,7 +59,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
       exception,
       status,
       requestContext,
-      requestId
+      requestId,
     );
 
     // Log do erro baseado na severidade
@@ -81,7 +81,8 @@ export class HttpExceptionFilter implements ExceptionFilter {
       userId: (request as any).user?.id,
       sessionId: (request as any).sessionId,
       query: Object.keys(request.query).length > 0 ? request.query : undefined,
-      params: Object.keys(request.params).length > 0 ? request.params : undefined,
+      params:
+        Object.keys(request.params).length > 0 ? request.params : undefined,
     };
   }
 
@@ -92,7 +93,7 @@ export class HttpExceptionFilter implements ExceptionFilter {
     exception: HttpException,
     status: number,
     requestContext: any,
-    requestId: string
+    requestId: string,
   ): ErrorResponse {
     const exceptionResponse = exception.getResponse();
     const message = this.extractErrorMessage(exceptionResponse);
@@ -118,11 +119,15 @@ export class HttpExceptionFilter implements ExceptionFilter {
 
     // Adicionar detalhes extras para exceções customizadas
     if (exception instanceof BaseCustomException) {
-      errorResponse.error.details = this.extractCustomExceptionDetails(exception);
+      errorResponse.error.details =
+        this.extractCustomExceptionDetails(exception);
     }
 
     // Adicionar detalhes de validação para erros 400
-    if (status === HttpStatus.BAD_REQUEST && typeof exceptionResponse === 'object') {
+    if (
+      status === HttpStatus.BAD_REQUEST &&
+      typeof exceptionResponse === 'object'
+    ) {
       errorResponse.error.details = {
         validation: (exceptionResponse as any).message || exceptionResponse,
       };
@@ -197,15 +202,20 @@ export class HttpExceptionFilter implements ExceptionFilter {
     // Campos específicos de cada tipo de exceção
     if ('field' in exception) details.field = (exception as any).field;
     if ('value' in exception) details.value = (exception as any).value;
-    if ('retryAfter' in exception) details.retryAfter = (exception as any).retryAfter;
+    if ('retryAfter' in exception)
+      details.retryAfter = (exception as any).retryAfter;
     if ('service' in exception) details.service = (exception as any).service;
-    if ('configKey' in exception) details.configKey = (exception as any).configKey;
-    if ('estimatedDowntime' in exception) details.estimatedDowntime = (exception as any).estimatedDowntime;
+    if ('configKey' in exception)
+      details.configKey = (exception as any).configKey;
+    if ('estimatedDowntime' in exception)
+      details.estimatedDowntime = (exception as any).estimatedDowntime;
     if ('resource' in exception) details.resource = (exception as any).resource;
     if ('limit' in exception) details.limit = (exception as any).limit;
     if ('current' in exception) details.current = (exception as any).current;
-    if ('paymentProvider' in exception) details.paymentProvider = (exception as any).paymentProvider;
-    if ('transactionId' in exception) details.transactionId = (exception as any).transactionId;
+    if ('paymentProvider' in exception)
+      details.paymentProvider = (exception as any).paymentProvider;
+    if ('transactionId' in exception)
+      details.transactionId = (exception as any).transactionId;
 
     return Object.keys(details).length > 0 ? details : undefined;
   }
@@ -213,7 +223,11 @@ export class HttpExceptionFilter implements ExceptionFilter {
   /**
    * Faz o log do erro baseado na severidade
    */
-  private logError(exception: HttpException, errorResponse: ErrorResponse, requestContext: any) {
+  private logError(
+    exception: HttpException,
+    errorResponse: ErrorResponse,
+    requestContext: any,
+  ) {
     const { statusCode, code, message, requestId } = errorResponse.error;
     const logContext = {
       requestId,
@@ -232,7 +246,11 @@ export class HttpExceptionFilter implements ExceptionFilter {
     // Log baseado na severidade do erro
     if (statusCode >= 500) {
       // Erros do servidor - críticos
-      this.logger.error(`Server Error [${code}]: ${message}`, exception.stack, logContext);
+      this.logger.error(
+        `Server Error [${code}]: ${message}`,
+        exception.stack,
+        logContext,
+      );
     } else if (statusCode >= 400) {
       // Erros do cliente - warnings
       this.logger.warn(`Client Error [${code}]: ${message}`, logContext);
