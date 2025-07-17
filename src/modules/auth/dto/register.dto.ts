@@ -30,28 +30,52 @@ export enum UserRole {
  */
 export class RegisterDto {
   @ApiProperty({
-    description: 'Nome completo do usuário',
-    example: 'João Silva Santos',
+    description: 'Primeiro nome do usuário',
+    example: 'João',
     minLength: 2,
     maxLength: 100,
   })
   @IsString({
-    message: 'Nome deve ser uma string',
+    message: 'Primeiro nome deve ser uma string',
   })
   @IsNotEmpty({
-    message: 'Nome é obrigatório',
+    message: 'Primeiro nome é obrigatório',
   })
   @MinLength(2, {
-    message: 'Nome deve ter pelo menos 2 caracteres',
+    message: 'Primeiro nome deve ter pelo menos 2 caracteres',
   })
   @MaxLength(100, {
-    message: 'Nome deve ter no máximo 100 caracteres',
+    message: 'Primeiro nome deve ter no máximo 100 caracteres',
   })
   @Matches(/^[a-zA-ZÀ-ÿ\s]+$/, {
-    message: 'Nome deve conter apenas letras e espaços',
+    message: 'Primeiro nome deve conter apenas letras e espaços',
   })
   @Transform(({ value }) => value?.trim())
-  name: string;
+  firstName: string;
+
+  @ApiProperty({
+    description: 'Sobrenome do usuário',
+    example: 'Silva Santos',
+    minLength: 2,
+    maxLength: 100,
+  })
+  @IsString({
+    message: 'Sobrenome deve ser uma string',
+  })
+  @IsNotEmpty({
+    message: 'Sobrenome é obrigatório',
+  })
+  @MinLength(2, {
+    message: 'Sobrenome deve ter pelo menos 2 caracteres',
+  })
+  @MaxLength(100, {
+    message: 'Sobrenome deve ter no máximo 100 caracteres',
+  })
+  @Matches(/^[a-zA-ZÀ-ÿ\s]+$/, {
+    message: 'Sobrenome deve conter apenas letras e espaços',
+  })
+  @Transform(({ value }) => value?.trim())
+  lastName: string;
 
   @ApiProperty({
     description: 'Email único do usuário',

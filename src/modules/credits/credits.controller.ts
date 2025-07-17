@@ -339,4 +339,105 @@ export class CreditsController {
       userId,
     });
   }
+
+  // ========== CreditBalance Endpoints ==========
+
+  @ApiOperation({
+    summary: 'Obter saldo de créditos de um usuário',
+    description: 'Retorna o saldo atual de créditos de um usuário específico. Requer permissões de administrador.',
+  })
+  @ApiParam({
+    name: 'userId',
+    description: 'ID único do usuário',
+    example: '123',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Saldo obtido com sucesso',
+    schema: {
+      type: 'object',
+      properties: {
+        id: { type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' },
+        userId: { type: 'string', example: '123' },
+        balance: { type: 'number', example: 100 },
+        createdAt: { type: 'string', format: 'date-time' },
+        updatedAt: { type: 'string', format: 'date-time' }
+      }
+    }
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Usuário não encontrado',
+  })
+  @Get('balance/:userId')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN)
+  async getUserCreditBalance(@Param('userId') userId: string) {
+    return this.creditsService.getUserCreditBalance(userId);
+  }
+
+  @ApiOperation({
+    summary: 'Criar saldo inicial de créditos',
+    description: 'Cria um saldo inicial de créditos para um usuário. Requer permissões de administrador.',
+  })
+  @ApiParam({
+    name: 'userId',
+    description: 'ID único do usuário',
+    example: '123',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Saldo inicial criado com sucesso',
+    schema: {
+      type: 'object',
+      properties: {
+        id: { type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' },
+        userId: { type: 'string', example: '123' },
+        balance: { type: 'number', example: 0 },
+        createdAt: { type: 'string', format: 'date-time' },
+        updatedAt: { type: 'string', format: 'date-time' }
+      }
+    }
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Dados inválidos',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Usuário não encontrado',
+  })
+  @Post('balance/:userId/initial')
+  @UseGuards(RolesGuard)
+  @Roles(UserRole.ADMIN)
+  async createInitialCreditBalance(
+    @Param('userId') userId: string,
+    @Body() createData: any
+  ) {
+    return this.creditsService.createInitialCreditBalance(userId, createData);
+  }
+
+  @ApiOperation({
+    summary: 'Obter meu saldo de créditos',
+    description: 'Retorna o saldo atual de créditos do usuário autenticado.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Saldo obtido com sucesso',
+    schema: {
+      type: 'object',
+      properties: {
+        id: { type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' },
+        userId: { type: 'string', example: '123' },
+        balance: { type: 'number', example: 100 },
+        createdAt: { type: 'string', format: 'date-time' },
+        updatedAt: { type: 'string', format: 'date-time' }
+      }
+    }
+  })
+  @Get('my-balance')
+  async getMyCreditBalance(@Request() req: ExpressRequest & { user: { sub: number } }) {
+    const userId = req.user.sub.toString();
+    return this.creditsService.getUserCreditBalance(userId);
+  }
 }

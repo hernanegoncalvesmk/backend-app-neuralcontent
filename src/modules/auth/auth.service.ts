@@ -8,6 +8,7 @@ import { LoggerService } from '../../shared/logger/logger.service';
 import { CacheService } from '../../shared/cache/cache.service';
 import { User, UserRole as EntityUserRole } from '../users/entities/user.entity';
 import { UserSession } from './entities/user-session.entity';
+import { VerificationToken, VerificationTokenType } from './entities/verification-token.entity';
 import { 
   LoginDto, 
   RegisterDto, 
@@ -52,6 +53,9 @@ export class AuthService {
     
     @InjectRepository(UserSession)
     private readonly sessionRepository: Repository<UserSession>,
+    
+    @InjectRepository(VerificationToken)
+    private readonly verificationTokenRepository: Repository<VerificationToken>,
     
     private readonly jwtService: JwtService,
     private readonly configService: ConfigService,
@@ -163,8 +167,8 @@ export class AuthService {
       // Criar usuário
       const user = this.userRepository.create({
         email: registerDto.email,
-        firstName: registerDto.name.split(' ')[0] || '',
-        lastName: registerDto.name.split(' ').slice(1).join(' ') || '',
+        firstName: registerDto.firstName,
+        lastName: registerDto.lastName,
         password: hashedPassword,
         role: (registerDto.role || UserRole.USER) as unknown as EntityUserRole,
         isActive: true, // Em produção, pode ser false para verificação de email
@@ -416,5 +420,149 @@ export class AuthService {
       isActive: false,
       updatedAt: new Date(),
     });
+  }
+
+  // VerificationToken Management Methods
+  
+  /**
+   * Cria um token de verificação
+   */
+  async createVerificationToken(
+    userId: number,
+    type: VerificationTokenType,
+    expiresInMinutes: number = 60,
+  ): Promise<VerificationToken> {
+    this.logger.log(`Creating verification token for user ${userId}, type: ${type}`);
+
+    try {
+      // Convert userId to string for compatibility with VerificationToken entity
+      const userIdString = userId.toString();
+      
+      // Invalidate existing tokens of the same type for this user
+      await this.invalidateUserVerificationTokens(userId, type);
+
+      const token = this.verificationTokenRepository.create({
+        userId: userIdString,
+        type,
+        expiresAt: new Date(Date.now() + expiresInMinutes * 60 * 1000),
+      });
+
+      const savedToken = await this.verificationTokenRepository.save(token);
+      this.logger.log(`Verification token created: ${savedToken.id}`);
+
+      return savedToken;
+    } catch (error) {
+      this.logger.error(`Error creating verification token: ${error.message}`, error.stack);
+      throw error;
+    }
+  }
+
+  /**
+   * Valida um token de verificação
+   */
+  async validateVerificationToken(
+    tokenValue: string,
+    type: VerificationTokenType,
+  ): Promise<VerificationToken> {
+    this.logger.log(`Validating verification token: ${tokenValue}, type: ${type}`);
+
+    try {
+      const token = await this.verificationTokenRepository.findOne({
+        where: {
+          token: tokenValue,
+          type,
+          isUsed: false,
+        },
+        relations: ['user'],
+      });
+
+      if (!token) {
+        throw new BadRequestException('Token inválido ou não encontrado');
+      }
+
+      if (token.isExpired) {
+        throw new BadRequestException('Token expirado');
+      }
+
+      return token;
+    } catch (error) {
+      this.logger.error(`Error validating verification token: ${error.message}`, error.stack);
+      throw error;
+    }
+  }
+
+  /**
+   * Marca um token como usado
+   */
+  async markTokenAsUsed(tokenId: string): Promise<void> {
+    this.logger.log(`Marking token as used: ${tokenId}`);
+
+    try {
+      await this.verificationTokenRepository.update(tokenId, {
+        isUsed: true,
+        usedAt: new Date(),
+      });
+    } catch (error) {
+      this.logger.error(`Error marking token as used: ${error.message}`, error.stack);
+      throw error;
+    }
+  }
+
+  /**
+   * Invalida todos os tokens de verificação de um usuário para um tipo específico
+   */
+  async invalidateUserVerificationTokens(
+    userId: number,
+    type?: VerificationTokenType,
+  ): Promise<void> {
+    this.logger.log(`Invalidating verification tokens for user ${userId}, type: ${type || 'all'}`);
+
+    try {
+      const userIdString = userId.toString();
+      const whereConditions: any = { userId: userIdString, isUsed: false };
+      if (type) {
+        whereConditions.type = type;
+      }
+
+      await this.verificationTokenRepository.update(whereConditions, {
+        isUsed: true,
+        usedAt: new Date(),
+      });
+    } catch (error) {
+      this.logger.error(`Error invalidating verification tokens: ${error.message}`, error.stack);
+      throw error;
+    }
+  }
+
+  /**
+   * Obtém tokens de verificação de um usuário
+   */
+  async getUserVerificationTokens(
+    userId: number,
+    type?: VerificationTokenType,
+    includeUsed: boolean = false,
+  ): Promise<VerificationToken[]> {
+    this.logger.log(`Getting verification tokens for user ${userId}, type: ${type || 'all'}`);
+
+    try {
+      const userIdString = userId.toString();
+      const whereConditions: any = { userId: userIdString };
+      if (type) {
+        whereConditions.type = type;
+      }
+      if (!includeUsed) {
+        whereConditions.isUsed = false;
+      }
+
+      const tokens = await this.verificationTokenRepository.find({
+        where: whereConditions,
+        order: { createdAt: 'DESC' },
+      });
+
+      return tokens;
+    } catch (error) {
+      this.logger.error(`Error getting verification tokens: ${error.message}`, error.stack);
+      throw error;
+    }
   }
 }

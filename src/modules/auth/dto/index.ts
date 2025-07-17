@@ -21,5 +21,9 @@ export {
 // DTOs de gestão de senha
 export { ChangePasswordDto } from './change-password.dto';
 
+// DTOs de token de verificação
+export { CreateVerificationTokenDto } from './create-verification-token.dto';
+export { VerificationTokenResponseDto } from './verification-token-response.dto';
+
 // Re-export do UserRole para uso externo
 export type { UserRole as AuthUserRole } from './register.dto';

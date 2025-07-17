@@ -336,4 +336,72 @@ export class PaymentsController {
       this.logger.error('Error handling PayPal payment failed:', error);
     }
   }
+
+  // ========== UserSubscription Endpoints ==========
+
+  @ApiOperation({
+    summary: 'Criar nova assinatura',
+    description: 'Cria uma nova assinatura para um usuário.',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Assinatura criada com sucesso',
+    type: UserSubscription,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Dados inválidos',
+  })
+  @Post('subscriptions')
+  @UseGuards()
+  async createUserSubscription(@Body() createSubscriptionDto: any) {
+    return this.paymentsService.createUserSubscription(createSubscriptionDto);
+  }
+
+  @ApiOperation({
+    summary: 'Atualizar assinatura',
+    description: 'Atualiza uma assinatura existente.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Assinatura atualizada com sucesso',
+    type: UserSubscription,
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Assinatura não encontrada',
+  })
+  @Post('subscriptions/:subscriptionId')
+  @UseGuards()
+  async updateUserSubscription(
+    @Param('subscriptionId', ParseUUIDPipe) subscriptionId: string,
+    @Body() updateSubscriptionDto: any
+  ) {
+    return this.paymentsService.updateUserSubscription(subscriptionId, updateSubscriptionDto);
+  }
+
+  @ApiOperation({
+    summary: 'Cancelar assinatura',
+    description: 'Cancela uma assinatura específica.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Assinatura cancelada com sucesso',
+    schema: {
+      type: 'object',
+      properties: {
+        message: { type: 'string', example: 'Assinatura cancelada com sucesso' }
+      }
+    }
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Assinatura não encontrada',
+  })
+  @Post('subscriptions/:subscriptionId/cancel')
+  @UseGuards()
+  @HttpCode(HttpStatus.OK)
+  async cancelUserSubscription(@Param('subscriptionId', ParseUUIDPipe) subscriptionId: string) {
+    return this.paymentsService.cancelUserSubscription(subscriptionId);
+  }
 }

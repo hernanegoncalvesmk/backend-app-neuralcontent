@@ -349,4 +349,203 @@ export class PlansController {
   async remove(@Param('id', ParseUUIDPipe) id: string): Promise<void> {
     return this.plansService.remove(id);
   }
+
+  // ========== PlanPrice Endpoints ==========
+
+  @ApiOperation({
+    summary: 'Criar preço para um plano',
+    description: 'Cria um novo preço/período para um plano específico. Requer permissões de administrador.',
+  })
+  @ApiParam({
+    name: 'planId',
+    description: 'ID único do plano',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @ApiResponse({
+    status: 201,
+    description: 'Preço criado com sucesso',
+    schema: {
+      type: 'object',
+      properties: {
+        id: { type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' },
+        planId: { type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' },
+        period: { type: 'string', example: 'monthly' },
+        price: { type: 'number', example: 29.99 },
+        currency: { type: 'string', example: 'BRL' },
+        isActive: { type: 'boolean', example: true },
+        createdAt: { type: 'string', format: 'date-time' },
+        updatedAt: { type: 'string', format: 'date-time' }
+      }
+    }
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Dados inválidos',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Não autorizado',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Acesso negado - permissões insuficientes',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Plano não encontrado',
+  })
+  @Post(':planId/prices')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.CREATED)
+  async createPlanPrice(
+    @Param('planId', ParseUUIDPipe) planId: string,
+    @Body() createPlanPriceDto: any
+  ) {
+    // Adiciona o planId ao DTO
+    const createData = { ...createPlanPriceDto, planId };
+    return this.plansService.createPlanPrice(createData);
+  }
+
+  @ApiOperation({
+    summary: 'Obter preços de um plano',
+    description: 'Retorna todos os preços/períodos de um plano específico.',
+  })
+  @ApiParam({
+    name: 'planId',
+    description: 'ID único do plano',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Preços encontrados com sucesso',
+    schema: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' },
+          planId: { type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' },
+          period: { type: 'string', example: 'monthly' },
+          price: { type: 'number', example: 29.99 },
+          currency: { type: 'string', example: 'BRL' },
+          isActive: { type: 'boolean', example: true },
+          createdAt: { type: 'string', format: 'date-time' },
+          updatedAt: { type: 'string', format: 'date-time' }
+        }
+      }
+    }
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Plano não encontrado',
+  })
+  @Get(':planId/prices')
+  @Public()
+  async getPlanPrices(@Param('planId', ParseUUIDPipe) planId: string) {
+    return this.plansService.getPlanPrices(planId);
+  }
+
+  @ApiOperation({
+    summary: 'Atualizar preço de um plano',
+    description: 'Atualiza um preço específico de um plano. Requer permissões de administrador.',
+  })
+  @ApiParam({
+    name: 'planId',
+    description: 'ID único do plano',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @ApiParam({
+    name: 'priceId',
+    description: 'ID único do preço',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Preço atualizado com sucesso',
+    schema: {
+      type: 'object',
+      properties: {
+        id: { type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' },
+        planId: { type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' },
+        period: { type: 'string', example: 'monthly' },
+        price: { type: 'number', example: 29.99 },
+        currency: { type: 'string', example: 'BRL' },
+        isActive: { type: 'boolean', example: true },
+        createdAt: { type: 'string', format: 'date-time' },
+        updatedAt: { type: 'string', format: 'date-time' }
+      }
+    }
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Dados inválidos',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Não autorizado',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Acesso negado - permissões insuficientes',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Plano ou preço não encontrado',
+  })
+  @Patch(':planId/prices/:priceId')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.OK)
+  async updatePlanPrice(
+    @Param('planId', ParseUUIDPipe) planId: string,
+    @Param('priceId', ParseUUIDPipe) priceId: string,
+    @Body() updatePlanPriceDto: any
+  ) {
+    return this.plansService.updatePlanPrice(priceId, updatePlanPriceDto);
+  }
+
+  @ApiOperation({
+    summary: 'Remover preço de um plano',
+    description: 'Remove um preço específico de um plano. Requer permissões de administrador.',
+  })
+  @ApiParam({
+    name: 'planId',
+    description: 'ID único do plano',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @ApiParam({
+    name: 'priceId',
+    description: 'ID único do preço',
+    example: '123e4567-e89b-12d3-a456-426614174000',
+  })
+  @ApiResponse({
+    status: 204,
+    description: 'Preço removido com sucesso',
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Não autorizado',
+  })
+  @ApiResponse({
+    status: 403,
+    description: 'Acesso negado - permissões insuficientes',
+  })
+  @ApiResponse({
+    status: 404,
+    description: 'Plano ou preço não encontrado',
+  })
+  @Delete(':planId/prices/:priceId')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles(UserRole.ADMIN)
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async deletePlanPrice(
+    @Param('planId', ParseUUIDPipe) planId: string,
+    @Param('priceId', ParseUUIDPipe) priceId: string
+  ): Promise<void> {
+    return this.plansService.deletePlanPrice(priceId);
+  }
 }

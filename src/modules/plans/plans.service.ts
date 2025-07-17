@@ -2,8 +2,8 @@ import { Injectable, NotFoundException, ConflictException, BadRequestException }
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, FindOptionsWhere } from 'typeorm';
 import { plainToClass } from 'class-transformer';
-import { Plan, PlanFeature } from './entities';
-import { CreatePlanDto, UpdatePlanDto, PlanResponseDto } from './dto';
+import { Plan, PlanFeature, PlanPrice } from './entities';
+import { CreatePlanDto, UpdatePlanDto, PlanResponseDto, CreatePlanPriceDto, UpdatePlanPriceDto, PlanPriceResponseDto } from './dto';
 
 @Injectable()
 export class PlansService {
@@ -12,6 +12,8 @@ export class PlansService {
     private readonly planRepository: Repository<Plan>,
     @InjectRepository(PlanFeature)
     private readonly planFeatureRepository: Repository<PlanFeature>,
+    @InjectRepository(PlanPrice)
+    private readonly planPriceRepository: Repository<PlanPrice>,
   ) {}
 
   /**
@@ -246,5 +248,129 @@ export class PlansService {
     if (planData.sortOrder && planData.sortOrder < 0) {
       throw new BadRequestException('Ordem deve ser maior ou igual a zero');
     }
+  }
+
+  // ============================================================================
+  // MÉTODOS PLAN PRICE
+  // ============================================================================
+
+  /**
+   * Criar novo preço para plano
+   */
+  async createPlanPrice(createPlanPriceDto: CreatePlanPriceDto): Promise<PlanPriceResponseDto> {
+    // Verificar se o plano existe
+    const plan = await this.findOne(createPlanPriceDto.planId);
+    if (!plan) {
+      throw new NotFoundException(`Plano com ID '${createPlanPriceDto.planId}' não encontrado`);
+    }
+
+    // Verificar se já existe preço para essa combinação
+    const existingPrice = await this.planPriceRepository.findOne({
+      where: {
+        planId: createPlanPriceDto.planId,
+        currency: createPlanPriceDto.currency,
+        intervalType: createPlanPriceDto.intervalType,
+      },
+    });
+
+    if (existingPrice) {
+      throw new ConflictException(
+        `Preço para plano '${createPlanPriceDto.planId}' com moeda '${createPlanPriceDto.currency}' ` +
+        `e período '${createPlanPriceDto.intervalType}' já existe`
+      );
+    }
+
+    const planPrice = this.planPriceRepository.create(createPlanPriceDto);
+    const savedPlanPrice = await this.planPriceRepository.save(planPrice);
+
+    return plainToClass(PlanPriceResponseDto, savedPlanPrice);
+  }
+
+  /**
+   * Buscar preços de um plano
+   */
+  async getPlanPrices(planId: string): Promise<PlanPriceResponseDto[]> {
+    const prices = await this.planPriceRepository.find({
+      where: { planId, isActive: true },
+      order: { intervalType: 'ASC', currency: 'ASC' },
+    });
+
+    return prices.map(price => plainToClass(PlanPriceResponseDto, price));
+  }
+
+  /**
+   * Buscar preço específico
+   */
+  async getPlanPrice(id: string): Promise<PlanPriceResponseDto> {
+    const price = await this.planPriceRepository.findOne({
+      where: { id },
+    });
+
+    if (!price) {
+      throw new NotFoundException(`Preço com ID '${id}' não encontrado`);
+    }
+
+    return plainToClass(PlanPriceResponseDto, price);
+  }
+
+  /**
+   * Atualizar preço do plano
+   */
+  async updatePlanPrice(id: string, updatePlanPriceDto: UpdatePlanPriceDto): Promise<PlanPriceResponseDto> {
+    const planPrice = await this.planPriceRepository.findOne({
+      where: { id },
+    });
+
+    if (!planPrice) {
+      throw new NotFoundException(`Preço com ID '${id}' não encontrado`);
+    }
+
+    // Se planId foi alterado, verificar se o novo plano existe
+    if (updatePlanPriceDto.planId && updatePlanPriceDto.planId !== planPrice.planId) {
+      const plan = await this.findOne(updatePlanPriceDto.planId);
+      if (!plan) {
+        throw new NotFoundException(`Plano com ID '${updatePlanPriceDto.planId}' não encontrado`);
+      }
+    }
+
+    Object.assign(planPrice, updatePlanPriceDto);
+    const updatedPlanPrice = await this.planPriceRepository.save(planPrice);
+
+    return plainToClass(PlanPriceResponseDto, updatedPlanPrice);
+  }
+
+  /**
+   * Deletar preço do plano
+   */
+  async deletePlanPrice(id: string): Promise<void> {
+    const planPrice = await this.planPriceRepository.findOne({
+      where: { id },
+    });
+
+    if (!planPrice) {
+      throw new NotFoundException(`Preço com ID '${id}' não encontrado`);
+    }
+
+    await this.planPriceRepository.remove(planPrice);
+  }
+
+  /**
+   * Buscar preços por moeda e período
+   */
+  async getPlanPriceByCriteria(
+    planId: string,
+    currency: any,
+    intervalType: any
+  ): Promise<PlanPriceResponseDto | null> {
+    const price = await this.planPriceRepository.findOne({
+      where: {
+        planId,
+        currency: currency as any,
+        intervalType: intervalType as any,
+        isActive: true,
+      },
+    });
+
+    return price ? plainToClass(PlanPriceResponseDto, price) : null;
   }
 }

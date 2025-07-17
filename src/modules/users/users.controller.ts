@@ -506,4 +506,120 @@ export class UsersController {
     const user = await this.usersService.updateActiveStatus(id, false);
     return new UserResponseDto(user);
   }
+
+  // New endpoints for CreditBalance management
+  @Get(':id/credit-balance')
+  @Roles(UserRole.ADMIN, UserRole.USER)
+  @ApiOperation({ 
+    summary: 'Get user credit balance',
+    description: 'Retrieve credit balance information for a specific user.',
+  })
+  @ApiParam({ 
+    name: 'id', 
+    type: String,
+    description: 'User ID',
+    example: '1',
+  })
+  @ApiResponse({ 
+    status: HttpStatus.OK, 
+    description: 'Credit balance retrieved successfully',
+  })
+  @ApiResponse({ 
+    status: HttpStatus.NOT_FOUND, 
+    description: 'User or credit balance not found',
+  })
+  async getUserCreditBalance(@Param('id', ParseIntPipe) id: number) {
+    return this.usersService.getUserCreditBalance(id.toString());
+  }
+
+  @Post(':id/credit-balance')
+  @Roles(UserRole.ADMIN)
+  @ApiOperation({ 
+    summary: 'Create initial credit balance',
+    description: 'Create initial credit balance for a user. Only accessible by administrators.',
+  })
+  @ApiParam({ 
+    name: 'id', 
+    type: String,
+    description: 'User ID',
+    example: '1',
+  })
+  @ApiResponse({ 
+    status: HttpStatus.CREATED, 
+    description: 'Credit balance created successfully',
+  })
+  @ApiResponse({ 
+    status: HttpStatus.CONFLICT, 
+    description: 'Credit balance already exists',
+  })
+  async createInitialCreditBalance(@Param('id', ParseIntPipe) id: number) {
+    return this.usersService.createInitialCreditBalance(id.toString());
+  }
+
+  // New endpoints for VerificationToken management
+  @Get(':id/verification-tokens')
+  @Roles(UserRole.ADMIN, UserRole.USER)
+  @ApiOperation({ 
+    summary: 'Get user verification tokens',
+    description: 'Retrieve verification tokens for a specific user.',
+  })
+  @ApiParam({ 
+    name: 'id', 
+    type: String,
+    description: 'User ID',
+    example: '1',
+  })
+  @ApiQuery({ 
+    name: 'type', 
+    required: false,
+    description: 'Token type filter',
+    example: 'email_verification',
+  })
+  @ApiQuery({ 
+    name: 'includeUsed', 
+    required: false,
+    type: Boolean,
+    description: 'Include used tokens',
+    example: false,
+  })
+  @ApiResponse({ 
+    status: HttpStatus.OK, 
+    description: 'Verification tokens retrieved successfully',
+  })
+  async getUserVerificationTokens(
+    @Param('id', ParseIntPipe) id: number,
+    @Query('type') type?: string,
+    @Query('includeUsed', new DefaultValuePipe(false)) includeUsed?: boolean,
+  ) {
+    return this.usersService.getUserVerificationTokens(id.toString(), type);
+  }
+
+  @Delete(':id/verification-tokens')
+  @Roles(UserRole.ADMIN, UserRole.USER)
+  @ApiOperation({ 
+    summary: 'Invalidate user verification tokens',
+    description: 'Invalidate all or specific type verification tokens for a user.',
+  })
+  @ApiParam({ 
+    name: 'id', 
+    type: String,
+    description: 'User ID',
+    example: '1',
+  })
+  @ApiQuery({ 
+    name: 'type', 
+    required: false,
+    description: 'Token type to invalidate',
+    example: 'email_verification',
+  })
+  @ApiResponse({ 
+    status: HttpStatus.OK, 
+    description: 'Verification tokens invalidated successfully',
+  })
+  async invalidateUserVerificationTokens(
+    @Param('id', ParseIntPipe) id: number,
+    @Query('type') type?: string,
+  ) {
+    return this.usersService.invalidateUserVerificationTokens(id.toString(), type);
+  }
 }

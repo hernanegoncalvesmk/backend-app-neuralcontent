@@ -812,6 +812,55 @@ git commit -m "refactor(services): atualizar services para novas estruturas de e
 Refs: PLANO_IMPLEMENTACAO_CORRECOES_ARQUITETURAIS.md - Passo 2.10"
 ```
 
+#### **Próximo Passo:** PASSO 2.11
+
+---
+
+### **PASSO 2.11: Atualização dos Controllers**
+**Objetivo:** Atualizar controllers para usar os services modificados
+**Tempo Estimado:** 90 minutos
+
+#### **Arquivos Afetados:**
+- `src/modules/users/users.controller.ts`
+- `src/modules/plans/plans.controller.ts`
+- `src/modules/payments/payments.controller.ts`
+- `src/modules/credits/credits.controller.ts`
+- `src/modules/auth/auth.controller.ts`
+
+#### **Modificações:**
+1. Ajustar endpoints para novas entidades
+2. Atualizar validações de DTOs
+3. Implementar novos endpoints para PlanPrice, CreditBalance, VerificationToken
+4. Manter compatibilidade com frontend
+5. Corrigir documentação Swagger
+
+#### **Validação:**
+```bash
+npm run build
+npm run test:unit
+npm run test:e2e
+```
+
+#### **Checklist:**
+- [ ] Controllers atualizados para novos services
+- [ ] Novos endpoints implementados
+- [ ] Validações de DTOs corretas
+- [ ] Documentação Swagger atualizada
+- [ ] Testes passando
+
+#### **Commit:**
+```bash
+git add src/modules/*/controllers/
+git commit -m "refactor(controllers): atualizar controllers para novos services e entidades
+
+- Ajustar endpoints para usar services atualizados
+- Implementar endpoints para PlanPrice, CreditBalance, VerificationToken
+- Atualizar validações e documentação Swagger
+- Manter compatibilidade com APIs existentes
+
+Refs: PLANO_IMPLEMENTACAO_CORRECOES_ARQUITETURAIS.md - Passo 2.11"
+```
+
 #### **Próximo Passo:** PASSO 3.1
 
 ---

@@ -21,8 +21,10 @@ import {
   UserStatsResponseDto,
 } from './dto/user-response.dto';
 
-// Entity
+// Entities
 import { User } from './entities/user.entity';
+import { CreditBalance } from '../credits/entities/credit-balance.entity';
+import { VerificationToken } from '../auth/entities/verification-token.entity';
 
 // Custom Exceptions
 import { 
@@ -67,6 +69,10 @@ export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(CreditBalance)
+    private readonly creditBalanceRepository: Repository<CreditBalance>,
+    @InjectRepository(VerificationToken)
+    private readonly verificationTokenRepository: Repository<VerificationToken>,
     private readonly configService: ConfigService,
   ) {
     this.saltRounds = this.configService.get<number>('BCRYPT_ROUNDS', 12);
@@ -621,6 +627,87 @@ export class UsersService {
    */
   private async hashPassword(password: string): Promise<string> {
     return bcrypt.hash(password, this.saltRounds);
+  }
+
+  /**
+   * Criar saldo de créditos inicial para novo usuário
+   * 
+   * @param userId - ID do usuário
+   * @returns CreditBalance criado
+   */
+  async createInitialCreditBalance(userId: string): Promise<CreditBalance> {
+    this.logger.log(`Creating initial credit balance for user: ${userId}`);
+
+    const creditBalance = this.creditBalanceRepository.create({
+      userId,
+      monthlyCredits: 0,
+      monthlyUsed: 0,
+      monthlyResetAt: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000), // 30 dias
+      extraCredits: 0,
+      extraUsed: 0,
+      totalConsumed: 0,
+    });
+
+    return await this.creditBalanceRepository.save(creditBalance);
+  }
+
+  /**
+   * Buscar saldo de créditos do usuário
+   * 
+   * @param userId - ID do usuário
+   * @returns CreditBalance ou null
+   */
+  async getUserCreditBalance(userId: string): Promise<CreditBalance | null> {
+    return await this.creditBalanceRepository.findOne({
+      where: { userId },
+    });
+  }
+
+  /**
+   * Buscar tokens de verificação ativos do usuário
+   * 
+   * @param userId - ID do usuário
+   * @param type - Tipo do token (opcional)
+   * @returns Lista de tokens
+   */
+  async getUserVerificationTokens(userId: string, type?: string): Promise<VerificationToken[]> {
+    const whereCondition: any = { 
+      userId,
+      usedAt: IsNull(),
+      expiresAt: MoreThanOrEqual(new Date()),
+    };
+
+    if (type) {
+      whereCondition.type = type;
+    }
+
+    return await this.verificationTokenRepository.find({
+      where: whereCondition,
+      order: { createdAt: 'DESC' },
+    });
+  }
+
+  /**
+   * Invalidar tokens de verificação do usuário
+   * 
+   * @param userId - ID do usuário
+   * @param type - Tipo do token (opcional)
+   */
+  async invalidateUserVerificationTokens(userId: string, type?: string): Promise<void> {
+    const whereCondition: any = { 
+      userId,
+      usedAt: IsNull(),
+    };
+
+    if (type) {
+      whereCondition.type = type;
+    }
+
+    await this.verificationTokenRepository.update(whereCondition, {
+      usedAt: new Date(),
+    });
+
+    this.logger.log(`Invalidated verification tokens for user ${userId}${type ? ` of type ${type}` : ''}`);
   }
 
   /**

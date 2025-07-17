@@ -3,6 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import { LoggerService } from '../../shared/logger/logger.service';
 import { CreditTransaction, CreditTransactionType } from './entities/credit-transaction.entity';
+import { CreditBalance } from './entities/credit-balance.entity';
 import { User } from '../users/entities/user.entity';
 import {
   ConsumeCreditsDto,
@@ -13,6 +14,9 @@ import {
   AddCreditsResponseDto,
   TransferCreditsDto,
   TransferCreditsResponseDto,
+  CreateCreditBalanceDto,
+  UpdateCreditBalanceDto,
+  CreditBalanceResponseDto,
 } from './dto';
 
 @Injectable()
@@ -20,385 +24,458 @@ export class CreditsService {
   constructor(
     @InjectRepository(CreditTransaction)
     private creditTransactionRepository: Repository<CreditTransaction>,
+    @InjectRepository(CreditBalance)
+    private creditBalanceRepository: Repository<CreditBalance>,
     @InjectRepository(User)
     private userRepository: Repository<User>,
     private dataSource: DataSource,
-    private logger: LoggerService,
+    private readonly logger: LoggerService,
   ) {}
 
-  /**
-   * Valida se o usuário tem créditos suficientes para uma operação
-   */
-  async validateCredits(dto: ValidateCreditsDto): Promise<ValidateCreditsResponseDto> {
+  // CreditBalance Management
+  async createCreditBalance(
+    userId: string,
+    createCreditBalanceDto: CreateCreditBalanceDto,
+  ): Promise<CreditBalanceResponseDto> {
+    this.logger.log(`Creating credit balance for user ${userId}`);
+
     try {
-      this.logger.log(`Validating credits for user ${dto.userId}, amount: ${dto.amount}, service: ${dto.serviceType}`);
-
-      const user = await this.userRepository.findOne({
-        where: { id: parseInt(dto.userId) },
-      });
-
+      // Convert userId string to number for compatibility with User entity
+      const userIdNumber = parseInt(userId, 10);
+      const user = await this.userRepository.findOne({ where: { id: userIdNumber } });
       if (!user) {
-        throw new NotFoundException('Usuário não encontrado');
+        throw new NotFoundException(`User with ID ${userId} not found`);
       }
 
-      const balance = await this.getUserCreditBalance(dto.userId);
-      const hasEnoughCredits = balance >= dto.amount;
+      const existingBalance = await this.creditBalanceRepository.findOne({
+        where: { userId }
+      });
 
-      // Usar o amount diretamente como custo
-      const serviceCost = dto.amount;
-      const hasEnoughForService = balance >= serviceCost;
+      if (existingBalance) {
+        throw new ConflictException(
+          `Credit balance already exists for user ${userId}`
+        );
+      }
 
-      const response: ValidateCreditsResponseDto = {
-        hasEnoughCredits: hasEnoughCredits && hasEnoughForService,
-        currentBalance: balance,
-        requiredAmount: dto.amount,
-        serviceCost,
-        remaining: balance - serviceCost,
-        canProceed: hasEnoughCredits && hasEnoughForService && balance > 0,
-        serviceType: dto.serviceType,
-        message: hasEnoughCredits && hasEnoughForService 
-          ? 'Créditos suficientes para a operação' 
-          : 'Créditos insuficientes',
+      const creditBalance = this.creditBalanceRepository.create({
+        ...createCreditBalanceDto,
+      });
+
+      const savedBalance = await this.creditBalanceRepository.save(creditBalance);
+
+      return {
+        id: savedBalance.id,
+        userId: savedBalance.userId,
+        monthlyCredits: savedBalance.monthlyCredits,
+        monthlyUsed: savedBalance.monthlyUsed,
+        monthlyResetAt: savedBalance.monthlyResetAt,
+        extraCredits: savedBalance.extraCredits,
+        extraUsed: savedBalance.extraUsed,
+        totalConsumed: savedBalance.totalUsed,
+        createdAt: savedBalance.createdAt,
+        updatedAt: savedBalance.updatedAt,
+        monthlyAvailable: 0, // will be calculated by transform
+        extraAvailable: 0, // will be calculated by transform
+        totalAvailable: 0, // will be calculated by transform
+        monthlyUsagePercent: 0, // will be calculated by transform
+        daysUntilReset: 0, // will be calculated by transform
+        balanceStatus: 'low', // will be calculated by transform
       };
-
-      this.logger.log(`Credit validation result for user ${dto.userId}: ${JSON.stringify(response)}`);
-      return response;
     } catch (error) {
-      this.logger.error(`Error validating credits for user ${dto.userId}:`, error);
+      this.logger.error(`Error creating credit balance: ${error.message}`, error.stack);
       throw error;
     }
   }
 
-  /**
-   * Consome créditos do usuário
-   */
-  async consumeCredits(dto: ConsumeCreditsDto): Promise<ConsumeCreditsResponseDto> {
+  async updateCreditBalance(
+    userId: string,
+    updateCreditBalanceDto: UpdateCreditBalanceDto,
+  ): Promise<CreditBalanceResponseDto> {
+    this.logger.log(`Updating credit balance for user ${userId}`);
+
+    try {
+      const creditBalance = await this.creditBalanceRepository.findOne({
+        where: { userId }
+      });
+
+      if (!creditBalance) {
+        throw new NotFoundException(
+          `Credit balance not found for user ${userId}`
+        );
+      }
+
+      Object.assign(creditBalance, updateCreditBalanceDto);
+      const savedBalance = await this.creditBalanceRepository.save(creditBalance);
+
+      return {
+        id: savedBalance.id,
+        userId: savedBalance.userId,
+        monthlyCredits: savedBalance.monthlyCredits,
+        monthlyUsed: savedBalance.monthlyUsed,
+        monthlyResetAt: savedBalance.monthlyResetAt,
+        extraCredits: savedBalance.extraCredits,
+        extraUsed: savedBalance.extraUsed,
+        totalConsumed: savedBalance.totalUsed,
+        createdAt: savedBalance.createdAt,
+        updatedAt: savedBalance.updatedAt,
+        monthlyAvailable: 0, // will be calculated by transform
+        extraAvailable: 0, // will be calculated by transform
+        totalAvailable: 0, // will be calculated by transform
+        monthlyUsagePercent: 0, // will be calculated by transform
+        daysUntilReset: 0, // will be calculated by transform
+        balanceStatus: 'low', // will be calculated by transform
+      };
+    } catch (error) {
+      this.logger.error(`Error updating credit balance: ${error.message}`, error.stack);
+      throw error;
+    }
+  }
+
+  async getCreditBalance(userId: string): Promise<CreditBalanceResponseDto> {
+    this.logger.log(`Getting credit balance for user ${userId}`);
+
+    try {
+      const creditBalance = await this.creditBalanceRepository.findOne({
+        where: { userId }
+      });
+
+      if (!creditBalance) {
+        throw new NotFoundException(
+          `Credit balance not found for user ${userId}`
+        );
+      }
+
+      return {
+        id: creditBalance.id,
+        userId: creditBalance.userId,
+        monthlyCredits: creditBalance.monthlyCredits,
+        monthlyUsed: creditBalance.monthlyUsed,
+        monthlyResetAt: creditBalance.monthlyResetAt,
+        extraCredits: creditBalance.extraCredits,
+        extraUsed: creditBalance.extraUsed,
+        totalConsumed: creditBalance.totalUsed,
+        createdAt: creditBalance.createdAt,
+        updatedAt: creditBalance.updatedAt,
+        monthlyAvailable: 0, // will be calculated by transform
+        extraAvailable: 0, // will be calculated by transform
+        totalAvailable: 0, // will be calculated by transform
+        monthlyUsagePercent: 0, // will be calculated by transform
+        daysUntilReset: 0, // will be calculated by transform
+        balanceStatus: 'low', // will be calculated by transform
+      };
+    } catch (error) {
+      this.logger.error(`Error getting credit balance: ${error.message}`, error.stack);
+      throw error;
+    }
+  }
+
+  async deleteCreditBalance(userId: string): Promise<void> {
+    this.logger.log(`Deleting credit balance for user ${userId}`);
+
+    try {
+      const creditBalance = await this.creditBalanceRepository.findOne({
+        where: { userId }
+      });
+
+      if (!creditBalance) {
+        throw new NotFoundException(
+          `Credit balance not found for user ${userId}`
+        );
+      }
+
+      await this.creditBalanceRepository.remove(creditBalance);
+    } catch (error) {
+      this.logger.error(`Error deleting credit balance: ${error.message}`, error.stack);
+      throw error;
+    }
+  }
+
+  // Original existing methods for credit operations
+  async validateCredits(
+    userId: string,
+    validateCreditsDto: ValidateCreditsDto,
+  ): Promise<ValidateCreditsResponseDto> {
+    this.logger.log(`Validating credits for user ${userId}`);
+
+    try {
+      // Convert userId string to number for compatibility with User entity
+      const userIdNumber = parseInt(userId, 10);
+      const user = await this.userRepository.findOne({ where: { id: userIdNumber } });
+      if (!user) {
+        throw new NotFoundException('Usuário não encontrado');
+      }
+
+      // Check credit balance from CreditBalance entity if available, fallback to user.creditBalance
+      let userCredits = 0;
+      try {
+        const creditBalance = await this.creditBalanceRepository.findOne({
+          where: { userId }
+        });
+        userCredits = creditBalance ? creditBalance.availableCredits : 0;
+      } catch {
+        // Fallback to legacy creditBalance relationship if CreditBalance table query doesn't exist
+        userCredits = user.creditBalance?.availableCredits || 0;
+      }
+
+      const requiredCredits = validateCreditsDto.amount;
+      const hasEnoughCredits = userCredits >= requiredCredits;
+
+      return {
+        hasEnoughCredits,
+        currentBalance: userCredits,
+        requiredAmount: requiredCredits,
+        serviceCost: requiredCredits,
+        remaining: Math.max(0, userCredits - requiredCredits),
+        message: hasEnoughCredits 
+          ? 'Créditos suficientes' 
+          : `Créditos insuficientes. Necessário: ${requiredCredits}, Disponível: ${userCredits}`,
+      };
+    } catch (error) {
+      this.logger.error(`Error validating credits: ${error.message}`, error.stack);
+      throw error;
+    }
+  }
+
+  async consumeCredits(
+    userId: string,
+    consumeCreditsDto: ConsumeCreditsDto,
+  ): Promise<ConsumeCreditsResponseDto> {
+    this.logger.log(`Consuming credits for user ${userId}`, 'CreditsService');
+
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
     try {
-      this.logger.log(`Consuming credits for user ${dto.userId}, amount: ${dto.amount}, service: ${dto.serviceType}`);
-
-      // Verifica se o usuário existe
-      const user = await queryRunner.manager.findOne(User, {
-        where: { id: parseInt(dto.userId) },
-      });
-
+      // Verificar se o usuário existe
+      const user = await queryRunner.manager.findOne(User, { where: { id: userId } });
       if (!user) {
         throw new NotFoundException('Usuário não encontrado');
       }
 
-      // Valida se tem créditos suficientes
-      const validation = await this.validateCredits({
-        userId: dto.userId,
-        amount: dto.amount,
-        serviceType: dto.serviceType,
-      });
+      const requiredCredits = consumeCreditsDto.amount;
+      const currentCredits = user.creditsBalance || 0;
 
-      if (!validation.canProceed) {
+      // Verificar se há créditos suficientes
+      if (currentCredits < requiredCredits) {
         throw new BadRequestException('Créditos insuficientes para a operação');
       }
 
-      const serviceCost = dto.amount; // Usar diretamente o valor informado
-      const previousBalance = await this.getUserCreditBalance(dto.userId);
+      // Atualizar o saldo do usuário
+      const newBalance = currentCredits - requiredCredits;
+      await queryRunner.manager.update(User, userId, { creditsBalance: newBalance });
 
-      // Preparar dados da transação
-      const transactionData: any = {
+      // Criar registro da transação
+      const transaction = queryRunner.manager.create(CreditTransaction, {
         user,
-        type: CreditTransactionType.USED,
-        amount: -serviceCost, // Valor negativo para consumo
-        balanceBefore: previousBalance,
-        balanceAfter: previousBalance - serviceCost,
-        description: dto.description,
-        relatedEntityType: 'service_consumption',
-        metadata: {
-          ...dto.metadata,
-          originalAmount: dto.amount,
-          serviceCost,
-          consumedAt: new Date().toISOString(),
-        },
-      };
-
-      // Adicionar relatedEntityId se sessionId for fornecido
-      if (dto.sessionId) {
-        transactionData.relatedEntityId = parseInt(dto.sessionId);
-      }
-
-      // Cria a transação de consumo
-      const transaction = queryRunner.manager.create(CreditTransaction, transactionData);
+        type: CreditTransactionType.CONSUMPTION,
+        amount: -requiredCredits,
+        balanceAfter: newBalance,
+        description: consumeCreditsDto.description || 'Consumo de créditos',
+        metadata: consumeCreditsDto.metadata,
+      });
 
       const savedTransaction = await queryRunner.manager.save(transaction);
 
       await queryRunner.commitTransaction();
 
-      const response: ConsumeCreditsResponseDto = {
+      return {
+        transactionId: savedTransaction.id,
+        previousBalance: currentCredits,
+        newBalance,
+        amountConsumed: requiredCredits,
         success: true,
-        transactionId: savedTransaction.id.toString(),
-        amountConsumed: serviceCost,
-        newBalance: previousBalance - serviceCost,
-        previousBalance,
-        serviceType: dto.serviceType,
         message: 'Créditos consumidos com sucesso',
-        timestamp: savedTransaction.createdAt,
       };
-
-      this.logger.log(`Credits consumed successfully for user ${dto.userId}: ${JSON.stringify(response)}`);
-      return response;
     } catch (error) {
       await queryRunner.rollbackTransaction();
-      this.logger.error(`Error consuming credits for user ${dto.userId}:`, error);
+      this.logger.error(`Error consuming credits: ${error.message}`, error.stack, 'CreditsService');
       throw error;
     } finally {
       await queryRunner.release();
     }
   }
 
-  /**
-   * Adiciona créditos ao usuário
-   */
-  async addCredits(dto: AddCreditsDto): Promise<AddCreditsResponseDto> {
+  async addCredits(
+    userId: string,
+    addCreditsDto: AddCreditsDto,
+  ): Promise<AddCreditsResponseDto> {
+    this.logger.log(`Adding credits for user ${userId}`, 'CreditsService');
+
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
     try {
-      this.logger.log(`Adding credits for user ${dto.userId}, amount: ${dto.amount}, type: ${dto.type}`);
-
-      // Verifica se o usuário existe
-      const user = await queryRunner.manager.findOne(User, {
-        where: { id: parseInt(dto.userId) },
-      });
-
+      // Verificar se o usuário existe
+      const user = await queryRunner.manager.findOne(User, { where: { id: userId } });
       if (!user) {
         throw new NotFoundException('Usuário não encontrado');
       }
 
-      const previousBalance = await this.getUserCreditBalance(dto.userId);
-      const expiresAt = dto.expiresAt ? new Date(dto.expiresAt) : this.calculateDefaultExpiration();
+      const creditsToAdd = addCreditsDto.amount;
+      const currentCredits = user.creditsBalance || 0;
+      const newBalance = currentCredits + creditsToAdd;
 
-      // Cria a transação de adição
+      // Atualizar o saldo do usuário
+      await queryRunner.manager.update(User, userId, { creditsBalance: newBalance });
+
+      // Criar registro da transação
       const transaction = queryRunner.manager.create(CreditTransaction, {
         user,
-        type: dto.type,
-        amount: dto.amount, // Valor positivo para adição
-        balanceBefore: previousBalance,
-        balanceAfter: previousBalance + dto.amount,
-        description: dto.description,
-        relatedEntityType: 'payment',
-        relatedEntityId: dto.paymentId ? parseInt(dto.paymentId) : undefined,
-        expiresAt,
-        metadata: {
-          ...dto.metadata,
-          paymentId: dto.paymentId,
-          addedAt: new Date().toISOString(),
-        },
+        type: CreditTransactionType.PURCHASE,
+        amount: creditsToAdd,
+        balanceAfter: newBalance,
+        description: addCreditsDto.description || 'Adição de créditos',
+        metadata: addCreditsDto.metadata,
       });
 
       const savedTransaction = await queryRunner.manager.save(transaction);
 
       await queryRunner.commitTransaction();
 
-      const response: AddCreditsResponseDto = {
+      return {
+        transactionId: savedTransaction.id,
+        previousBalance: currentCredits,
+        newBalance,
+        amountAdded: creditsToAdd,
         success: true,
-        transactionId: savedTransaction.id.toString(),
-        amountAdded: dto.amount,
-        newBalance: previousBalance + dto.amount,
-        previousBalance,
-        expiresAt,
         message: 'Créditos adicionados com sucesso',
-        timestamp: savedTransaction.createdAt,
       };
-
-      this.logger.log(`Credits added successfully for user ${dto.userId}: ${JSON.stringify(response)}`);
-      return response;
     } catch (error) {
       await queryRunner.rollbackTransaction();
-      this.logger.error(`Error adding credits for user ${dto.userId}:`, error);
+      this.logger.error(`Error adding credits: ${error.message}`, error.stack, 'CreditsService');
       throw error;
     } finally {
       await queryRunner.release();
     }
   }
 
-  /**
-   * Transfere créditos entre usuários
-   */
-  async transferCredits(dto: TransferCreditsDto): Promise<TransferCreditsResponseDto> {
+  async transferCredits(
+    fromUserId: string,
+    transferCreditsDto: TransferCreditsDto,
+  ): Promise<TransferCreditsResponseDto> {
+    this.logger.log(`Transferring credits from user ${fromUserId} to ${transferCreditsDto.toUserId}`, 'CreditsService');
+
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
 
     try {
-      this.logger.log(`Transferring credits from ${dto.fromUserId} to ${dto.toUserId}, amount: ${dto.amount}`);
-
-      // Verifica se ambos os usuários existem
-      const [fromUser, toUser] = await Promise.all([
-        queryRunner.manager.findOne(User, { where: { id: parseInt(dto.fromUserId) } }),
-        queryRunner.manager.findOne(User, { where: { id: parseInt(dto.toUserId) } }),
-      ]);
-
+      // Verificar se ambos os usuários existem
+      const fromUser = await queryRunner.manager.findOne(User, { where: { id: fromUserId } });
       if (!fromUser) {
         throw new NotFoundException('Usuário origem não encontrado');
       }
 
+      const toUser = await queryRunner.manager.findOne(User, { where: { id: transferCreditsDto.toUserId } });
       if (!toUser) {
         throw new NotFoundException('Usuário destino não encontrado');
       }
 
-      if (dto.fromUserId === dto.toUserId) {
+      if (fromUserId === transferCreditsDto.toUserId) {
         throw new BadRequestException('Não é possível transferir créditos para o mesmo usuário');
       }
 
-      // Verifica se o usuário origem tem créditos suficientes
-      const fromUserBalance = await this.getUserCreditBalance(dto.fromUserId);
-      if (fromUserBalance < dto.amount) {
+      const transferAmount = transferCreditsDto.amount;
+      const fromUserCurrentCredits = fromUser.creditsBalance || 0;
+
+      if (fromUserCurrentCredits < transferAmount) {
         throw new BadRequestException('Créditos insuficientes para transferência');
       }
 
-      const toUserBalance = await this.getUserCreditBalance(dto.toUserId);
+      const toUserCurrentCredits = toUser.creditsBalance || 0;
 
-      // Cria transação de débito (usuário origem)
-      const debitTransaction = queryRunner.manager.create(CreditTransaction, {
+      // Atualizar saldos
+      const fromUserNewBalance = fromUserCurrentCredits - transferAmount;
+      const toUserNewBalance = toUserCurrentCredits + transferAmount;
+
+      await queryRunner.manager.update(User, fromUserId, { creditsBalance: fromUserNewBalance });
+      await queryRunner.manager.update(User, transferCreditsDto.toUserId, { creditsBalance: toUserNewBalance });
+
+      // Criar transações para ambos os usuários
+      const fromTransaction = queryRunner.manager.create(CreditTransaction, {
         user: fromUser,
-        type: CreditTransactionType.USED,
-        amount: -dto.amount, // Valor negativo para débito
-        balanceBefore: fromUserBalance,
-        balanceAfter: fromUserBalance - dto.amount,
-        description: `${dto.description} (Envio para ${toUser.email})`,
-        relatedEntityType: 'transfer',
-        relatedEntityId: parseInt(dto.toUserId),
-        metadata: {
-          ...dto.metadata,
-          transferType: 'debit',
-          toUserId: dto.toUserId,
-          toUserEmail: toUser.email,
-          transferredAt: new Date().toISOString(),
-        },
+        type: CreditTransactionType.TRANSFER_OUT,
+        amount: -transferAmount,
+        balanceAfter: fromUserNewBalance,
+        description: transferCreditsDto.description || `Transferência para ${toUser.email}`,
+        metadata: { ...transferCreditsDto.metadata, transferToUserId: transferCreditsDto.toUserId },
       });
 
-      // Cria transação de crédito (usuário destino)
-      const creditTransaction = queryRunner.manager.create(CreditTransaction, {
+      const toTransaction = queryRunner.manager.create(CreditTransaction, {
         user: toUser,
-        type: CreditTransactionType.GRANTED,
-        amount: dto.amount, // Valor positivo para crédito
-        balanceBefore: toUserBalance,
-        balanceAfter: toUserBalance + dto.amount,
-        description: `${dto.description} (Recebido de ${fromUser.email})`,
-        relatedEntityType: 'transfer',
-        relatedEntityId: parseInt(dto.fromUserId),
-        metadata: {
-          ...dto.metadata,
-          transferType: 'credit',
-          fromUserId: dto.fromUserId,
-          fromUserEmail: fromUser.email,
-          transferredAt: new Date().toISOString(),
-        },
+        type: CreditTransactionType.TRANSFER_IN,
+        amount: transferAmount,
+        balanceAfter: toUserNewBalance,
+        description: transferCreditsDto.description || `Transferência de ${fromUser.email}`,
+        metadata: { ...transferCreditsDto.metadata, transferFromUserId: fromUserId },
       });
 
-      const [savedDebitTransaction, savedCreditTransaction] = await Promise.all([
-        queryRunner.manager.save(debitTransaction),
-        queryRunner.manager.save(creditTransaction),
+      const [savedFromTransaction, savedToTransaction] = await queryRunner.manager.save([
+        fromTransaction,
+        toTransaction,
       ]);
 
       await queryRunner.commitTransaction();
 
-      const response: TransferCreditsResponseDto = {
+      return {
+        fromTransactionId: savedFromTransaction.id,
+        toTransactionId: savedToTransaction.id,
+        fromUserId,
+        toUserId: transferCreditsDto.toUserId,
+        amount: transferAmount,
+        fromUserPreviousBalance: fromUserCurrentCredits,
+        fromUserNewBalance: fromUserNewBalance,
+        toUserPreviousBalance: toUserCurrentCredits,
+        toUserNewBalance: toUserNewBalance,
         success: true,
-        debitTransactionId: savedDebitTransaction.id.toString(),
-        creditTransactionId: savedCreditTransaction.id.toString(),
-        amountTransferred: dto.amount,
-        fromUserNewBalance: fromUserBalance - dto.amount,
-        toUserNewBalance: toUserBalance + dto.amount,
         message: 'Transferência realizada com sucesso',
-        timestamp: savedDebitTransaction.createdAt,
       };
-
-      this.logger.log(`Credits transferred successfully: ${JSON.stringify(response)}`);
-      return response;
     } catch (error) {
       await queryRunner.rollbackTransaction();
-      this.logger.error(`Error transferring credits:`, error);
+      this.logger.error(`Error transferring credits: ${error.message}`, error.stack, 'CreditsService');
       throw error;
     } finally {
       await queryRunner.release();
     }
   }
 
-  /**
-   * Obtém o saldo atual de créditos do usuário
-   */
   async getUserCreditBalance(userId: string): Promise<number> {
-    try {
-      const result = await this.creditTransactionRepository
-        .createQueryBuilder('transaction')
-        .select('COALESCE(SUM(transaction.amount), 0)', 'balance')
-        .where('transaction.userId = :userId', { userId: parseInt(userId) })
-        .andWhere('(transaction.expiresAt IS NULL OR transaction.expiresAt > :now)', { now: new Date() })
-        .getRawOne();
+    this.logger.log(`Getting credit balance for user ${userId}`, 'CreditsService');
 
-      return Math.max(0, parseInt(result.balance) || 0);
+    try {
+      const user = await this.userRepository.findOne({ where: { id: userId } });
+      if (!user) {
+        throw new NotFoundException('Usuário não encontrado');
+      }
+
+      return user.creditsBalance || 0;
     } catch (error) {
-      this.logger.error(`Error getting credit balance for user ${userId}:`, error);
+      this.logger.error(`Error getting user credit balance: ${error.message}`, error.stack, 'CreditsService');
       throw error;
     }
   }
 
-  /**
-   * Obtém histórico de transações do usuário
-   */
-  async getUserTransactionHistory(
+  async getCreditTransactionHistory(
     userId: string,
-    limit: number = 50,
-    offset: number = 0,
+    limit = 10,
+    offset = 0,
   ): Promise<CreditTransaction[]> {
+    this.logger.log(`Getting credit transaction history for user ${userId}`, 'CreditsService');
+
     try {
-      return await this.creditTransactionRepository.find({
-        where: { user: { id: parseInt(userId) } },
+      const transactions = await this.creditTransactionRepository.find({
+        where: { user: { id: userId } },
         order: { createdAt: 'DESC' },
         take: limit,
         skip: offset,
         relations: ['user'],
       });
+
+      return transactions;
     } catch (error) {
-      this.logger.error(`Error getting transaction history for user ${userId}:`, error);
-      throw error;
-    }
-  }
-
-  /**
-   * Calcula data de expiração padrão (1 ano)
-   */
-  private calculateDefaultExpiration(): Date {
-    const expiration = new Date();
-    expiration.setFullYear(expiration.getFullYear() + 1);
-    return expiration;
-  }
-
-  /**
-   * Remove créditos expirados (método para execução via cron)
-   */
-  async removeExpiredCredits(): Promise<number> {
-    try {
-      this.logger.log('Removing expired credits');
-
-      const expiredTransactions = await this.creditTransactionRepository.find({
-        where: {
-          expiresAt: { /* LessThan */ } as any, // TypeORM LessThan operator
-        },
-      });
-
-      if (expiredTransactions.length === 0) {
-        return 0;
-      }
-
-      // Como não temos mais status, as transações expiradas são tratadas automaticamente
-      // pela query de saldo que filtra por expiresAt
-
-      this.logger.log(`Found ${expiredTransactions.length} expired credit transactions`);
-      return expiredTransactions.length;
-    } catch (error) {
-      this.logger.error('Error removing expired credits:', error);
+      this.logger.error(`Error getting credit transaction history: ${error.message}`, error.stack, 'CreditsService');
       throw error;
     }
   }

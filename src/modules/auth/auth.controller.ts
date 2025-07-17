@@ -246,6 +246,72 @@ export class AuthController {
     };
   }
 
+  // ========== VerificationToken Endpoints ==========
+
+  @ApiOperation({
+    summary: 'Obter tokens de verificação de um usuário',
+    description: 'Retorna todos os tokens de verificação válidos de um usuário.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Tokens encontrados com sucesso',
+    schema: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          id: { type: 'string', example: '123e4567-e89b-12d3-a456-426614174000' },
+          userId: { type: 'string', example: '123' },
+          token: { type: 'string', example: 'verification_token_hash' },
+          type: { type: 'string', example: 'email_verification' },
+          expiresAt: { type: 'string', format: 'date-time' },
+          isUsed: { type: 'boolean', example: false },
+          createdAt: { type: 'string', format: 'date-time' },
+          updatedAt: { type: 'string', format: 'date-time' }
+        }
+      }
+    }
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Não autorizado',
+  })
+  @Get('my-verification-tokens')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  async getMyVerificationTokens(@Req() request: any) {
+    const user = request.user;
+    return this.authService.getUserVerificationTokens(user.sub.toString());
+  }
+
+  @ApiOperation({
+    summary: 'Invalidar tokens de verificação de um usuário',
+    description: 'Invalida todos os tokens de verificação de um usuário específico.',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Tokens invalidados com sucesso',
+    schema: {
+      type: 'object',
+      properties: {
+        affected: { type: 'number', example: 3 },
+        message: { type: 'string', example: 'Tokens invalidados com sucesso' }
+      }
+    }
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'Não autorizado',
+  })
+  @Post('invalidate-my-verification-tokens')
+  @UseGuards(AuthGuard)
+  @ApiBearerAuth()
+  @HttpCode(HttpStatus.OK)
+  async invalidateMyVerificationTokens(@Req() request: any) {
+    const user = request.user;
+    return this.authService.invalidateUserVerificationTokens(user.sub.toString());
+  }
+
   /**
    * Extrai informações do cliente da requisição
    */
