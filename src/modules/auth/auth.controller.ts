@@ -35,7 +35,7 @@ import { LoggerService } from '../../shared/logger/logger.service';
  * @author NeuralContent Team
  * @since 1.0.0
  */
-@ApiTags('✅ Autenticação')
+@ApiTags('🔐 Autenticação')
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -53,21 +53,94 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @ApiOperation({
     summary: 'Login do usuário',
-    description: 'Autentica usuário e retorna tokens de acesso',
+    description: `
+    Autentica usuário com email e senha, retornando tokens de acesso JWT.
+    
+    **Funcionalidades:**
+    - Validação de credenciais
+    - Geração de access_token (válido por 1h)
+    - Geração de refresh_token (válido por 7 dias)
+    - Registro de sessão com IP e User-Agent
+    - Controle de tentativas de login
+    `,
   })
-  @ApiBody({ type: LoginDto })
+  @ApiBody({ 
+    type: LoginDto,
+    examples: {
+      admin: {
+        summary: 'Login de Administrador',
+        description: 'Exemplo de login com usuário administrador',
+        value: {
+          email: 'admin@neuralcontent.com',
+          password: 'admin123'
+        }
+      },
+      user: {
+        summary: 'Login de Usuário',
+        description: 'Exemplo de login com usuário comum',
+        value: {
+          email: 'usuario@exemplo.com',
+          password: 'senha123'
+        }
+      }
+    }
+  })
   @ApiResponse({
     status: 200,
     description: 'Login realizado com sucesso',
     type: AuthResponseDto,
+    example: {
+      success: true,
+      message: 'Login realizado com sucesso',
+      data: {
+        access_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+        refresh_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+        token_type: 'Bearer',
+        expires_in: 3600,
+        user: {
+          id: 1,
+          firstName: 'João',
+          lastName: 'Silva',
+          email: 'usuario@exemplo.com',
+          role: 'user',
+          isActive: true,
+          avatar: null,
+          createdAt: '2025-01-01T00:00:00.000Z'
+        }
+      },
+      timestamp: '2025-07-17T20:45:12.023Z'
+    }
   })
   @ApiResponse({
     status: 401,
     description: 'Credenciais inválidas ou usuário inativo',
+    example: {
+      success: false,
+      message: 'Email ou senha inválidos',
+      error: 'INVALID_CREDENTIALS',
+      timestamp: '2025-07-17T20:45:12.023Z'
+    }
   })
   @ApiResponse({
     status: 422,
     description: 'Dados de entrada inválidos',
+    example: {
+      success: false,
+      message: 'Dados de entrada inválidos',
+      errors: [
+        {
+          field: 'email',
+          message: 'Email deve ter um formato válido',
+          value: 'email-invalido'
+        },
+        {
+          field: 'password',
+          message: 'Senha deve ter pelo menos 6 caracteres',
+          value: '123'
+        }
+      ],
+      timestamp: '2025-07-17T20:45:12.023Z'
+    }
   })
   async login(
     @Body() loginDto: LoginDto,
@@ -95,21 +168,107 @@ export class AuthController {
   @HttpCode(HttpStatus.CREATED)
   @ApiOperation({
     summary: 'Registro de usuário',
-    description: 'Cria nova conta de usuário',
+    description: `
+    Cria uma nova conta de usuário no sistema.
+    
+    **Funcionalidades:**
+    - Validação de unicidade do email
+    - Criptografia segura da senha (bcrypt)
+    - Geração automática de tokens JWT
+    - Criação de perfil inicial
+    - Envio de email de boas-vindas (opcional)
+    `,
   })
-  @ApiBody({ type: RegisterDto })
+  @ApiBody({ 
+    type: RegisterDto,
+    examples: {
+      basic: {
+        summary: 'Registro Básico',
+        description: 'Exemplo básico de registro de usuário',
+        value: {
+          firstName: 'João',
+          lastName: 'Silva',
+          email: 'joao.silva@exemplo.com',
+          password: 'senha123',
+          confirmPassword: 'senha123'
+        }
+      },
+      complete: {
+        summary: 'Registro Completo',
+        description: 'Exemplo com todos os campos opcionais',
+        value: {
+          firstName: 'Maria',
+          lastName: 'Santos',
+          email: 'maria.santos@exemplo.com',
+          password: 'minhasenha456',
+          confirmPassword: 'minhasenha456',
+          acceptTerms: true
+        }
+      }
+    }
+  })
   @ApiResponse({
     status: 201,
     description: 'Usuário criado com sucesso',
     type: AuthResponseDto,
+    example: {
+      success: true,
+      message: 'Usuário registrado com sucesso',
+      data: {
+        access_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+        refresh_token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+        token_type: 'Bearer',
+        expires_in: 3600,
+        user: {
+          id: 2,
+          firstName: 'João',
+          lastName: 'Silva',
+          email: 'joao.silva@exemplo.com',
+          role: 'user',
+          isActive: true,
+          avatar: null,
+          emailVerifiedAt: null,
+          createdAt: '2025-07-17T20:45:12.023Z'
+        }
+      },
+      timestamp: '2025-07-17T20:45:12.023Z'
+    }
   })
   @ApiResponse({
     status: 400,
     description: 'Email já está em uso',
+    example: {
+      success: false,
+      message: 'Este email já está registrado no sistema',
+      error: 'EMAIL_ALREADY_EXISTS',
+      timestamp: '2025-07-17T20:45:12.023Z'
+    }
   })
   @ApiResponse({
     status: 422,
     description: 'Dados de entrada inválidos',
+    example: {
+      success: false,
+      message: 'Dados de entrada inválidos',
+      errors: [
+        {
+          field: 'email',
+          message: 'Email deve ter um formato válido',
+          value: 'email-invalido'
+        },
+        {
+          field: 'password',
+          message: 'Senha deve ter pelo menos 6 caracteres',
+          value: '123'
+        },
+        {
+          field: 'confirmPassword',
+          message: 'Confirmação de senha não confere',
+          value: 'diferente'
+        }
+      ],
+      timestamp: '2025-07-17T20:45:12.023Z'
+    }
   })
   async register(
     @Body() registerDto: RegisterDto,

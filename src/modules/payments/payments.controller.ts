@@ -36,7 +36,7 @@ import { PayPalWebhookDto } from './dto/paypal-webhook.dto';
 import { Payment } from './entities/payment.entity';
 import { UserSubscription } from './entities/user-subscription.entity';
 
-@ApiTags('✅ Pagamentos')
+@ApiTags('💰 Pagamentos')
 @Controller('payments')
 export class PaymentsController {
   private readonly logger = new Logger(PaymentsController.name);

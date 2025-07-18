@@ -30,7 +30,7 @@ import { RolesGuard, UserRole } from '../../shared/guards/roles.guard';
 import { Roles } from '../../shared/decorators/roles.decorator';
 import { Public } from '../../shared/decorators/public.decorator';
 
-@ApiTags('✅ Planos')
+@ApiTags('📋 Planos')
 @Controller('plans')
 export class PlansController {
   constructor(private readonly plansService: PlansService) {}

@@ -71,7 +71,7 @@ export class PlansService {
 
     const plans = await this.planRepository.find({
       where: whereCondition,
-      relations: ['features'],
+      relations: ['planFeatures', 'prices'],
       order: {
         sortOrder: 'ASC',
         createdAt: 'DESC',
@@ -87,7 +87,7 @@ export class PlansService {
   async findOne(id: string): Promise<PlanResponseDto> {
     const plan = await this.planRepository.findOne({
       where: { id },
-      relations: ['features'],
+      relations: ['planFeatures', 'prices'],
     });
 
     if (!plan) {
@@ -103,7 +103,7 @@ export class PlansService {
   async findBySlug(slug: string): Promise<PlanResponseDto> {
     const plan = await this.planRepository.findOne({
       where: { slug },
-      relations: ['features'],
+      relations: ['planFeatures', 'prices'],
     });
 
     if (!plan) {
@@ -122,7 +122,7 @@ export class PlansService {
   ): Promise<PlanResponseDto> {
     const plan = await this.planRepository.findOne({
       where: { id },
-      relations: ['features'],
+      relations: ['planFeatures', 'prices'],
     });
 
     if (!plan) {
@@ -157,7 +157,7 @@ export class PlansService {
   async toggleActive(id: string): Promise<PlanResponseDto> {
     const plan = await this.planRepository.findOne({
       where: { id },
-      relations: ['features'],
+      relations: ['planFeatures', 'prices'],
     });
 
     if (!plan) {
@@ -176,7 +176,7 @@ export class PlansService {
   async setFeatured(id: string, featured: boolean): Promise<PlanResponseDto> {
     const plan = await this.planRepository.findOne({
       where: { id },
-      relations: ['features'],
+      relations: ['planFeatures', 'prices'],
     });
 
     if (!plan) {
@@ -198,7 +198,7 @@ export class PlansService {
         type: type as any,
         isActive: true,
       },
-      relations: ['features'],
+      relations: ['planFeatures', 'prices'],
       order: {
         sortOrder: 'ASC',
       },

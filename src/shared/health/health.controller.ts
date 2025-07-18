@@ -46,7 +46,7 @@ interface SystemLoad {
   uptime_seconds: number;
 }
 
-@ApiTags('🏥 Health & Metrics')
+@ApiTags('🏥 Monitoramento')
 @Controller('health')
 export class HealthController {
   private startTime = Date.now();

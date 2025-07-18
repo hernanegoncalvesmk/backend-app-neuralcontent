@@ -17,7 +17,7 @@ import {
   PaymentException,
 } from './shared/exceptions/custom.exceptions';
 
-@ApiTags('✅ Aplicações')
+@ApiTags('🏥 Monitoramento')
 @Controller()
 export class AppController {
   constructor(

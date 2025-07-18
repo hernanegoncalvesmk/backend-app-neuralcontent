@@ -1,0 +1,20 @@
+openapi: 3.0.0
+info:
+  title: "🧠 NeuralContent API"
+  description: |
+    
+  version: "1.0.0"
+  contact:
+    name: "API Support"
+    url: ""
+    email: ""
+  license:
+    name: "MIT"
+    url: ""
+
+servers:
+  - url: http://localhost:3001/v1
+    description: Development
+
+# Para o spec completo em YAML, use ferramentas como swagger-codegen
+# Este é um resumo básico para referência rápida

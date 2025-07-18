@@ -10,7 +10,6 @@ import {
 import { ApiProperty } from '@nestjs/swagger';
 
 @Entity('pln_features')
-@Index(['keyName'], { unique: true })
 @Index(['category'])
 @Index(['isActive'])
 export class Feature {

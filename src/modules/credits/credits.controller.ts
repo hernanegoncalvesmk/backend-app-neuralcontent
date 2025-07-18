@@ -46,7 +46,7 @@ import { CreditTransaction } from './entities/credit-transaction.entity';
  * - Consulta de histórico
  * - Consulta de saldo
  */
-@ApiTags('✅ Créditos')
+@ApiTags('🔵 Créditos')
 @Controller('credits')
 @UseGuards(AuthGuard)
 @ApiBearerAuth()

@@ -48,7 +48,6 @@ export enum VerificationTokenType {
  */
 @Entity('usr_verification_tokens')
 @Index(['userId'])
-@Index(['token'])
 @Index(['type'])
 @Index(['expiresAt'])
 export class VerificationToken {
@@ -63,8 +62,8 @@ export class VerificationToken {
     description: 'ID do usuário proprietário do token',
     example: 'uuid-v4-user-id',
   })
-  @Column('char', { length: 36, name: 'user_id' })
-  userId: string;
+  @Column('int', { name: 'user_id' })
+  userId: number;
 
   @ApiProperty({
     description: 'Token de verificação único (hash)',
@@ -252,7 +251,7 @@ export class VerificationToken {
    */
   toAuditLog(): {
     id: string;
-    userId: string;
+    userId: number;
     type: VerificationTokenType;
     tokenMask: string;
     isExpired: boolean;

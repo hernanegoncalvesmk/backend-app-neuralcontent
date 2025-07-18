@@ -38,7 +38,6 @@ export enum UserStatus {
  * @table usr_users - Alinhado com migration 002
  */
 @Entity('usr_users')
-@Index(['email'], { unique: true })
 @Index(['isActive'])
 @Index(['role'])
 @Index(['emailVerifiedAt'])

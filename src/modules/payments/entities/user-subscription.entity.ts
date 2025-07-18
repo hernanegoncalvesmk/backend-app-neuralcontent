@@ -32,7 +32,6 @@ export enum BillingCycle {
 @Index(['status'])
 @Index(['userId'])
 @Index(['planId'])
-@Index(['stripeSubscriptionId'])
 @Index(['currentPeriodEnd'])
 export class UserSubscription {
   @ApiProperty({

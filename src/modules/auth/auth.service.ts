@@ -422,7 +422,7 @@ export class AuthService {
     expiresAt.setDate(expiresAt.getDate() + 7); // 7 dias
 
     const session = this.sessionRepository.create({
-      userId: userId.toString(),
+      userId: parseInt(userId.toString(), 10),
       sessionToken: UserSession.generateSessionToken(),
       refreshToken: refreshTokenHash,
       expiresAt,
@@ -442,7 +442,7 @@ export class AuthService {
     maxSessions: number,
   ): Promise<void> {
     const activeSessions = await this.sessionRepository.find({
-      where: { userId: userId.toString(), isActive: true },
+      where: { userId: userId, isActive: true },
       order: { createdAt: 'ASC' },
     });
 
@@ -492,7 +492,7 @@ export class AuthService {
       await this.invalidateUserVerificationTokens(userId, type);
 
       const token = this.verificationTokenRepository.create({
-        userId: userIdString,
+        userId: parseInt(userIdString, 10),
         type,
         expiresAt: new Date(Date.now() + expiresInMinutes * 60 * 1000),
       });

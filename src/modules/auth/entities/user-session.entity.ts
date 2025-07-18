@@ -21,8 +21,6 @@ import { User } from '../../users/entities/user.entity';
  */
 @Entity('usr_sessions')
 @Index(['userId', 'isActive'])
-@Index(['sessionToken'])
-@Index(['refreshToken'])
 @Index(['expiresAt'])
 export class UserSession {
   @ApiProperty({
@@ -36,8 +34,8 @@ export class UserSession {
     description: 'ID do usuário proprietário da sessão',
     example: 1,
   })
-  @Column('char', { length: 36, name: 'user_id' })
-  userId: string;
+  @Column('int', { name: 'user_id' })
+  userId: number;
 
   @ApiProperty({
     description: 'Token único da sessão',

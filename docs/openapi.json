@@ -1,0 +1,6383 @@
+{
+  "openapi": "3.0.0",
+  "paths": {
+    "/v1": {
+      "get": {
+        "operationId": "AppController_getHello",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "🏥 Monitoramento"
+        ]
+      }
+    },
+    "/v1/health": {
+      "get": {
+        "operationId": "AppController_getHealth",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "🏥 Monitoramento"
+        ]
+      }
+    },
+    "/v1/health/database": {
+      "get": {
+        "operationId": "AppController_getDatabaseHealth",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "🏥 Monitoramento"
+        ]
+      }
+    },
+    "/v1/health/cache": {
+      "get": {
+        "operationId": "AppController_getCacheHealth",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "🏥 Monitoramento"
+        ]
+      }
+    },
+    "/v1/health/live": {
+      "get": {
+        "description": "Verifica se a aplicação está respondendo (para Kubernetes/Docker)",
+        "operationId": "AppController_getLiveness",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Aplicação está viva"
+          }
+        },
+        "summary": "Liveness Probe",
+        "tags": [
+          "🏥 Monitoramento"
+        ]
+      }
+    },
+    "/v1/health/ready": {
+      "get": {
+        "description": "Verifica se a aplicação está pronta para receber tráfego",
+        "operationId": "AppController_getReadiness",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Aplicação está pronta"
+          },
+          "503": {
+            "description": "Aplicação não está pronta"
+          }
+        },
+        "summary": "Readiness Probe",
+        "tags": [
+          "🏥 Monitoramento"
+        ]
+      }
+    },
+    "/v1/metrics": {
+      "get": {
+        "description": "Retorna métricas detalhadas de performance, memória, CPU e sistema",
+        "operationId": "AppController_getMetrics",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Métricas coletadas com sucesso"
+          }
+        },
+        "summary": "Métricas da Aplicação",
+        "tags": [
+          "🏥 Monitoramento"
+        ]
+      }
+    },
+    "/v1/test/error/{type}": {
+      "get": {
+        "operationId": "AppController_testError",
+        "parameters": [
+          {
+            "name": "type",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": ""
+          }
+        },
+        "tags": [
+          "🏥 Monitoramento"
+        ]
+      }
+    },
+    "/v1/auth/login": {
+      "post": {
+        "description": "\n    Autentica usuário com email e senha, retornando tokens de acesso JWT.\n    \n    **Funcionalidades:**\n    - Validação de credenciais\n    - Geração de access_token (válido por 1h)\n    - Geração de refresh_token (válido por 7 dias)\n    - Registro de sessão com IP e User-Agent\n    - Controle de tentativas de login\n    ",
+        "operationId": "AuthController_login",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginDto"
+              },
+              "examples": {
+                "admin": {
+                  "summary": "Login de Administrador",
+                  "description": "Exemplo de login com usuário administrador",
+                  "value": {
+                    "email": "admin@neuralcontent.com",
+                    "password": "admin123"
+                  }
+                },
+                "user": {
+                  "summary": "Login de Usuário",
+                  "description": "Exemplo de login com usuário comum",
+                  "value": {
+                    "email": "usuario@exemplo.com",
+                    "password": "senha123"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Login realizado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponseDto"
+                },
+                "example": {
+                  "success": true,
+                  "message": "Login realizado com sucesso",
+                  "data": {
+                    "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                    "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                    "token_type": "Bearer",
+                    "expires_in": 3600,
+                    "user": {
+                      "id": 1,
+                      "firstName": "João",
+                      "lastName": "Silva",
+                      "email": "usuario@exemplo.com",
+                      "role": "user",
+                      "isActive": true,
+                      "avatar": null,
+                      "createdAt": "2025-01-01T00:00:00.000Z"
+                    }
+                  },
+                  "timestamp": "2025-07-17T20:45:12.023Z"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Credenciais inválidas ou usuário inativo",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "message": "Email ou senha inválidos",
+                  "error": "INVALID_CREDENTIALS",
+                  "timestamp": "2025-07-17T20:45:12.023Z"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Dados de entrada inválidos",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "message": "Dados de entrada inválidos",
+                  "errors": [
+                    {
+                      "field": "email",
+                      "message": "Email deve ter um formato válido",
+                      "value": "email-invalido"
+                    },
+                    {
+                      "field": "password",
+                      "message": "Senha deve ter pelo menos 6 caracteres",
+                      "value": "123"
+                    }
+                  ],
+                  "timestamp": "2025-07-17T20:45:12.023Z"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Login do usuário",
+        "tags": [
+          "🔐 Autenticação"
+        ]
+      }
+    },
+    "/v1/auth/register": {
+      "post": {
+        "description": "\n    Cria uma nova conta de usuário no sistema.\n    \n    **Funcionalidades:**\n    - Validação de unicidade do email\n    - Criptografia segura da senha (bcrypt)\n    - Geração automática de tokens JWT\n    - Criação de perfil inicial\n    - Envio de email de boas-vindas (opcional)\n    ",
+        "operationId": "AuthController_register",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegisterDto"
+              },
+              "examples": {
+                "basic": {
+                  "summary": "Registro Básico",
+                  "description": "Exemplo básico de registro de usuário",
+                  "value": {
+                    "firstName": "João",
+                    "lastName": "Silva",
+                    "email": "joao.silva@exemplo.com",
+                    "password": "senha123",
+                    "confirmPassword": "senha123"
+                  }
+                },
+                "complete": {
+                  "summary": "Registro Completo",
+                  "description": "Exemplo com todos os campos opcionais",
+                  "value": {
+                    "firstName": "Maria",
+                    "lastName": "Santos",
+                    "email": "maria.santos@exemplo.com",
+                    "password": "minhasenha456",
+                    "confirmPassword": "minhasenha456",
+                    "acceptTerms": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Usuário criado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponseDto"
+                },
+                "example": {
+                  "success": true,
+                  "message": "Usuário registrado com sucesso",
+                  "data": {
+                    "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                    "refresh_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+                    "token_type": "Bearer",
+                    "expires_in": 3600,
+                    "user": {
+                      "id": 2,
+                      "firstName": "João",
+                      "lastName": "Silva",
+                      "email": "joao.silva@exemplo.com",
+                      "role": "user",
+                      "isActive": true,
+                      "avatar": null,
+                      "emailVerifiedAt": null,
+                      "createdAt": "2025-07-17T20:45:12.023Z"
+                    }
+                  },
+                  "timestamp": "2025-07-17T20:45:12.023Z"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Email já está em uso",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "message": "Este email já está registrado no sistema",
+                  "error": "EMAIL_ALREADY_EXISTS",
+                  "timestamp": "2025-07-17T20:45:12.023Z"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Dados de entrada inválidos",
+            "content": {
+              "application/json": {
+                "example": {
+                  "success": false,
+                  "message": "Dados de entrada inválidos",
+                  "errors": [
+                    {
+                      "field": "email",
+                      "message": "Email deve ter um formato válido",
+                      "value": "email-invalido"
+                    },
+                    {
+                      "field": "password",
+                      "message": "Senha deve ter pelo menos 6 caracteres",
+                      "value": "123"
+                    },
+                    {
+                      "field": "confirmPassword",
+                      "message": "Confirmação de senha não confere",
+                      "value": "diferente"
+                    }
+                  ],
+                  "timestamp": "2025-07-17T20:45:12.023Z"
+                }
+              }
+            }
+          }
+        },
+        "summary": "Registro de usuário",
+        "tags": [
+          "🔐 Autenticação"
+        ]
+      }
+    },
+    "/v1/auth/refresh": {
+      "post": {
+        "description": "Gera novo access token usando refresh token válido",
+        "operationId": "AuthController_refreshToken",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RefreshTokenDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Token renovado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Refresh token inválido ou expirado"
+          }
+        },
+        "summary": "Renovar token de acesso",
+        "tags": [
+          "🔐 Autenticação"
+        ]
+      }
+    },
+    "/v1/auth/logout": {
+      "post": {
+        "description": "Invalida refresh token e encerra sessão",
+        "operationId": "AuthController_logout",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LogoutDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Logout realizado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Logout realizado com sucesso"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token de acesso inválido"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Logout do usuário",
+        "tags": [
+          "🔐 Autenticação"
+        ]
+      }
+    },
+    "/v1/auth/me": {
+      "get": {
+        "description": "Retorna informações do usuário logado",
+        "operationId": "AuthController_getProfile",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Dados do usuário",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "number",
+                      "example": 1
+                    },
+                    "email": {
+                      "type": "string",
+                      "example": "usuario@neuralcontent.com"
+                    },
+                    "name": {
+                      "type": "string",
+                      "example": "João Silva Santos"
+                    },
+                    "role": {
+                      "type": "string",
+                      "example": "user"
+                    },
+                    "status": {
+                      "type": "string",
+                      "example": "active"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token de acesso inválido"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Dados do usuário autenticado",
+        "tags": [
+          "🔐 Autenticação"
+        ]
+      }
+    },
+    "/v1/auth/my-verification-tokens": {
+      "get": {
+        "description": "Retorna todos os tokens de verificação válidos de um usuário.",
+        "operationId": "AuthController_getMyVerificationTokens",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Tokens encontrados com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "example": "123e4567-e89b-12d3-a456-426614174000"
+                      },
+                      "userId": {
+                        "type": "string",
+                        "example": "123"
+                      },
+                      "token": {
+                        "type": "string",
+                        "example": "verification_token_hash"
+                      },
+                      "type": {
+                        "type": "string",
+                        "example": "email_verification"
+                      },
+                      "expiresAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "isUsed": {
+                        "type": "boolean",
+                        "example": false
+                      },
+                      "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "updatedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autorizado"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Obter tokens de verificação de um usuário",
+        "tags": [
+          "🔐 Autenticação"
+        ]
+      }
+    },
+    "/v1/auth/invalidate-my-verification-tokens": {
+      "post": {
+        "description": "Invalida todos os tokens de verificação de um usuário específico.",
+        "operationId": "AuthController_invalidateMyVerificationTokens",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Tokens invalidados com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "affected": {
+                      "type": "number",
+                      "example": 3
+                    },
+                    "message": {
+                      "type": "string",
+                      "example": "Tokens invalidados com sucesso"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autorizado"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Invalidar tokens de verificação de um usuário",
+        "tags": [
+          "🔐 Autenticação"
+        ]
+      }
+    },
+    "/v1/users": {
+      "post": {
+        "description": "Create a new user in the system. Only administrators can create users.",
+        "operationId": "UsersController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreateUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "User created successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input data"
+          },
+          "401": {
+            "description": "Unauthorized access"
+          },
+          "403": {
+            "description": "Insufficient permissions"
+          },
+          "409": {
+            "description": "Email already exists"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create a new user",
+        "tags": [
+          "👥 Usuários"
+        ]
+      },
+      "get": {
+        "description": "Retrieve a paginated list of all users. Accessible by administrators and moderators.",
+        "operationId": "UsersController_findAll",
+        "parameters": [
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "Page number (default: 1)",
+            "schema": {
+              "example": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Number of items per page (default: 10, max: 100)",
+            "schema": {
+              "example": 10,
+              "type": "number"
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Search term for name or email",
+            "schema": {
+              "example": "john",
+              "type": "string"
+            }
+          },
+          {
+            "name": "role",
+            "required": false,
+            "in": "query",
+            "description": "Filter by user role",
+            "schema": {
+              "enum": [
+                "user",
+                "admin",
+                "super-admin",
+                "guest"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "name": "isActive",
+            "required": false,
+            "in": "query",
+            "description": "Filter by user active status",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Users retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserListResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized access"
+          },
+          "403": {
+            "description": "Insufficient permissions"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get all users",
+        "tags": [
+          "👥 Usuários"
+        ]
+      }
+    },
+    "/v1/users/stats": {
+      "get": {
+        "description": "Get comprehensive statistics about users in the system. Only accessible by administrators.",
+        "operationId": "UsersController_getStats",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "User statistics retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserStatsResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized access"
+          },
+          "403": {
+            "description": "Insufficient permissions"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get user statistics",
+        "tags": [
+          "👥 Usuários"
+        ]
+      }
+    },
+    "/v1/users/profile": {
+      "get": {
+        "description": "Get the profile information of the currently authenticated user.",
+        "operationId": "UsersController_getProfile",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "User profile retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized access"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get current user profile",
+        "tags": [
+          "👥 Usuários"
+        ]
+      },
+      "patch": {
+        "description": "Update the profile information of the currently authenticated user.",
+        "operationId": "UsersController_updateProfile",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User profile updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input data"
+          },
+          "401": {
+            "description": "Unauthorized access"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update current user profile",
+        "tags": [
+          "👥 Usuários"
+        ]
+      }
+    },
+    "/v1/users/{id}": {
+      "get": {
+        "description": "Retrieve a specific user by their ID. Accessible by administrators and moderators.",
+        "operationId": "UsersController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "User ID",
+            "schema": {
+              "example": "1",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User retrieved successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized access"
+          },
+          "403": {
+            "description": "Insufficient permissions"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get user by ID",
+        "tags": [
+          "👥 Usuários"
+        ]
+      },
+      "patch": {
+        "description": "Update a specific user by their ID. Only accessible by administrators.",
+        "operationId": "UsersController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "User ID",
+            "schema": {
+              "example": "1",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid input data"
+          },
+          "401": {
+            "description": "Unauthorized access"
+          },
+          "403": {
+            "description": "Insufficient permissions"
+          },
+          "404": {
+            "description": "User not found"
+          },
+          "409": {
+            "description": "Email already exists"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update user by ID",
+        "tags": [
+          "👥 Usuários"
+        ]
+      },
+      "delete": {
+        "description": "Permanently delete a user from the system. Only accessible by administrators. This action cannot be undone.",
+        "operationId": "UsersController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "User ID",
+            "schema": {
+              "example": "1",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "User deleted successfully"
+          },
+          "401": {
+            "description": "Unauthorized access"
+          },
+          "403": {
+            "description": "Insufficient permissions"
+          },
+          "404": {
+            "description": "User not found"
+          },
+          "409": {
+            "description": "Cannot delete user with active dependencies"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Delete user by ID",
+        "tags": [
+          "👥 Usuários"
+        ]
+      }
+    },
+    "/v1/users/{id}/status": {
+      "patch": {
+        "description": "Update the status of a specific user. Only accessible by administrators.",
+        "operationId": "UsersController_updateStatus",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "User ID",
+            "schema": {
+              "example": "1",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "isActive": {
+                    "type": "boolean",
+                    "description": "User active status"
+                  }
+                },
+                "required": [
+                  "isActive"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User status updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid status value"
+          },
+          "401": {
+            "description": "Unauthorized access"
+          },
+          "403": {
+            "description": "Insufficient permissions"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Update user status",
+        "tags": [
+          "👥 Usuários"
+        ]
+      }
+    },
+    "/v1/users/{id}/change-password": {
+      "patch": {
+        "description": "Change the password of a specific user. Only accessible by administrators.",
+        "operationId": "UsersController_changePassword",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "User ID",
+            "schema": {
+              "example": "1",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChangePasswordDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Password changed successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Password changed successfully"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid password format"
+          },
+          "401": {
+            "description": "Unauthorized access"
+          },
+          "403": {
+            "description": "Insufficient permissions"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Change user password",
+        "tags": [
+          "👥 Usuários"
+        ]
+      }
+    },
+    "/v1/users/{id}/activate": {
+      "patch": {
+        "description": "Activate a user account. Only accessible by administrators.",
+        "operationId": "UsersController_activateUser",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "User ID",
+            "schema": {
+              "example": "1",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User activated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized access"
+          },
+          "403": {
+            "description": "Insufficient permissions"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Activate user account",
+        "tags": [
+          "👥 Usuários"
+        ]
+      }
+    },
+    "/v1/users/{id}/deactivate": {
+      "patch": {
+        "description": "Deactivate a user account. Only accessible by administrators.",
+        "operationId": "UsersController_deactivateUser",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "User ID",
+            "schema": {
+              "example": "1",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User deactivated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized access"
+          },
+          "403": {
+            "description": "Insufficient permissions"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Deactivate user account",
+        "tags": [
+          "👥 Usuários"
+        ]
+      }
+    },
+    "/v1/users/{id}/credit-balance": {
+      "get": {
+        "description": "Retrieve credit balance information for a specific user.",
+        "operationId": "UsersController_getUserCreditBalance",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "User ID",
+            "schema": {
+              "example": "1",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Credit balance retrieved successfully"
+          },
+          "404": {
+            "description": "User or credit balance not found"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get user credit balance",
+        "tags": [
+          "👥 Usuários"
+        ]
+      },
+      "post": {
+        "description": "Create initial credit balance for a user. Only accessible by administrators.",
+        "operationId": "UsersController_createInitialCreditBalance",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "User ID",
+            "schema": {
+              "example": "1",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Credit balance created successfully"
+          },
+          "409": {
+            "description": "Credit balance already exists"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Create initial credit balance",
+        "tags": [
+          "👥 Usuários"
+        ]
+      }
+    },
+    "/v1/users/{id}/verification-tokens": {
+      "get": {
+        "description": "Retrieve verification tokens for a specific user.",
+        "operationId": "UsersController_getUserVerificationTokens",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "User ID",
+            "schema": {
+              "example": "1",
+              "type": "string"
+            }
+          },
+          {
+            "name": "type",
+            "required": false,
+            "in": "query",
+            "description": "Token type filter",
+            "schema": {
+              "example": "email_verification",
+              "type": "string"
+            }
+          },
+          {
+            "name": "includeUsed",
+            "required": false,
+            "in": "query",
+            "description": "Include used tokens",
+            "schema": {
+              "example": false,
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Verification tokens retrieved successfully"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Get user verification tokens",
+        "tags": [
+          "👥 Usuários"
+        ]
+      },
+      "delete": {
+        "description": "Invalidate all or specific type verification tokens for a user.",
+        "operationId": "UsersController_invalidateUserVerificationTokens",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "User ID",
+            "schema": {
+              "example": "1",
+              "type": "string"
+            }
+          },
+          {
+            "name": "type",
+            "required": false,
+            "in": "query",
+            "description": "Token type to invalidate",
+            "schema": {
+              "example": "email_verification",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Verification tokens invalidated successfully"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Invalidate user verification tokens",
+        "tags": [
+          "👥 Usuários"
+        ]
+      }
+    },
+    "/v1/plans": {
+      "post": {
+        "description": "Cria um novo plano no sistema. Requer permissões de administrador.",
+        "operationId": "PlansController_create",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePlanDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Plano criado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlanResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos"
+          },
+          "401": {
+            "description": "Não autorizado"
+          },
+          "403": {
+            "description": "Acesso negado - permissões insuficientes"
+          },
+          "409": {
+            "description": "Plano com este slug já existe"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Criar novo plano",
+        "tags": [
+          "📋 Planos"
+        ]
+      },
+      "get": {
+        "description": "Retorna lista de planos disponíveis. Por padrão, retorna apenas planos ativos.",
+        "operationId": "PlansController_findAll",
+        "parameters": [
+          {
+            "name": "includeInactive",
+            "required": false,
+            "in": "query",
+            "description": "Incluir planos inativos na listagem",
+            "schema": {
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de planos retornada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PlanResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Listar todos os planos",
+        "tags": [
+          "📋 Planos"
+        ]
+      }
+    },
+    "/v1/plans/{id}": {
+      "get": {
+        "description": "Retorna detalhes de um plano específico pelo ID.",
+        "operationId": "PlansController_findOne",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID único do plano",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Plano encontrado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlanResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Plano não encontrado"
+          }
+        },
+        "summary": "Buscar plano por ID",
+        "tags": [
+          "📋 Planos"
+        ]
+      },
+      "patch": {
+        "description": "Atualiza dados de um plano existente. Requer permissões de administrador.",
+        "operationId": "PlansController_update",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID único do plano",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePlanDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Plano atualizado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlanResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos"
+          },
+          "401": {
+            "description": "Não autorizado"
+          },
+          "403": {
+            "description": "Acesso negado - permissões insuficientes"
+          },
+          "404": {
+            "description": "Plano não encontrado"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Atualizar plano",
+        "tags": [
+          "📋 Planos"
+        ]
+      },
+      "delete": {
+        "description": "Remove um plano do sistema (soft delete). Requer permissões de administrador.",
+        "operationId": "PlansController_remove",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID único do plano",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Plano removido com sucesso"
+          },
+          "401": {
+            "description": "Não autorizado"
+          },
+          "403": {
+            "description": "Acesso negado - permissões insuficientes"
+          },
+          "404": {
+            "description": "Plano não encontrado"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remover plano",
+        "tags": [
+          "📋 Planos"
+        ]
+      }
+    },
+    "/v1/plans/slug/{slug}": {
+      "get": {
+        "description": "Retorna detalhes de um plano específico pelo slug.",
+        "operationId": "PlansController_findBySlug",
+        "parameters": [
+          {
+            "name": "slug",
+            "required": true,
+            "in": "path",
+            "description": "Slug único do plano",
+            "schema": {
+              "example": "premium-plan",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Plano encontrado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlanResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Plano não encontrado"
+          }
+        },
+        "summary": "Buscar plano por slug",
+        "tags": [
+          "📋 Planos"
+        ]
+      }
+    },
+    "/v1/plans/type/{type}": {
+      "get": {
+        "description": "Retorna lista de planos filtrados por tipo.",
+        "operationId": "PlansController_findByType",
+        "parameters": [
+          {
+            "name": "type",
+            "required": true,
+            "in": "path",
+            "description": "Tipo do plano",
+            "schema": {
+              "enum": [
+                "free",
+                "basic",
+                "premium",
+                "enterprise"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Planos encontrados com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/PlanResponseDto"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Buscar planos por tipo",
+        "tags": [
+          "📋 Planos"
+        ]
+      }
+    },
+    "/v1/plans/admin/stats": {
+      "get": {
+        "description": "Retorna estatísticas gerais dos planos cadastrados. Requer permissões de administrador.",
+        "operationId": "PlansController_getStats",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Estatísticas retornadas com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "total": {
+                      "type": "number",
+                      "example": 10
+                    },
+                    "active": {
+                      "type": "number",
+                      "example": 8
+                    },
+                    "inactive": {
+                      "type": "number",
+                      "example": 2
+                    },
+                    "featured": {
+                      "type": "number",
+                      "example": 3
+                    },
+                    "byType": {
+                      "type": "object",
+                      "example": {
+                        "free": 2,
+                        "premium": 5,
+                        "enterprise": 3
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autorizado"
+          },
+          "403": {
+            "description": "Acesso negado - permissões insuficientes"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Obter estatísticas dos planos",
+        "tags": [
+          "📋 Planos"
+        ]
+      }
+    },
+    "/v1/plans/{id}/toggle-active": {
+      "patch": {
+        "description": "Alterna o status ativo de um plano. Requer permissões de administrador.",
+        "operationId": "PlansController_toggleActive",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID único do plano",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Status do plano alterado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlanResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autorizado"
+          },
+          "403": {
+            "description": "Acesso negado - permissões insuficientes"
+          },
+          "404": {
+            "description": "Plano não encontrado"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Ativar/Desativar plano",
+        "tags": [
+          "📋 Planos"
+        ]
+      }
+    },
+    "/v1/plans/{id}/featured": {
+      "patch": {
+        "description": "Define se um plano é destacado na listagem. Requer permissões de administrador.",
+        "operationId": "PlansController_setFeatured",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID único do plano",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          },
+          {
+            "name": "featured",
+            "required": true,
+            "in": "query",
+            "description": "Se o plano deve ser destacado",
+            "schema": {
+              "example": true,
+              "type": "boolean"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Status destacado alterado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PlanResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Não autorizado"
+          },
+          "403": {
+            "description": "Acesso negado - permissões insuficientes"
+          },
+          "404": {
+            "description": "Plano não encontrado"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Definir plano como destacado",
+        "tags": [
+          "📋 Planos"
+        ]
+      }
+    },
+    "/v1/plans/{planId}/prices": {
+      "post": {
+        "description": "Cria um novo preço/período para um plano específico. Requer permissões de administrador.",
+        "operationId": "PlansController_createPlanPrice",
+        "parameters": [
+          {
+            "name": "planId",
+            "required": true,
+            "in": "path",
+            "description": "ID único do plano",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePlanPriceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Preço criado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "example": "123e4567-e89b-12d3-a456-426614174000"
+                    },
+                    "planId": {
+                      "type": "string",
+                      "example": "123e4567-e89b-12d3-a456-426614174000"
+                    },
+                    "period": {
+                      "type": "string",
+                      "example": "monthly"
+                    },
+                    "price": {
+                      "type": "number",
+                      "example": 29.99
+                    },
+                    "currency": {
+                      "type": "string",
+                      "example": "BRL"
+                    },
+                    "isActive": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updatedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos"
+          },
+          "401": {
+            "description": "Não autorizado"
+          },
+          "403": {
+            "description": "Acesso negado - permissões insuficientes"
+          },
+          "404": {
+            "description": "Plano não encontrado"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Criar preço para um plano",
+        "tags": [
+          "📋 Planos"
+        ]
+      },
+      "get": {
+        "description": "Retorna todos os preços/períodos de um plano específico.",
+        "operationId": "PlansController_getPlanPrices",
+        "parameters": [
+          {
+            "name": "planId",
+            "required": true,
+            "in": "path",
+            "description": "ID único do plano",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Preços encontrados com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string",
+                        "example": "123e4567-e89b-12d3-a456-426614174000"
+                      },
+                      "planId": {
+                        "type": "string",
+                        "example": "123e4567-e89b-12d3-a456-426614174000"
+                      },
+                      "period": {
+                        "type": "string",
+                        "example": "monthly"
+                      },
+                      "price": {
+                        "type": "number",
+                        "example": 29.99
+                      },
+                      "currency": {
+                        "type": "string",
+                        "example": "BRL"
+                      },
+                      "isActive": {
+                        "type": "boolean",
+                        "example": true
+                      },
+                      "createdAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      },
+                      "updatedAt": {
+                        "type": "string",
+                        "format": "date-time"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Plano não encontrado"
+          }
+        },
+        "summary": "Obter preços de um plano",
+        "tags": [
+          "📋 Planos"
+        ]
+      }
+    },
+    "/v1/plans/{planId}/prices/{priceId}": {
+      "patch": {
+        "description": "Atualiza um preço específico de um plano. Requer permissões de administrador.",
+        "operationId": "PlansController_updatePlanPrice",
+        "parameters": [
+          {
+            "name": "planId",
+            "required": true,
+            "in": "path",
+            "description": "ID único do plano",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          },
+          {
+            "name": "priceId",
+            "required": true,
+            "in": "path",
+            "description": "ID único do preço",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdatePlanPriceDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Preço atualizado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "example": "123e4567-e89b-12d3-a456-426614174000"
+                    },
+                    "planId": {
+                      "type": "string",
+                      "example": "123e4567-e89b-12d3-a456-426614174000"
+                    },
+                    "period": {
+                      "type": "string",
+                      "example": "monthly"
+                    },
+                    "price": {
+                      "type": "number",
+                      "example": 29.99
+                    },
+                    "currency": {
+                      "type": "string",
+                      "example": "BRL"
+                    },
+                    "isActive": {
+                      "type": "boolean",
+                      "example": true
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updatedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos"
+          },
+          "401": {
+            "description": "Não autorizado"
+          },
+          "403": {
+            "description": "Acesso negado - permissões insuficientes"
+          },
+          "404": {
+            "description": "Plano ou preço não encontrado"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Atualizar preço de um plano",
+        "tags": [
+          "📋 Planos"
+        ]
+      },
+      "delete": {
+        "description": "Remove um preço específico de um plano. Requer permissões de administrador.",
+        "operationId": "PlansController_deletePlanPrice",
+        "parameters": [
+          {
+            "name": "planId",
+            "required": true,
+            "in": "path",
+            "description": "ID único do plano",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          },
+          {
+            "name": "priceId",
+            "required": true,
+            "in": "path",
+            "description": "ID único do preço",
+            "schema": {
+              "example": "123e4567-e89b-12d3-a456-426614174000",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Preço removido com sucesso"
+          },
+          "401": {
+            "description": "Não autorizado"
+          },
+          "403": {
+            "description": "Acesso negado - permissões insuficientes"
+          },
+          "404": {
+            "description": "Plano ou preço não encontrado"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Remover preço de um plano",
+        "tags": [
+          "📋 Planos"
+        ]
+      }
+    },
+    "/v1/payments": {
+      "post": {
+        "operationId": "PaymentsController_createPayment",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePaymentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Pagamento criado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Payment"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos"
+          },
+          "404": {
+            "description": "Usuário ou plano não encontrado"
+          }
+        },
+        "summary": "Criar um novo pagamento",
+        "tags": [
+          "💰 Pagamentos"
+        ]
+      }
+    },
+    "/v1/payments/intent": {
+      "post": {
+        "operationId": "PaymentsController_createPaymentIntent",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/CreatePaymentIntentDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Intenção de pagamento criada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "payment": {
+                      "$ref": "#/components/schemas/Payment"
+                    },
+                    "clientSecret": {
+                      "type": "string",
+                      "description": "Client secret do Stripe (se aplicável)"
+                    },
+                    "approvalUrl": {
+                      "type": "string",
+                      "description": "URL de aprovação do PayPal (se aplicável)"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos"
+          }
+        },
+        "summary": "Criar intenção de pagamento (Stripe/PayPal)",
+        "tags": [
+          "💰 Pagamentos"
+        ]
+      }
+    },
+    "/v1/payments/{id}/confirm": {
+      "post": {
+        "operationId": "PaymentsController_confirmPayment",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pagamento confirmado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Payment"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Pagamento não encontrado"
+          },
+          "409": {
+            "description": "Pagamento não está em estado pendente"
+          }
+        },
+        "summary": "Confirmar um pagamento",
+        "tags": [
+          "💰 Pagamentos"
+        ]
+      }
+    },
+    "/v1/payments/{id}/cancel": {
+      "post": {
+        "operationId": "PaymentsController_cancelPayment",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pagamento cancelado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Payment"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Pagamento não encontrado"
+          },
+          "409": {
+            "description": "Apenas pagamentos pendentes podem ser cancelados"
+          }
+        },
+        "summary": "Cancelar um pagamento pendente",
+        "tags": [
+          "💰 Pagamentos"
+        ]
+      }
+    },
+    "/v1/payments/{id}/refund": {
+      "post": {
+        "operationId": "PaymentsController_createRefund",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Reembolso criado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Payment"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Pagamento não encontrado"
+          },
+          "409": {
+            "description": "Apenas pagamentos completos podem ser reembolsados"
+          }
+        },
+        "summary": "Criar reembolso para um pagamento",
+        "tags": [
+          "💰 Pagamentos"
+        ]
+      }
+    },
+    "/v1/payments/{id}": {
+      "get": {
+        "operationId": "PaymentsController_getPaymentById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Pagamento encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Payment"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Pagamento não encontrado"
+          }
+        },
+        "summary": "Buscar um pagamento por ID",
+        "tags": [
+          "💰 Pagamentos"
+        ]
+      }
+    },
+    "/v1/payments/user/{userId}": {
+      "get": {
+        "operationId": "PaymentsController_getUserPayments",
+        "parameters": [
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Limite de resultados",
+            "schema": {
+              "type": "number"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "Offset para paginação",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de pagamentos do usuário",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "payments": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/Payment"
+                      }
+                    },
+                    "total": {
+                      "type": "number",
+                      "description": "Total de pagamentos"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Listar pagamentos de um usuário",
+        "tags": [
+          "💰 Pagamentos"
+        ]
+      }
+    },
+    "/v1/payments/subscriptions/user/{userId}": {
+      "get": {
+        "operationId": "PaymentsController_getUserSubscriptions",
+        "parameters": [
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de assinaturas do usuário",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserSubscription"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "summary": "Listar assinaturas de um usuário",
+        "tags": [
+          "💰 Pagamentos"
+        ]
+      }
+    },
+    "/v1/payments/subscriptions/user/{userId}/active": {
+      "get": {
+        "operationId": "PaymentsController_getUserActiveSubscription",
+        "parameters": [
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Assinatura ativa do usuário",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserSubscription"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Assinatura ativa não encontrada"
+          }
+        },
+        "summary": "Buscar assinatura ativa de um usuário",
+        "tags": [
+          "💰 Pagamentos"
+        ]
+      }
+    },
+    "/v1/payments/webhooks/stripe": {
+      "post": {
+        "operationId": "PaymentsController_handleStripeWebhook",
+        "parameters": [
+          {
+            "name": "stripe-signature",
+            "required": true,
+            "in": "header",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Webhook processado com sucesso"
+          },
+          "400": {
+            "description": "Assinatura do webhook inválida"
+          }
+        },
+        "summary": "Webhook do Stripe",
+        "tags": [
+          "💰 Pagamentos"
+        ]
+      }
+    },
+    "/v1/payments/webhooks/paypal": {
+      "post": {
+        "operationId": "PaymentsController_handlePayPalWebhook",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PayPalWebhookDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Webhook processado com sucesso"
+          },
+          "400": {
+            "description": "Webhook inválido"
+          }
+        },
+        "summary": "Webhook do PayPal",
+        "tags": [
+          "💰 Pagamentos"
+        ]
+      }
+    },
+    "/v1/payments/subscriptions": {
+      "post": {
+        "description": "Cria uma nova assinatura para um usuário.",
+        "operationId": "PaymentsController_createUserSubscription",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "Assinatura criada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserSubscription"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos"
+          }
+        },
+        "summary": "Criar nova assinatura",
+        "tags": [
+          "💰 Pagamentos"
+        ]
+      }
+    },
+    "/v1/payments/subscriptions/{subscriptionId}": {
+      "post": {
+        "description": "Atualiza uma assinatura existente.",
+        "operationId": "PaymentsController_updateUserSubscription",
+        "parameters": [
+          {
+            "name": "subscriptionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Assinatura atualizada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserSubscription"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Assinatura não encontrada"
+          }
+        },
+        "summary": "Atualizar assinatura",
+        "tags": [
+          "💰 Pagamentos"
+        ]
+      }
+    },
+    "/v1/payments/subscriptions/{subscriptionId}/cancel": {
+      "post": {
+        "description": "Cancela uma assinatura específica.",
+        "operationId": "PaymentsController_cancelUserSubscription",
+        "parameters": [
+          {
+            "name": "subscriptionId",
+            "required": true,
+            "in": "path",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Assinatura cancelada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "message": {
+                      "type": "string",
+                      "example": "Assinatura cancelada com sucesso"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Assinatura não encontrada"
+          }
+        },
+        "summary": "Cancelar assinatura",
+        "tags": [
+          "💰 Pagamentos"
+        ]
+      }
+    },
+    "/v1/credits/validate": {
+      "post": {
+        "description": "Verifica se o usuário possui créditos suficientes para uma operação específica",
+        "operationId": "CreditsController_validateCredits",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ValidateCreditsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Validação realizada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidateCreditsResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Usuário não encontrado"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Validar créditos suficientes",
+        "tags": [
+          "🔵 Créditos"
+        ]
+      }
+    },
+    "/v1/credits/consume": {
+      "post": {
+        "description": "Consome uma quantidade específica de créditos do usuário para um serviço",
+        "operationId": "CreditsController_consumeCredits",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConsumeCreditsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Créditos consumidos com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsumeCreditsResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Créditos insuficientes ou dados inválidos"
+          },
+          "404": {
+            "description": "Usuário não encontrado"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Consumir créditos",
+        "tags": [
+          "🔵 Créditos"
+        ]
+      }
+    },
+    "/v1/credits/add": {
+      "post": {
+        "description": "Adiciona créditos a um usuário (apenas administradores)",
+        "operationId": "CreditsController_addCredits",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AddCreditsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Créditos adicionados com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddCreditsResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos"
+          },
+          "403": {
+            "description": "Acesso negado - apenas administradores"
+          },
+          "404": {
+            "description": "Usuário não encontrado"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Adicionar créditos",
+        "tags": [
+          "🔵 Créditos"
+        ]
+      }
+    },
+    "/v1/credits/transfer": {
+      "post": {
+        "description": "Transfere créditos de um usuário para outro",
+        "operationId": "CreditsController_transferCredits",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TransferCreditsDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Transferência realizada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/TransferCreditsResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Créditos insuficientes ou dados inválidos"
+          },
+          "404": {
+            "description": "Usuário origem ou destino não encontrado"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Transferir créditos",
+        "tags": [
+          "🔵 Créditos"
+        ]
+      }
+    },
+    "/v1/credits/balance/{userId}": {
+      "get": {
+        "description": "Retorna o saldo atual de créditos de um usuário específico. Requer permissões de administrador.",
+        "operationId": "CreditsController_getUserCreditBalance",
+        "parameters": [
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "description": "ID único do usuário",
+            "schema": {
+              "example": "123",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Saldo obtido com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "example": "123e4567-e89b-12d3-a456-426614174000"
+                    },
+                    "userId": {
+                      "type": "string",
+                      "example": "123"
+                    },
+                    "balance": {
+                      "type": "number",
+                      "example": 100
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updatedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Usuário não encontrado"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Obter saldo de créditos de um usuário",
+        "tags": [
+          "🔵 Créditos"
+        ]
+      }
+    },
+    "/v1/credits/history/{userId}": {
+      "get": {
+        "description": "Obtém o histórico de transações de créditos de um usuário",
+        "operationId": "CreditsController_getTransactionHistory",
+        "parameters": [
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "description": "ID do usuário",
+            "schema": {
+              "example": "123",
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Número máximo de transações a retornar",
+            "schema": {
+              "example": 50,
+              "type": "number"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "Número de transações a pular (paginação)",
+            "schema": {
+              "example": 0,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Histórico obtido com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CreditTransaction"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Histórico de transações",
+        "tags": [
+          "🔵 Créditos"
+        ]
+      }
+    },
+    "/v1/credits/my-balance": {
+      "get": {
+        "description": "Retorna o saldo atual de créditos do usuário autenticado.",
+        "operationId": "CreditsController_getMyCreditBalance",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Saldo obtido com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "example": "123e4567-e89b-12d3-a456-426614174000"
+                    },
+                    "userId": {
+                      "type": "string",
+                      "example": "123"
+                    },
+                    "balance": {
+                      "type": "number",
+                      "example": 100
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updatedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Obter meu saldo de créditos",
+        "tags": [
+          "🔵 Créditos"
+        ]
+      }
+    },
+    "/v1/credits/my-history": {
+      "get": {
+        "description": "Obtém o histórico de transações de créditos do usuário autenticado",
+        "operationId": "CreditsController_getMyTransactionHistory",
+        "parameters": [
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Número máximo de transações a retornar",
+            "schema": {
+              "example": 50,
+              "type": "number"
+            }
+          },
+          {
+            "name": "offset",
+            "required": false,
+            "in": "query",
+            "description": "Número de transações a pular (paginação)",
+            "schema": {
+              "example": 0,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Histórico obtido com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/CreditTransaction"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Meu histórico de transações",
+        "tags": [
+          "🔵 Créditos"
+        ]
+      }
+    },
+    "/v1/credits/my-consume": {
+      "post": {
+        "description": "Consome créditos do usuário autenticado",
+        "operationId": "CreditsController_consumeMyCredits",
+        "parameters": [],
+        "responses": {
+          "201": {
+            "description": "Créditos consumidos com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConsumeCreditsResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Créditos insuficientes ou dados inválidos"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Consumir meus créditos",
+        "tags": [
+          "🔵 Créditos"
+        ]
+      }
+    },
+    "/v1/credits/my-validate": {
+      "post": {
+        "description": "Verifica se o usuário autenticado possui créditos suficientes",
+        "operationId": "CreditsController_validateMyCredits",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Validação realizada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ValidateCreditsResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Validar meus créditos",
+        "tags": [
+          "🔵 Créditos"
+        ]
+      }
+    },
+    "/v1/credits/balance/{userId}/initial": {
+      "post": {
+        "description": "Cria um saldo inicial de créditos para um usuário. Requer permissões de administrador.",
+        "operationId": "CreditsController_createInitialCreditBalance",
+        "parameters": [
+          {
+            "name": "userId",
+            "required": true,
+            "in": "path",
+            "description": "ID único do usuário",
+            "schema": {
+              "example": "123",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "Saldo inicial criado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string",
+                      "example": "123e4567-e89b-12d3-a456-426614174000"
+                    },
+                    "userId": {
+                      "type": "string",
+                      "example": "123"
+                    },
+                    "balance": {
+                      "type": "number",
+                      "example": 0
+                    },
+                    "createdAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    },
+                    "updatedAt": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos"
+          },
+          "404": {
+            "description": "Usuário não encontrado"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Criar saldo inicial de créditos",
+        "tags": [
+          "🔵 Créditos"
+        ]
+      }
+    },
+    "/v1/admin/stats": {
+      "get": {
+        "description": "Retorna estatísticas detalhadas do sistema incluindo usuários, receita, créditos e performance",
+        "operationId": "AdminController_getSystemStats",
+        "parameters": [
+          {
+            "name": "startDate",
+            "required": false,
+            "in": "query",
+            "description": "Data de início para as estatísticas",
+            "schema": {
+              "example": "2025-01-01",
+              "type": "string"
+            }
+          },
+          {
+            "name": "endDate",
+            "required": false,
+            "in": "query",
+            "description": "Data de fim para as estatísticas",
+            "schema": {
+              "example": "2025-12-31",
+              "type": "string"
+            }
+          },
+          {
+            "name": "period",
+            "required": false,
+            "in": "query",
+            "description": "Período das estatísticas",
+            "schema": {
+              "example": "monthly",
+              "type": "string",
+              "enum": [
+                "daily",
+                "weekly",
+                "monthly",
+                "yearly"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Estatísticas obtidas com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminStatsResponseDto"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Token não fornecido ou inválido"
+          },
+          "403": {
+            "description": "Usuário não tem permissões administrativas"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Obter estatísticas do sistema",
+        "tags": [
+          "⚙️ Administração"
+        ]
+      }
+    },
+    "/v1/admin/users": {
+      "get": {
+        "description": "Lista usuários do sistema com opções de filtro e paginação",
+        "operationId": "AdminController_getUsers",
+        "parameters": [
+          {
+            "name": "status",
+            "required": false,
+            "in": "query",
+            "description": "Filtrar por status",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "active",
+                "inactive",
+                "pending",
+                "suspended"
+              ]
+            }
+          },
+          {
+            "name": "role",
+            "required": false,
+            "in": "query",
+            "description": "Filtrar por role",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "user",
+                "admin",
+                "moderator",
+                "super_admin"
+              ]
+            }
+          },
+          {
+            "name": "search",
+            "required": false,
+            "in": "query",
+            "description": "Buscar por nome ou email",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "page",
+            "required": false,
+            "in": "query",
+            "description": "Página da listagem",
+            "schema": {
+              "minimum": 1,
+              "default": 1,
+              "type": "number"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Itens por página",
+            "schema": {
+              "minimum": 1,
+              "maximum": 100,
+              "default": 20,
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Lista de usuários obtida com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminUserListResponseDto"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Listar usuários",
+        "tags": [
+          "⚙️ Administração"
+        ]
+      }
+    },
+    "/v1/admin/users/{id}": {
+      "get": {
+        "description": "Retorna informações detalhadas de um usuário específico",
+        "operationId": "AdminController_getUserById",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID do usuário",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Usuário encontrado",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminUserResponseDto"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Usuário não encontrado"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Obter usuário por ID",
+        "tags": [
+          "⚙️ Administração"
+        ]
+      },
+      "put": {
+        "description": "Atualiza informações de um usuário específico",
+        "operationId": "AdminController_updateUser",
+        "parameters": [
+          {
+            "name": "id",
+            "required": true,
+            "in": "path",
+            "description": "ID do usuário",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminUpdateUserDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Usuário atualizado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AdminUserResponseDto"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Dados inválidos fornecidos"
+          },
+          "404": {
+            "description": "Usuário não encontrado"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Atualizar usuário",
+        "tags": [
+          "⚙️ Administração"
+        ]
+      }
+    },
+    "/v1/admin/users/bulk-action": {
+      "post": {
+        "description": "Executa uma ação em múltiplos usuários simultaneamente",
+        "operationId": "AdminController_bulkAction",
+        "parameters": [],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminBulkActionDto"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Ação executada com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "affected": {
+                      "type": "number"
+                    },
+                    "message": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Ação inválida ou dados incorretos"
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Ação em lote",
+        "tags": [
+          "⚙️ Administração"
+        ]
+      }
+    },
+    "/v1/admin/dashboard": {
+      "get": {
+        "description": "Retorna dados resumidos para o dashboard administrativo",
+        "operationId": "AdminController_getDashboard",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "Dados do dashboard obtidos com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "overview": {
+                      "type": "object",
+                      "properties": {
+                        "totalUsers": {
+                          "type": "number"
+                        },
+                        "activeUsers": {
+                          "type": "number"
+                        },
+                        "totalRevenue": {
+                          "type": "number"
+                        },
+                        "totalCreditsConsumed": {
+                          "type": "number"
+                        }
+                      }
+                    },
+                    "recentActivity": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {
+                            "type": "string"
+                          },
+                          "type": {
+                            "type": "string"
+                          },
+                          "description": {
+                            "type": "string"
+                          },
+                          "timestamp": {
+                            "type": "string",
+                            "format": "date-time"
+                          },
+                          "userId": {
+                            "type": "string"
+                          },
+                          "userName": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "systemHealth": {
+                      "type": "object",
+                      "properties": {
+                        "status": {
+                          "type": "string"
+                        },
+                        "uptime": {
+                          "type": "number"
+                        },
+                        "memoryUsage": {
+                          "type": "number"
+                        },
+                        "responseTime": {
+                          "type": "number"
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Dashboard administrativo",
+        "tags": [
+          "⚙️ Administração"
+        ]
+      }
+    },
+    "/v1/admin/export/users": {
+      "get": {
+        "description": "Exporta dados de usuários em formato CSV",
+        "operationId": "AdminController_exportUsers",
+        "parameters": [
+          {
+            "name": "format",
+            "required": false,
+            "in": "query",
+            "description": "Formato do export (csv, xlsx)",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Export iniciado com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "success": {
+                      "type": "boolean"
+                    },
+                    "message": {
+                      "type": "string"
+                    },
+                    "downloadUrl": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Exportar usuários",
+        "tags": [
+          "⚙️ Administração"
+        ]
+      }
+    },
+    "/v1/admin/logs": {
+      "get": {
+        "description": "Retorna logs do sistema com filtros opcionais",
+        "operationId": "AdminController_getLogs",
+        "parameters": [
+          {
+            "name": "level",
+            "required": false,
+            "in": "query",
+            "description": "Nível do log (error, warn, info)",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "name": "limit",
+            "required": false,
+            "in": "query",
+            "description": "Limite de logs",
+            "schema": {
+              "type": "number"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Logs obtidos com sucesso",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "logs": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "timestamp": {
+                            "type": "string"
+                          },
+                          "level": {
+                            "type": "string"
+                          },
+                          "message": {
+                            "type": "string"
+                          },
+                          "context": {
+                            "type": "string"
+                          },
+                          "trace": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    },
+                    "total": {
+                      "type": "number"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "bearer": []
+          }
+        ],
+        "summary": "Obter logs do sistema",
+        "tags": [
+          "⚙️ Administração"
+        ]
+      }
+    }
+  },
+  "info": {
+    "title": "🧠 NeuralContent API",
+    "description": "\n## API completa para plataforma de geração de conteúdo com IA\n\n### 🔐 Autenticação\nEsta API utiliza **JWT Bearer tokens**. Para autenticar suas requisições:\n```\nAuthorization: Bearer {seu_jwt_token}\n```\n\n### 📊 Rate Limiting\n- **Usuários Free:** 100 req/min\n- **Usuários Pro:** 500 req/min  \n- **Usuários Enterprise:** 1000 req/min\n- **Administradores:** Sem limite\n\n### 🔄 Versionamento\n- **Versão Atual:** v1.0.0\n- **URL Base:** `/v1`\n- **Suporte:** Versionamento semântico (SemVer)\n\n### 📈 Funcionalidades Principais\n- **Autenticação e Autorização** (JWT + Roles)\n- **Gestão de Usuários** (CRUD + Perfis)\n- **Sistema de Planos** (Free, Pro, Enterprise)\n- **Gestão de Créditos** (Compra, Consumo, Histórico)\n- **Processamento de Pagamentos** (Stripe Integration)\n- **Monitoramento e Logs** (Health Checks + Analytics)\n\n### 🛡️ Segurança\n- Criptografia de senhas (bcrypt)\n- Validação de entrada (class-validator)\n- Proteção CORS configurável\n- Headers de segurança (Helmet)\n- Rate limiting por usuário\n    ",
+    "version": "1.0.0",
+    "contact": {
+      "name": "NeuralContent Support",
+      "url": "https://neuralcontent.com/support",
+      "email": "api-support@neuralcontent.com"
+    },
+    "license": {
+      "name": "MIT License",
+      "url": "https://opensource.org/licenses/MIT"
+    },
+    "termsOfService": "https://neuralcontent.com/terms"
+  },
+  "tags": [
+    {
+      "name": "🔐 Autenticação",
+      "description": "Endpoints de login, registro e gestão de tokens"
+    },
+    {
+      "name": "👥 Usuários",
+      "description": "Gestão de usuários, perfis e permissões"
+    },
+    {
+      "name": "📋 Planos",
+      "description": "Gestão de planos e recursos disponíveis"
+    },
+    {
+      "name": "💰 Pagamentos",
+      "description": "Processamento de pagamentos e assinaturas"
+    },
+    {
+      "name": "🔵 Créditos",
+      "description": "Sistema de créditos e transações"
+    },
+    {
+      "name": "⚙️ Administração",
+      "description": "Endpoints administrativos"
+    },
+    {
+      "name": "🏥 Monitoramento",
+      "description": "Health checks e status do sistema"
+    }
+  ],
+  "servers": [
+    {
+      "url": "http://localhost:3001/v1",
+      "description": "Desenvolvimento Local"
+    },
+    {
+      "url": "https://staging-api.neuralcontent.com/v1",
+      "description": "Staging"
+    },
+    {
+      "url": "https://api.neuralcontent.com/v1",
+      "description": "Produção"
+    }
+  ],
+  "components": {
+    "securitySchemes": {
+      "JWT-auth": {
+        "scheme": "bearer",
+        "bearerFormat": "JWT",
+        "type": "http",
+        "name": "JWT",
+        "description": "JWT token obtido via /auth/login. Formato: Bearer {token}",
+        "in": "header"
+      },
+      "ApiKey-auth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "X-API-Key",
+        "description": "API Key para integração de sistemas externos"
+      }
+    },
+    "schemas": {
+      "LoginDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "Email do usuário",
+            "example": "usuario@neuralcontent.com",
+            "format": "email"
+          },
+          "password": {
+            "type": "string",
+            "description": "Senha do usuário",
+            "example": "MinhaS3nh@Segura",
+            "minLength": 6,
+            "maxLength": 50
+          },
+          "rememberMe": {
+            "type": "boolean",
+            "description": "Manter sessão ativa por mais tempo",
+            "example": false,
+            "default": false
+          }
+        },
+        "required": [
+          "email",
+          "password"
+        ]
+      },
+      "AuthResponseDto": {
+        "type": "object",
+        "properties": {
+          "accessToken": {
+            "type": "string",
+            "description": "Token de acesso JWT",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+          },
+          "refreshToken": {
+            "type": "string",
+            "description": "Token para renovação de acesso",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+          },
+          "tokenType": {
+            "type": "string",
+            "description": "Tipo do token",
+            "example": "Bearer",
+            "default": "Bearer"
+          },
+          "expiresIn": {
+            "type": "number",
+            "description": "Tempo de expiração do access token em segundos",
+            "example": 900
+          },
+          "expiresAt": {
+            "type": "number",
+            "description": "Timestamp de quando o token expira",
+            "example": 1625097600
+          },
+          "user": {
+            "type": "object",
+            "description": "Dados básicos do usuário autenticado",
+            "example": {
+              "id": 1,
+              "email": "usuario@neuralcontent.com",
+              "firstName": "João",
+              "lastName": "Silva Santos",
+              "role": "user",
+              "isEmailVerified": true
+            }
+          },
+          "permissions": {
+            "description": "Permissões específicas do usuário",
+            "example": [
+              "read_profile",
+              "write_content",
+              "manage_credits"
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "sessionId": {
+            "type": "string",
+            "description": "ID da sessão para controle",
+            "example": "uuid-v4-generated"
+          }
+        },
+        "required": [
+          "accessToken",
+          "refreshToken",
+          "tokenType",
+          "expiresIn",
+          "expiresAt",
+          "user"
+        ]
+      },
+      "RegisterDto": {
+        "type": "object",
+        "properties": {
+          "firstName": {
+            "type": "string",
+            "description": "Primeiro nome do usuário",
+            "example": "João",
+            "minLength": 2,
+            "maxLength": 100
+          },
+          "lastName": {
+            "type": "string",
+            "description": "Sobrenome do usuário",
+            "example": "Silva Santos",
+            "minLength": 2,
+            "maxLength": 100
+          },
+          "email": {
+            "type": "string",
+            "description": "Email único do usuário",
+            "example": "joao.silva@neuralcontent.com",
+            "format": "email"
+          },
+          "password": {
+            "type": "string",
+            "description": "Senha segura do usuário",
+            "example": "MinhaS3nh@SuperSegura123",
+            "minLength": 8,
+            "maxLength": 50
+          },
+          "role": {
+            "type": "string",
+            "description": "Papel do usuário no sistema",
+            "example": "user",
+            "enum": [
+              "user",
+              "admin",
+              "moderator"
+            ],
+            "default": "user"
+          },
+          "phone": {
+            "type": "string",
+            "description": "Telefone do usuário (opcional)",
+            "example": "+5511999999999"
+          },
+          "acceptTerms": {
+            "type": "boolean",
+            "description": "Aceitar termos de uso e política de privacidade",
+            "example": true,
+            "default": false
+          },
+          "acceptMarketing": {
+            "type": "boolean",
+            "description": "Aceitar receber comunicações de marketing",
+            "example": false,
+            "default": false
+          }
+        },
+        "required": [
+          "firstName",
+          "lastName",
+          "email",
+          "password"
+        ]
+      },
+      "RefreshTokenDto": {
+        "type": "object",
+        "properties": {
+          "refreshToken": {
+            "type": "string",
+            "description": "Refresh token válido para renovar acesso",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+          }
+        },
+        "required": [
+          "refreshToken"
+        ]
+      },
+      "LogoutDto": {
+        "type": "object",
+        "properties": {
+          "refreshToken": {
+            "type": "string",
+            "description": "Refresh token a ser invalidado",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+          },
+          "logoutAll": {
+            "type": "boolean",
+            "description": "Logout de todos os dispositivos",
+            "example": false,
+            "default": false
+          }
+        },
+        "required": [
+          "refreshToken"
+        ]
+      },
+      "CreateUserDto": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "Email único do usuário",
+            "example": "usuario@neuralcontent.com",
+            "format": "email"
+          },
+          "firstName": {
+            "type": "string",
+            "description": "Primeiro nome do usuário",
+            "example": "João",
+            "minLength": 2,
+            "maxLength": 100
+          },
+          "lastName": {
+            "type": "string",
+            "description": "Sobrenome do usuário",
+            "example": "Silva Santos",
+            "minLength": 2,
+            "maxLength": 100
+          },
+          "password": {
+            "type": "string",
+            "description": "Senha do usuário",
+            "example": "MinhaSenh@123!",
+            "minLength": 8,
+            "maxLength": 50
+          },
+          "role": {
+            "type": "string",
+            "description": "Papel do usuário no sistema",
+            "enum": [
+              "user",
+              "admin",
+              "super-admin",
+              "guest"
+            ],
+            "default": "user"
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Status se o usuário está ativo",
+            "default": true
+          },
+          "phone": {
+            "type": "string",
+            "description": "Telefone de contato do usuário",
+            "example": "+55 11 99999-9999",
+            "maxLength": 20
+          },
+          "bio": {
+            "type": "string",
+            "description": "Biografia ou descrição do usuário",
+            "example": "Desenvolvedor apaixonado por tecnologia e inovação.",
+            "maxLength": 500
+          },
+          "city": {
+            "type": "string",
+            "description": "Cidade do usuário",
+            "example": "São Paulo",
+            "maxLength": 100
+          },
+          "country": {
+            "type": "string",
+            "description": "País do usuário",
+            "example": "Brasil",
+            "maxLength": 50
+          },
+          "timezone": {
+            "type": "string",
+            "description": "Timezone do usuário",
+            "example": "America/Sao_Paulo",
+            "maxLength": 50
+          },
+          "preferredLanguage": {
+            "type": "string",
+            "description": "Idioma preferido do usuário",
+            "example": "pt-BR",
+            "maxLength": 20
+          }
+        },
+        "required": [
+          "email",
+          "firstName",
+          "lastName",
+          "password"
+        ]
+      },
+      "UserResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "number",
+            "description": "ID único do usuário",
+            "example": 1
+          },
+          "email": {
+            "type": "string",
+            "description": "Email do usuário",
+            "example": "usuario@neuralcontent.com"
+          },
+          "firstName": {
+            "type": "string",
+            "description": "Primeiro nome do usuário",
+            "example": "João"
+          },
+          "lastName": {
+            "type": "string",
+            "description": "Sobrenome do usuário",
+            "example": "Silva Santos"
+          },
+          "role": {
+            "type": "string",
+            "description": "Papel do usuário no sistema",
+            "enum": [
+              "user",
+              "admin",
+              "super-admin",
+              "guest"
+            ],
+            "example": "user"
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Se o usuário está ativo",
+            "example": true
+          },
+          "isEmailVerified": {
+            "type": "boolean",
+            "description": "Se o email foi verificado",
+            "example": true
+          },
+          "avatar": {
+            "type": "string",
+            "description": "URL do avatar do usuário",
+            "example": "https://gravatar.com/avatar/hash"
+          },
+          "emailVerifiedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Data de verificação do email",
+            "example": "2025-07-13T10:30:00Z"
+          },
+          "phone": {
+            "type": "string",
+            "description": "Telefone de contato do usuário",
+            "example": "+55 11 99999-9999"
+          },
+          "preferences": {
+            "type": "object",
+            "description": "Preferências do usuário",
+            "example": {
+              "theme": "dark",
+              "language": "pt-BR"
+            }
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Data de criação do usuário",
+            "example": "2025-07-13T10:30:00Z"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Data da última atualização",
+            "example": "2025-07-13T15:45:00Z"
+          },
+          "lastLoginAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Data do último login",
+            "example": "2025-07-13T14:20:00Z"
+          }
+        },
+        "required": [
+          "id",
+          "email",
+          "firstName",
+          "lastName",
+          "role",
+          "isActive",
+          "isEmailVerified",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "UserListResponseDto": {
+        "type": "object",
+        "properties": {
+          "data": {
+            "description": "Lista de usuários",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/UserResponseDto"
+            }
+          },
+          "meta": {
+            "type": "object",
+            "description": "Metadados de paginação",
+            "example": {
+              "total": 150,
+              "page": 1,
+              "limit": 10,
+              "totalPages": 15
+            }
+          }
+        },
+        "required": [
+          "data",
+          "meta"
+        ]
+      },
+      "UserStatsResponseDto": {
+        "type": "object",
+        "properties": {
+          "totalUsers": {
+            "type": "number",
+            "description": "Total de usuários cadastrados",
+            "example": 1520
+          },
+          "activeUsers": {
+            "type": "number",
+            "description": "Usuários ativos",
+            "example": 1245
+          },
+          "inactiveUsers": {
+            "type": "number",
+            "description": "Usuários inativos",
+            "example": 275
+          },
+          "newUsersToday": {
+            "type": "number",
+            "description": "Novos usuários hoje",
+            "example": 15
+          },
+          "newUsersThisWeek": {
+            "type": "number",
+            "description": "Novos usuários esta semana",
+            "example": 89
+          },
+          "newUsersThisMonth": {
+            "type": "number",
+            "description": "Novos usuários este mês",
+            "example": 356
+          }
+        },
+        "required": [
+          "totalUsers",
+          "activeUsers",
+          "inactiveUsers",
+          "newUsersToday",
+          "newUsersThisWeek",
+          "newUsersThisMonth"
+        ]
+      },
+      "UpdateUserDto": {
+        "type": "object",
+        "properties": {
+          "firstName": {
+            "type": "string",
+            "description": "Primeiro nome do usuário",
+            "example": "João",
+            "minLength": 2,
+            "maxLength": 100
+          },
+          "lastName": {
+            "type": "string",
+            "description": "Sobrenome do usuário",
+            "example": "Silva Santos",
+            "minLength": 2,
+            "maxLength": 100
+          },
+          "role": {
+            "type": "string",
+            "description": "Papel do usuário no sistema",
+            "enum": [
+              "user",
+              "admin",
+              "super-admin",
+              "guest"
+            ]
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Se o usuário está ativo",
+            "example": true
+          },
+          "isEmailVerified": {
+            "type": "boolean",
+            "description": "Se o email foi verificado",
+            "example": true
+          },
+          "phone": {
+            "type": "string",
+            "description": "Telefone de contato do usuário",
+            "example": "+55 11 99999-9999",
+            "maxLength": 50
+          },
+          "bio": {
+            "type": "string",
+            "description": "Biografia ou descrição do usuário",
+            "example": "Desenvolvedor apaixonado por tecnologia e inovação.",
+            "maxLength": 500
+          },
+          "city": {
+            "type": "string",
+            "description": "Cidade do usuário",
+            "example": "São Paulo",
+            "maxLength": 100
+          },
+          "country": {
+            "type": "string",
+            "description": "País do usuário",
+            "example": "Brasil",
+            "maxLength": 50
+          },
+          "timezone": {
+            "type": "string",
+            "description": "Timezone do usuário",
+            "example": "America/Sao_Paulo",
+            "maxLength": 50
+          },
+          "preferredLanguage": {
+            "type": "string",
+            "description": "Idioma preferido do usuário",
+            "example": "pt-BR",
+            "maxLength": 20
+          },
+          "emailNotifications": {
+            "type": "boolean",
+            "description": "Preferência para receber notificações por email",
+            "example": true
+          },
+          "marketingEmails": {
+            "type": "boolean",
+            "description": "Preferência para receber newsletters e emails de marketing",
+            "example": false
+          }
+        }
+      },
+      "ChangePasswordDto": {
+        "type": "object",
+        "properties": {
+          "currentPassword": {
+            "type": "string",
+            "description": "Senha atual do usuário (opcional para admin)",
+            "example": "MinhaSenh@Atual123!",
+            "minLength": 8,
+            "maxLength": 50
+          },
+          "newPassword": {
+            "type": "string",
+            "description": "Nova senha do usuário",
+            "example": "MinhaNov@Senha123!",
+            "minLength": 8,
+            "maxLength": 50
+          },
+          "confirmPassword": {
+            "type": "string",
+            "description": "Confirmação da nova senha",
+            "example": "MinhaNov@Senha123!",
+            "minLength": 8,
+            "maxLength": 50
+          }
+        }
+      },
+      "CreatePlanDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Nome do plano",
+            "example": "Premium",
+            "minLength": 2,
+            "maxLength": 100
+          },
+          "slug": {
+            "type": "string",
+            "description": "Slug único do plano para URLs",
+            "example": "premium-plan",
+            "minLength": 2,
+            "maxLength": 50
+          },
+          "description": {
+            "type": "string",
+            "description": "Descrição detalhada do plano",
+            "example": "Plano premium com recursos avançados e suporte prioritário"
+          },
+          "type": {
+            "type": "string",
+            "description": "Tipo do plano",
+            "enum": [
+              "free",
+              "basic",
+              "premium",
+              "enterprise"
+            ],
+            "example": "premium"
+          },
+          "monthlyPrice": {
+            "type": "number",
+            "description": "Preço mensal em centavos",
+            "example": 2999,
+            "minimum": 0
+          },
+          "annualPrice": {
+            "type": "number",
+            "description": "Preço anual em centavos",
+            "example": 29990,
+            "minimum": 0
+          },
+          "monthlyCredits": {
+            "type": "number",
+            "description": "Créditos mensais inclusos no plano",
+            "example": 1000,
+            "minimum": 0
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Se o plano está ativo e disponível",
+            "example": true,
+            "default": true
+          },
+          "isFeatured": {
+            "type": "boolean",
+            "description": "Se o plano é destacado na lista",
+            "example": false,
+            "default": false
+          },
+          "sortOrder": {
+            "type": "number",
+            "description": "Ordem de exibição do plano",
+            "example": 1,
+            "minimum": 0
+          },
+          "metadata": {
+            "type": "object",
+            "description": "Metadados adicionais do plano",
+            "example": {
+              "color": "#007bff",
+              "icon": "star"
+            }
+          }
+        },
+        "required": [
+          "name",
+          "slug",
+          "type"
+        ]
+      },
+      "PlanFeatureResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "ID da funcionalidade",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "featureKey": {
+            "type": "string",
+            "description": "Chave da funcionalidade",
+            "example": "unlimited_translations"
+          },
+          "name": {
+            "type": "string",
+            "description": "Nome da funcionalidade",
+            "example": "Traduções Ilimitadas"
+          },
+          "description": {
+            "type": "string",
+            "description": "Descrição da funcionalidade",
+            "example": "Traduza documentos sem limites mensais"
+          },
+          "limitValue": {
+            "type": "number",
+            "description": "Valor limite da funcionalidade",
+            "example": 100
+          },
+          "limitUnit": {
+            "type": "string",
+            "description": "Unidade do limite",
+            "example": "translations"
+          },
+          "isEnabled": {
+            "type": "boolean",
+            "description": "Se a funcionalidade está habilitada",
+            "example": true
+          },
+          "sortOrder": {
+            "type": "number",
+            "description": "Ordem de exibição",
+            "example": 1
+          },
+          "metadata": {
+            "type": "object",
+            "description": "Metadados da funcionalidade",
+            "example": {
+              "icon": "translate",
+              "color": "#28a745"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "featureKey",
+          "name",
+          "isEnabled",
+          "sortOrder"
+        ]
+      },
+      "PlanResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "ID único do plano",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "name": {
+            "type": "string",
+            "description": "Nome do plano",
+            "example": "Premium"
+          },
+          "slug": {
+            "type": "string",
+            "description": "Slug do plano",
+            "example": "premium-plan"
+          },
+          "description": {
+            "type": "string",
+            "description": "Descrição do plano",
+            "example": "Plano premium com recursos avançados"
+          },
+          "type": {
+            "type": "string",
+            "description": "Tipo do plano",
+            "enum": [
+              "free",
+              "basic",
+              "premium",
+              "enterprise"
+            ],
+            "example": "premium"
+          },
+          "monthlyPriceFormatted": {
+            "type": "string",
+            "description": "Preço mensal formatado em reais",
+            "example": "R$ 29,99"
+          },
+          "annualPriceFormatted": {
+            "type": "string",
+            "description": "Preço anual formatado em reais",
+            "example": "R$ 299,90"
+          },
+          "monthlyPrice": {
+            "type": "number",
+            "description": "Preço mensal em centavos",
+            "example": 2999
+          },
+          "annualPrice": {
+            "type": "number",
+            "description": "Preço anual em centavos",
+            "example": 29990
+          },
+          "annualDiscountPercentage": {
+            "type": "number",
+            "description": "Desconto anual em porcentagem",
+            "example": 16.7
+          },
+          "monthlyCredits": {
+            "type": "number",
+            "description": "Créditos mensais inclusos",
+            "example": 1000
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Se o plano está ativo",
+            "example": true
+          },
+          "isFeatured": {
+            "type": "boolean",
+            "description": "Se o plano é destacado",
+            "example": false
+          },
+          "sortOrder": {
+            "type": "number",
+            "description": "Ordem de exibição",
+            "example": 1
+          },
+          "metadata": {
+            "type": "object",
+            "description": "Metadados do plano",
+            "example": {
+              "color": "#007bff",
+              "icon": "star"
+            }
+          },
+          "features": {
+            "description": "Funcionalidades do plano",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PlanFeatureResponseDto"
+            }
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Data de criação",
+            "example": "2025-07-13T12:00:00Z"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Data de atualização",
+            "example": "2025-07-13T12:00:00Z"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "slug",
+          "type",
+          "monthlyPriceFormatted",
+          "annualPriceFormatted",
+          "monthlyPrice",
+          "annualPrice",
+          "annualDiscountPercentage",
+          "monthlyCredits",
+          "isActive",
+          "isFeatured",
+          "sortOrder",
+          "features",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "UpdatePlanDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Nome do plano",
+            "example": "Premium",
+            "minLength": 2,
+            "maxLength": 100
+          },
+          "description": {
+            "type": "string",
+            "description": "Descrição detalhada do plano",
+            "example": "Plano premium com recursos avançados e suporte prioritário"
+          },
+          "type": {
+            "type": "string",
+            "description": "Tipo do plano",
+            "enum": [
+              "free",
+              "basic",
+              "premium",
+              "enterprise"
+            ],
+            "example": "premium"
+          },
+          "monthlyPrice": {
+            "type": "number",
+            "description": "Preço mensal em centavos",
+            "example": 2999,
+            "minimum": 0
+          },
+          "annualPrice": {
+            "type": "number",
+            "description": "Preço anual em centavos",
+            "example": 29990,
+            "minimum": 0
+          },
+          "monthlyCredits": {
+            "type": "number",
+            "description": "Créditos mensais inclusos no plano",
+            "example": 1000,
+            "minimum": 0
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Se o plano está ativo e disponível",
+            "example": true,
+            "default": true
+          },
+          "isFeatured": {
+            "type": "boolean",
+            "description": "Se o plano é destacado na lista",
+            "example": false,
+            "default": false
+          },
+          "sortOrder": {
+            "type": "number",
+            "description": "Ordem de exibição do plano",
+            "example": 1,
+            "minimum": 0
+          },
+          "metadata": {
+            "type": "object",
+            "description": "Metadados adicionais do plano",
+            "example": {
+              "color": "#007bff",
+              "icon": "star"
+            }
+          }
+        }
+      },
+      "CreatePlanPriceDto": {
+        "type": "object",
+        "properties": {
+          "planId": {
+            "type": "string",
+            "description": "ID do plano ao qual o preço será associado",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "currency": {
+            "type": "string",
+            "description": "Moeda do preço",
+            "enum": [
+              "BRL",
+              "USD",
+              "EUR"
+            ],
+            "example": "BRL"
+          },
+          "amount": {
+            "type": "number",
+            "description": "Valor do preço em formato decimal",
+            "example": 29.99,
+            "minimum": 0
+          },
+          "intervalType": {
+            "type": "string",
+            "description": "Tipo de período de cobrança",
+            "enum": [
+              "month",
+              "year"
+            ],
+            "example": "month"
+          },
+          "discountCode": {
+            "type": "string",
+            "description": "Código de desconto aplicável",
+            "example": "PROMO2025",
+            "maxLength": 50
+          },
+          "discountPercent": {
+            "type": "number",
+            "description": "Percentual de desconto (0-100)",
+            "example": 15.5,
+            "minimum": 0,
+            "maximum": 100
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Status se o preço está ativo",
+            "example": true,
+            "default": true
+          },
+          "isAvailable": {
+            "type": "boolean",
+            "description": "Preço está disponível para assinatura",
+            "example": true,
+            "default": true
+          },
+          "displayOrder": {
+            "type": "number",
+            "description": "Ordem de exibição do preço",
+            "example": 1,
+            "minimum": 0
+          },
+          "notes": {
+            "type": "string",
+            "description": "Observações sobre o preço",
+            "example": "Preço promocional válido até dezembro/2025",
+            "maxLength": 500
+          }
+        },
+        "required": [
+          "planId",
+          "currency",
+          "amount",
+          "intervalType"
+        ]
+      },
+      "UpdatePlanPriceDto": {
+        "type": "object",
+        "properties": {
+          "planId": {
+            "type": "string",
+            "description": "ID do plano ao qual o preço será associado",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "currency": {
+            "type": "string",
+            "description": "Moeda do preço",
+            "enum": [
+              "BRL",
+              "USD",
+              "EUR"
+            ],
+            "example": "BRL"
+          },
+          "amount": {
+            "type": "number",
+            "description": "Valor do preço em formato decimal",
+            "example": 29.99,
+            "minimum": 0
+          },
+          "intervalType": {
+            "type": "string",
+            "description": "Tipo de período de cobrança",
+            "enum": [
+              "month",
+              "year"
+            ],
+            "example": "month"
+          },
+          "discountCode": {
+            "type": "string",
+            "description": "Código de desconto aplicável",
+            "example": "PROMO2025",
+            "maxLength": 50
+          },
+          "discountPercent": {
+            "type": "number",
+            "description": "Percentual de desconto (0-100)",
+            "example": 15.5,
+            "minimum": 0,
+            "maximum": 100
+          },
+          "isActive": {
+            "type": "boolean",
+            "description": "Status se o preço está ativo",
+            "example": true,
+            "default": true
+          },
+          "isAvailable": {
+            "type": "boolean",
+            "description": "Preço está disponível para assinatura",
+            "example": true,
+            "default": true
+          },
+          "displayOrder": {
+            "type": "number",
+            "description": "Ordem de exibição do preço",
+            "example": 1,
+            "minimum": 0
+          },
+          "notes": {
+            "type": "string",
+            "description": "Observações sobre o preço",
+            "example": "Preço promocional válido até dezembro/2025",
+            "maxLength": 500
+          },
+          "id": {
+            "type": "string",
+            "description": "ID do preço do plano (readonly para identificação)",
+            "example": "123e4567-e89b-12d3-a456-426614174000",
+            "readOnly": true
+          }
+        }
+      },
+      "CreatePaymentDto": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "description": "ID do usuário que realizará o pagamento",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "planId": {
+            "type": "string",
+            "description": "ID do plano a ser adquirido",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "amount": {
+            "type": "number",
+            "description": "Valor do pagamento em centavos",
+            "example": 2990,
+            "minimum": 1,
+            "maximum": 1000000000
+          },
+          "currency": {
+            "type": "string",
+            "description": "Moeda do pagamento",
+            "example": "BRL",
+            "default": "BRL"
+          },
+          "paymentMethod": {
+            "type": "string",
+            "description": "Método de pagamento",
+            "enum": [
+              "stripe",
+              "paypal",
+              "credit_card",
+              "pix",
+              "bank_transfer"
+            ],
+            "example": "stripe"
+          },
+          "paymentType": {
+            "type": "string",
+            "description": "Tipo de pagamento",
+            "enum": [
+              "subscription",
+              "one_time",
+              "credits",
+              "upgrade",
+              "renewal"
+            ],
+            "example": "subscription"
+          },
+          "description": {
+            "type": "string",
+            "description": "Descrição do pagamento",
+            "example": "Assinatura Premium - Mensal"
+          },
+          "dueDate": {
+            "type": "string",
+            "description": "Data de vencimento do pagamento",
+            "example": "2025-08-14T00:00:00.000Z"
+          },
+          "isRecurring": {
+            "type": "boolean",
+            "description": "Se o pagamento é recorrente",
+            "example": false,
+            "default": false
+          },
+          "metadata": {
+            "type": "object",
+            "description": "Dados adicionais do pagamento",
+            "example": {
+              "installments": 1,
+              "discount": 0
+            }
+          }
+        },
+        "required": [
+          "userId",
+          "amount",
+          "paymentMethod",
+          "paymentType"
+        ]
+      },
+      "Payment": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "ID único do pagamento",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "userId": {
+            "type": "string",
+            "description": "ID do usuário que realizou o pagamento",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "planId": {
+            "type": "string",
+            "description": "ID do plano adquirido",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "amount": {
+            "type": "number",
+            "description": "Valor do pagamento em centavos",
+            "example": 2990,
+            "minimum": 0
+          },
+          "currency": {
+            "type": "string",
+            "description": "Moeda do pagamento",
+            "example": "BRL",
+            "default": "BRL"
+          },
+          "status": {
+            "type": "string",
+            "description": "Status do pagamento",
+            "enum": [
+              "pending",
+              "completed",
+              "failed",
+              "cancelled",
+              "refunded",
+              "processing"
+            ],
+            "example": "pending"
+          },
+          "paymentMethod": {
+            "type": "string",
+            "description": "Método de pagamento utilizado",
+            "enum": [
+              "stripe",
+              "paypal",
+              "credit_card",
+              "pix",
+              "bank_transfer"
+            ],
+            "example": "stripe"
+          },
+          "paymentType": {
+            "type": "string",
+            "description": "Tipo de pagamento",
+            "enum": [
+              "subscription",
+              "one_time",
+              "credits",
+              "upgrade",
+              "renewal"
+            ],
+            "example": "subscription"
+          },
+          "externalPaymentId": {
+            "type": "string",
+            "description": "ID do pagamento no provedor externo (Stripe, PayPal, etc.)",
+            "example": "pi_1234567890"
+          },
+          "externalSessionId": {
+            "type": "string",
+            "description": "ID da sessão de checkout no provedor externo",
+            "example": "cs_1234567890"
+          },
+          "description": {
+            "type": "string",
+            "description": "Descrição do pagamento",
+            "example": "Assinatura Premium - Mensal"
+          },
+          "dueDate": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Data de vencimento do pagamento",
+            "example": "2025-08-14T00:00:00.000Z"
+          },
+          "processedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Data de processamento do pagamento",
+            "example": "2025-07-14T10:30:00.000Z"
+          },
+          "failureReason": {
+            "type": "string",
+            "description": "Motivo da falha/cancelamento",
+            "example": "Cartão insuficiente"
+          },
+          "metadata": {
+            "type": "object",
+            "description": "Dados adicionais do pagamento em formato JSON",
+            "example": {
+              "installments": 1,
+              "discount": 0
+            }
+          },
+          "isRecurring": {
+            "type": "boolean",
+            "description": "Se o pagamento é recorrente",
+            "example": false,
+            "default": false
+          },
+          "confirmedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Data de confirmação do pagamento",
+            "example": "2025-07-14T10:15:00.000Z"
+          },
+          "cancelledAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Data de cancelamento do pagamento",
+            "example": "2025-07-14T10:15:00.000Z"
+          },
+          "refundedAmount": {
+            "type": "number",
+            "description": "Valor total reembolsado em centavos",
+            "example": 0,
+            "minimum": 0
+          },
+          "gatewayResponse": {
+            "type": "object",
+            "description": "Resposta completa do gateway de pagamento",
+            "example": {}
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Data de criação do registro",
+            "example": "2025-07-14T10:00:00.000Z"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Data da última atualização do registro",
+            "example": "2025-07-14T10:30:00.000Z"
+          }
+        },
+        "required": [
+          "id",
+          "userId",
+          "amount",
+          "currency",
+          "status",
+          "paymentMethod",
+          "paymentType",
+          "externalPaymentId",
+          "externalSessionId",
+          "description",
+          "dueDate",
+          "processedAt",
+          "failureReason",
+          "metadata",
+          "isRecurring",
+          "refundedAmount",
+          "createdAt",
+          "updatedAt"
+        ]
+      },
+      "CreatePaymentIntentDto": {
+        "type": "object",
+        "properties": {
+          "planId": {
+            "type": "string",
+            "description": "ID do plano para criar intenção de pagamento",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "amount": {
+            "type": "number",
+            "description": "Valor customizado em centavos (se não for plano)",
+            "example": 2990,
+            "minimum": 1,
+            "maximum": 1000000000
+          },
+          "paymentMethod": {
+            "type": "string",
+            "description": "Método de pagamento preferido",
+            "enum": [
+              "stripe",
+              "paypal",
+              "credit_card",
+              "pix",
+              "bank_transfer"
+            ],
+            "example": "stripe"
+          },
+          "successUrl": {
+            "type": "string",
+            "description": "URL de sucesso após o pagamento",
+            "example": "https://app.neuralbook.app/payment/success"
+          },
+          "cancelUrl": {
+            "type": "string",
+            "description": "URL de cancelamento do pagamento",
+            "example": "https://app.neuralbook.app/payment/cancel"
+          },
+          "metadata": {
+            "type": "object",
+            "description": "Dados adicionais para o pagamento",
+            "example": {
+              "coupon": "WELCOME10"
+            }
+          }
+        },
+        "required": [
+          "paymentMethod"
+        ]
+      },
+      "UserSubscription": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "ID único da assinatura",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "userId": {
+            "type": "string",
+            "description": "ID do usuário da assinatura",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "planId": {
+            "type": "string",
+            "description": "ID do plano da assinatura",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "status": {
+            "type": "string",
+            "description": "Status da assinatura",
+            "enum": [
+              "trial",
+              "active",
+              "cancelled",
+              "expired",
+              "suspended",
+              "pending"
+            ],
+            "example": "active"
+          },
+          "billingCycle": {
+            "type": "string",
+            "description": "Ciclo de cobrança da assinatura",
+            "enum": [
+              "monthly",
+              "annual",
+              "weekly",
+              "lifetime"
+            ],
+            "example": "monthly"
+          },
+          "stripeSubscriptionId": {
+            "type": "string",
+            "description": "ID da assinatura no Stripe",
+            "example": "sub_1234567890"
+          },
+          "stripeCustomerId": {
+            "type": "string",
+            "description": "ID do cliente no Stripe",
+            "example": "cus_1234567890"
+          },
+          "startDate": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Data de início da assinatura",
+            "example": "2025-07-14T10:00:00.000Z"
+          },
+          "currentPeriodStart": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Data de início do período atual",
+            "example": "2025-07-14T10:00:00.000Z"
+          },
+          "currentPeriodEnd": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Data de fim do período atual",
+            "example": "2025-08-14T10:00:00.000Z"
+          },
+          "trialStartDate": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Data de início do período de trial",
+            "example": "2025-07-14T10:00:00.000Z"
+          },
+          "trialEndDate": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Data de fim do período de trial",
+            "example": "2025-07-21T10:00:00.000Z"
+          },
+          "isTrialUsed": {
+            "type": "boolean",
+            "description": "Se o usuário já utilizou o período de trial",
+            "example": false,
+            "default": false
+          },
+          "cancelledAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Data de cancelamento da assinatura",
+            "example": "2025-08-14T10:00:00.000Z"
+          },
+          "nextBillingDate": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Data da próxima cobrança",
+            "example": "2025-08-14T10:00:00.000Z"
+          },
+          "pricePaid": {
+            "type": "number",
+            "description": "Preço pago pela assinatura",
+            "example": 29.9,
+            "minimum": 0
+          },
+          "currency": {
+            "type": "string",
+            "description": "Moeda da assinatura",
+            "example": "BRL",
+            "default": "BRL"
+          },
+          "creditsGranted": {
+            "type": "number",
+            "description": "Créditos concedidos com esta assinatura",
+            "example": 1000,
+            "minimum": 0
+          },
+          "creditsUsed": {
+            "type": "number",
+            "description": "Créditos utilizados nesta assinatura",
+            "example": 150,
+            "minimum": 0
+          },
+          "autoRenew": {
+            "type": "boolean",
+            "description": "Se a renovação automática está ativa",
+            "example": true,
+            "default": true
+          },
+          "metadata": {
+            "type": "object",
+            "description": "Dados adicionais da assinatura em formato JSON",
+            "example": {
+              "discount": 10,
+              "coupon": "WELCOME10"
+            }
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Data de criação do registro",
+            "example": "2025-07-14T10:00:00.000Z"
+          },
+          "updatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Data da última atualização do registro",
+            "example": "2025-07-14T10:30:00.000Z"
+          },
+          "creditsRemaining": {
+            "type": "number",
+            "description": "Créditos restantes no período atual",
+            "example": 850
+          },
+          "isExpired": {
+            "type": "boolean",
+            "description": "Se a assinatura está expirada",
+            "example": false
+          },
+          "isInTrial": {
+            "type": "boolean",
+            "description": "Se a assinatura está em período de trial",
+            "example": false
+          }
+        },
+        "required": [
+          "id",
+          "userId",
+          "planId",
+          "status",
+          "billingCycle",
+          "stripeSubscriptionId",
+          "stripeCustomerId",
+          "startDate",
+          "currentPeriodStart",
+          "currentPeriodEnd",
+          "trialStartDate",
+          "trialEndDate",
+          "isTrialUsed",
+          "cancelledAt",
+          "nextBillingDate",
+          "pricePaid",
+          "currency",
+          "creditsGranted",
+          "creditsUsed",
+          "autoRenew",
+          "metadata",
+          "createdAt",
+          "updatedAt",
+          "creditsRemaining",
+          "isExpired",
+          "isInTrial"
+        ]
+      },
+      "PayPalWebhookDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "ID único do evento no PayPal",
+            "example": "WH-2WR32451HC0233532-67976317FL4543714"
+          },
+          "create_time": {
+            "type": "string",
+            "description": "Timestamp de criação do evento",
+            "example": "2025-07-14T10:30:00Z"
+          },
+          "event_type": {
+            "type": "string",
+            "description": "Tipo do evento",
+            "enum": [
+              "PAYMENT.CAPTURE.COMPLETED",
+              "PAYMENT.CAPTURE.DENIED",
+              "PAYMENT.CAPTURE.PENDING",
+              "PAYMENT.CAPTURE.REFUNDED",
+              "PAYMENT.CAPTURE.REVERSED",
+              "CHECKOUT.ORDER.APPROVED",
+              "CHECKOUT.ORDER.COMPLETED",
+              "BILLING.SUBSCRIPTION.CREATED",
+              "BILLING.SUBSCRIPTION.ACTIVATED",
+              "BILLING.SUBSCRIPTION.UPDATED",
+              "BILLING.SUBSCRIPTION.EXPIRED",
+              "BILLING.SUBSCRIPTION.CANCELLED",
+              "BILLING.SUBSCRIPTION.SUSPENDED",
+              "BILLING.SUBSCRIPTION.PAYMENT.FAILED",
+              "INVOICING.INVOICE.PAID",
+              "INVOICING.INVOICE.CANCELLED"
+            ],
+            "example": "PAYMENT.CAPTURE.COMPLETED"
+          },
+          "event_version": {
+            "type": "string",
+            "description": "Versão do evento",
+            "example": "1.0"
+          },
+          "resource": {
+            "type": "object",
+            "description": "Dados do recurso do evento",
+            "example": {
+              "id": "5O190127TN364715T",
+              "amount": {
+                "currency_code": "BRL",
+                "value": "29.90"
+              },
+              "status": "COMPLETED"
+            }
+          },
+          "resource_type": {
+            "type": "string",
+            "description": "Tipo do recurso",
+            "example": "capture"
+          },
+          "summary": {
+            "type": "string",
+            "description": "Resumo do evento",
+            "example": "Payment completed for $ 29.90 BRL"
+          },
+          "links": {
+            "description": "Links relacionados ao evento",
+            "example": [
+              {
+                "href": "https://api.paypal.com/v2/payments/captures/5O190127TN364715T",
+                "rel": "self",
+                "method": "GET"
+              }
+            ],
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "id",
+          "create_time",
+          "event_type",
+          "event_version",
+          "resource",
+          "resource_type"
+        ]
+      },
+      "ValidateCreditsDto": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "description": "ID do usuário",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "amount": {
+            "type": "number",
+            "description": "Quantidade de créditos necessários",
+            "example": 50,
+            "minimum": 1,
+            "maximum": 10000
+          },
+          "serviceType": {
+            "type": "string",
+            "description": "Tipo do serviço para calcular custo",
+            "example": "text_generation"
+          }
+        },
+        "required": [
+          "userId",
+          "amount",
+          "serviceType"
+        ]
+      },
+      "ValidateCreditsResponseDto": {
+        "type": "object",
+        "properties": {
+          "hasEnoughCredits": {
+            "type": "boolean",
+            "description": "Se o usuário tem créditos suficientes",
+            "example": true
+          },
+          "currentBalance": {
+            "type": "number",
+            "description": "Saldo atual de créditos",
+            "example": 1000
+          },
+          "requiredAmount": {
+            "type": "number",
+            "description": "Quantidade necessária",
+            "example": 50
+          },
+          "serviceCost": {
+            "type": "number",
+            "description": "Custo do serviço calculado",
+            "example": 100
+          },
+          "remaining": {
+            "type": "number",
+            "description": "Créditos restantes após a operação",
+            "example": 900
+          },
+          "canProceed": {
+            "type": "boolean",
+            "description": "Se pode prosseguir com a operação",
+            "example": true
+          },
+          "serviceType": {
+            "type": "string",
+            "description": "Tipo do serviço",
+            "example": "text_generation"
+          },
+          "message": {
+            "type": "string",
+            "description": "Mensagem explicativa",
+            "example": "Saldo suficiente para a operação"
+          }
+        },
+        "required": [
+          "hasEnoughCredits",
+          "currentBalance",
+          "requiredAmount",
+          "serviceCost",
+          "remaining",
+          "canProceed",
+          "serviceType",
+          "message"
+        ]
+      },
+      "ConsumeCreditsDto": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "description": "ID do usuário que está consumindo os créditos",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "amount": {
+            "type": "number",
+            "description": "Quantidade de créditos a serem consumidos",
+            "example": 50,
+            "minimum": 1,
+            "maximum": 10000
+          },
+          "serviceType": {
+            "type": "string",
+            "description": "Tipo de serviço que está consumindo os créditos",
+            "example": "text_generation",
+            "enum": [
+              "text_generation",
+              "image_generation",
+              "translation",
+              "summarization",
+              "voice_synthesis",
+              "document_analysis",
+              "custom_service"
+            ]
+          },
+          "description": {
+            "type": "string",
+            "description": "Descrição detalhada do consumo",
+            "example": "Geração de texto com 1500 tokens usando modelo GPT-4",
+            "maxLength": 500
+          },
+          "sessionId": {
+            "type": "string",
+            "description": "ID da sessão ou processo que originou o consumo",
+            "example": "session_12345",
+            "maxLength": 255
+          },
+          "clientIp": {
+            "type": "string",
+            "description": "IP do cliente",
+            "example": "192.168.1.1"
+          },
+          "userAgent": {
+            "type": "string",
+            "description": "User agent do cliente",
+            "example": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+          },
+          "metadata": {
+            "type": "object",
+            "description": "Metadados adicionais do consumo",
+            "example": {
+              "requestId": "req_12345",
+              "model": "gpt-4",
+              "tokens": 1500,
+              "duration": 2.5,
+              "parameters": {
+                "temperature": 0.7,
+                "maxTokens": 2000
+              }
+            }
+          }
+        },
+        "required": [
+          "userId",
+          "amount",
+          "serviceType",
+          "description"
+        ]
+      },
+      "ConsumeCreditsResponseDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Se o consumo foi bem-sucedido",
+            "example": true
+          },
+          "transactionId": {
+            "type": "string",
+            "description": "ID da transação criada",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "amountConsumed": {
+            "type": "number",
+            "description": "Quantidade de créditos consumidos",
+            "example": 50
+          },
+          "newBalance": {
+            "type": "number",
+            "description": "Saldo de créditos após o consumo",
+            "example": 950
+          },
+          "previousBalance": {
+            "type": "number",
+            "description": "Saldo anterior",
+            "example": 1000
+          },
+          "serviceType": {
+            "type": "string",
+            "description": "Tipo do serviço consumido",
+            "example": "text_generation"
+          },
+          "message": {
+            "type": "string",
+            "description": "Mensagem descritiva do resultado",
+            "example": "Créditos consumidos com sucesso"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Timestamp do consumo",
+            "example": "2025-07-14T10:15:00.000Z"
+          }
+        },
+        "required": [
+          "success",
+          "transactionId",
+          "amountConsumed",
+          "newBalance",
+          "previousBalance",
+          "serviceType",
+          "message",
+          "timestamp"
+        ]
+      },
+      "AddCreditsDto": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "description": "ID do usuário que receberá os créditos",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "amount": {
+            "type": "number",
+            "description": "Quantidade de créditos a serem adicionados",
+            "example": 1000,
+            "minimum": 1,
+            "maximum": 100000
+          },
+          "type": {
+            "type": "string",
+            "description": "Tipo da transação de adição",
+            "enum": [
+              "granted",
+              "refunded"
+            ],
+            "example": "granted"
+          },
+          "description": {
+            "type": "string",
+            "description": "Descrição da adição de créditos",
+            "example": "Compra de 1000 créditos via pagamento com cartão",
+            "maxLength": 500
+          },
+          "paymentId": {
+            "type": "string",
+            "description": "ID do pagamento relacionado (se aplicável)",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "sessionId": {
+            "type": "string",
+            "description": "ID da sessão ou processo que originou a adição",
+            "example": "session_12345",
+            "maxLength": 255
+          },
+          "expiresAt": {
+            "type": "string",
+            "description": "Data de expiração dos créditos (ISO string)",
+            "example": "2025-12-31T23:59:59.000Z"
+          },
+          "clientIp": {
+            "type": "string",
+            "description": "IP do cliente",
+            "example": "192.168.1.1"
+          },
+          "userAgent": {
+            "type": "string",
+            "description": "User agent do cliente",
+            "example": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"
+          },
+          "metadata": {
+            "type": "object",
+            "description": "Metadados adicionais da transação",
+            "example": {
+              "source": "payment_gateway",
+              "planId": "plan_premium",
+              "promotionCode": "WELCOME50",
+              "originalAmount": 1000,
+              "bonusAmount": 50
+            }
+          }
+        },
+        "required": [
+          "userId",
+          "amount",
+          "type",
+          "description"
+        ]
+      },
+      "AddCreditsResponseDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Se a adição foi bem-sucedida",
+            "example": true
+          },
+          "transactionId": {
+            "type": "string",
+            "description": "ID da transação criada",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "amountAdded": {
+            "type": "number",
+            "description": "Quantidade de créditos adicionados",
+            "example": 1000
+          },
+          "newBalance": {
+            "type": "number",
+            "description": "Saldo de créditos após a adição",
+            "example": 2000
+          },
+          "previousBalance": {
+            "type": "number",
+            "description": "Saldo anterior",
+            "example": 1000
+          },
+          "expiresAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Data de expiração dos créditos adicionados",
+            "example": "2025-12-31T23:59:59.000Z"
+          },
+          "message": {
+            "type": "string",
+            "description": "Mensagem descritiva do resultado",
+            "example": "Créditos adicionados com sucesso"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Timestamp da adição",
+            "example": "2025-07-14T10:15:00.000Z"
+          }
+        },
+        "required": [
+          "success",
+          "transactionId",
+          "amountAdded",
+          "newBalance",
+          "previousBalance",
+          "message",
+          "timestamp"
+        ]
+      },
+      "TransferCreditsDto": {
+        "type": "object",
+        "properties": {
+          "fromUserId": {
+            "type": "string",
+            "description": "ID do usuário origem (que enviará os créditos)",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "toUserId": {
+            "type": "string",
+            "description": "ID do usuário destino (que receberá os créditos)",
+            "example": "987fcdeb-51d3-4a2b-a456-426614174999"
+          },
+          "amount": {
+            "type": "number",
+            "description": "Quantidade de créditos a serem transferidos",
+            "example": 500,
+            "minimum": 1,
+            "maximum": 50000
+          },
+          "description": {
+            "type": "string",
+            "description": "Descrição da transferência",
+            "example": "Transferência de créditos para usuário premium",
+            "maxLength": 500
+          },
+          "metadata": {
+            "type": "object",
+            "description": "Metadados adicionais da transferência",
+            "example": {
+              "reason": "gift",
+              "giftMessage": "Parabéns pela promoção!"
+            }
+          }
+        },
+        "required": [
+          "fromUserId",
+          "toUserId",
+          "amount",
+          "description"
+        ]
+      },
+      "TransferCreditsResponseDto": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "description": "Se a transferência foi bem-sucedida",
+            "example": true
+          },
+          "debitTransactionId": {
+            "type": "string",
+            "description": "ID da transação de débito (usuário origem)",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "creditTransactionId": {
+            "type": "string",
+            "description": "ID da transação de crédito (usuário destino)",
+            "example": "987fcdeb-51d3-4a2b-a456-426614174999"
+          },
+          "amountTransferred": {
+            "type": "number",
+            "description": "Quantidade transferida",
+            "example": 500
+          },
+          "fromUserNewBalance": {
+            "type": "number",
+            "description": "Saldo do usuário origem após a transferência",
+            "example": 1500
+          },
+          "toUserNewBalance": {
+            "type": "number",
+            "description": "Saldo do usuário destino após a transferência",
+            "example": 750
+          },
+          "message": {
+            "type": "string",
+            "description": "Mensagem descritiva do resultado",
+            "example": "Transferência realizada com sucesso"
+          },
+          "timestamp": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Timestamp da transferência",
+            "example": "2025-07-14T10:15:00.000Z"
+          }
+        },
+        "required": [
+          "success",
+          "debitTransactionId",
+          "creditTransactionId",
+          "amountTransferred",
+          "fromUserNewBalance",
+          "toUserNewBalance",
+          "message",
+          "timestamp"
+        ]
+      },
+      "CreditTransaction": {
+        "type": "object",
+        "properties": {
+          "userId": {
+            "type": "string",
+            "description": "ID do usuário proprietário da transação",
+            "example": "123e4567-e89b-12d3-a456-426614174000"
+          },
+          "type": {
+            "type": "string",
+            "description": "Tipo da transação de crédito",
+            "enum": [
+              "granted",
+              "used",
+              "refunded",
+              "expired"
+            ],
+            "example": "used"
+          },
+          "amount": {
+            "type": "number",
+            "description": "Quantidade de créditos na transação (positivo para granted/refunded, negativo para used)",
+            "example": -50
+          },
+          "description": {
+            "type": "string",
+            "description": "Descrição da transação",
+            "example": "Consumo de 50 créditos para geração de texto",
+            "maxLength": 255
+          },
+          "relatedEntityType": {
+            "type": "string",
+            "description": "Tipo da entidade relacionada",
+            "example": "subscription"
+          },
+          "relatedEntityId": {
+            "type": "number",
+            "description": "ID da entidade relacionada",
+            "example": 123
+          },
+          "balanceBefore": {
+            "type": "number",
+            "description": "Saldo de créditos antes da transação",
+            "example": 1000,
+            "minimum": 0
+          },
+          "balanceAfter": {
+            "type": "number",
+            "description": "Saldo de créditos após a transação",
+            "example": 950,
+            "minimum": 0
+          },
+          "expiresAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Data de expiração dos créditos (se aplicável)",
+            "example": "2025-12-31T23:59:59.000Z"
+          },
+          "isCredit": {
+            "type": "boolean",
+            "description": "Se é uma transação de entrada de créditos",
+            "example": false
+          },
+          "isDebit": {
+            "type": "boolean",
+            "description": "Se é uma transação de saída de créditos",
+            "example": true
+          },
+          "hasExpiration": {
+            "type": "boolean",
+            "description": "Se os créditos têm data de expiração",
+            "example": true
+          },
+          "isExpired": {
+            "type": "boolean",
+            "description": "Se os créditos estão expirados",
+            "example": false
+          },
+          "absoluteAmount": {
+            "type": "number",
+            "description": "Valor absoluto da quantidade de créditos",
+            "example": 50
+          }
+        },
+        "required": [
+          "userId",
+          "type",
+          "amount",
+          "description",
+          "balanceBefore",
+          "balanceAfter",
+          "isCredit",
+          "isDebit",
+          "hasExpiration",
+          "isExpired",
+          "absoluteAmount"
+        ]
+      },
+      "UserStatsDto": {
+        "type": "object",
+        "properties": {
+          "totalUsers": {
+            "type": "number",
+            "description": "Total de usuários cadastrados"
+          },
+          "newUsers": {
+            "type": "number",
+            "description": "Novos usuários no período"
+          },
+          "activeUsers": {
+            "type": "number",
+            "description": "Usuários ativos no período"
+          },
+          "premiumUsers": {
+            "type": "number",
+            "description": "Usuários com planos premium"
+          },
+          "growthRate": {
+            "type": "number",
+            "description": "Taxa de crescimento de usuários (%)"
+          }
+        },
+        "required": [
+          "totalUsers",
+          "newUsers",
+          "activeUsers",
+          "premiumUsers",
+          "growthRate"
+        ]
+      },
+      "RevenueStatsDto": {
+        "type": "object",
+        "properties": {
+          "totalRevenue": {
+            "type": "number",
+            "description": "Receita total no período"
+          },
+          "averageRevenuePerUser": {
+            "type": "number",
+            "description": "Receita média por usuário"
+          },
+          "totalTransactions": {
+            "type": "number",
+            "description": "Número total de transações"
+          },
+          "conversionRate": {
+            "type": "number",
+            "description": "Taxa de conversão (%)"
+          },
+          "revenueGrowthRate": {
+            "type": "number",
+            "description": "Crescimento da receita (%)"
+          }
+        },
+        "required": [
+          "totalRevenue",
+          "averageRevenuePerUser",
+          "totalTransactions",
+          "conversionRate",
+          "revenueGrowthRate"
+        ]
+      },
+      "CreditsStatsDto": {
+        "type": "object",
+        "properties": {
+          "totalCreditsConsumed": {
+            "type": "number",
+            "description": "Total de créditos consumidos"
+          },
+          "totalCreditsAdded": {
+            "type": "number",
+            "description": "Total de créditos adicionados"
+          },
+          "averageCreditsPerUser": {
+            "type": "number",
+            "description": "Média de créditos por usuário"
+          },
+          "topCreditConsumers": {
+            "description": "Usuários que mais consomem créditos",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        },
+        "required": [
+          "totalCreditsConsumed",
+          "totalCreditsAdded",
+          "averageCreditsPerUser",
+          "topCreditConsumers"
+        ]
+      },
+      "SystemStatsDto": {
+        "type": "object",
+        "properties": {
+          "totalApiRequests": {
+            "type": "number",
+            "description": "Total de requests à API"
+          },
+          "averageResponseTime": {
+            "type": "number",
+            "description": "Tempo médio de resposta (ms)"
+          },
+          "errorRate": {
+            "type": "number",
+            "description": "Taxa de erro (%)"
+          },
+          "systemUptime": {
+            "type": "number",
+            "description": "Uptime do sistema (%)"
+          },
+          "memoryUsage": {
+            "type": "number",
+            "description": "Uso de memória (MB)"
+          }
+        },
+        "required": [
+          "totalApiRequests",
+          "averageResponseTime",
+          "errorRate",
+          "systemUptime",
+          "memoryUsage"
+        ]
+      },
+      "AdminStatsResponseDto": {
+        "type": "object",
+        "properties": {
+          "userStats": {
+            "description": "Estatísticas de usuários",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/UserStatsDto"
+              }
+            ]
+          },
+          "revenueStats": {
+            "description": "Estatísticas de receita",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/RevenueStatsDto"
+              }
+            ]
+          },
+          "creditsStats": {
+            "description": "Estatísticas de créditos",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/CreditsStatsDto"
+              }
+            ]
+          },
+          "systemStats": {
+            "description": "Estatísticas do sistema",
+            "allOf": [
+              {
+                "$ref": "#/components/schemas/SystemStatsDto"
+              }
+            ]
+          },
+          "generatedAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Data/hora da consulta"
+          },
+          "period": {
+            "type": "string",
+            "description": "Período das estatísticas"
+          }
+        },
+        "required": [
+          "userStats",
+          "revenueStats",
+          "creditsStats",
+          "systemStats",
+          "generatedAt",
+          "period"
+        ]
+      },
+      "AdminUserResponseDto": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string",
+            "description": "ID do usuário"
+          },
+          "name": {
+            "type": "string",
+            "description": "Nome do usuário"
+          },
+          "email": {
+            "type": "string",
+            "description": "Email do usuário"
+          },
+          "status": {
+            "type": "string",
+            "description": "Status do usuário",
+            "enum": [
+              "active",
+              "inactive",
+              "pending",
+              "suspended"
+            ]
+          },
+          "role": {
+            "type": "string",
+            "description": "Role do usuário",
+            "enum": [
+              "user",
+              "admin",
+              "moderator",
+              "super_admin"
+            ]
+          },
+          "emailVerified": {
+            "type": "boolean",
+            "description": "Se o email foi verificado"
+          },
+          "credits": {
+            "type": "number",
+            "description": "Créditos disponíveis"
+          },
+          "createdAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Data de cadastro"
+          },
+          "lastLoginAt": {
+            "format": "date-time",
+            "type": "string",
+            "description": "Último login"
+          },
+          "currentPlan": {
+            "type": "string",
+            "description": "Plano atual"
+          },
+          "totalSpent": {
+            "type": "number",
+            "description": "Total gasto"
+          },
+          "totalCreditsConsumed": {
+            "type": "number",
+            "description": "Total de créditos consumidos"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "email",
+          "status",
+          "role",
+          "emailVerified",
+          "credits",
+          "createdAt",
+          "lastLoginAt",
+          "currentPlan",
+          "totalSpent",
+          "totalCreditsConsumed"
+        ]
+      },
+      "AdminUserListResponseDto": {
+        "type": "object",
+        "properties": {
+          "users": {
+            "description": "Lista de usuários",
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/AdminUserResponseDto"
+            }
+          },
+          "total": {
+            "type": "number",
+            "description": "Total de usuários encontrados"
+          },
+          "page": {
+            "type": "number",
+            "description": "Página atual"
+          },
+          "limit": {
+            "type": "number",
+            "description": "Itens por página"
+          },
+          "totalPages": {
+            "type": "number",
+            "description": "Total de páginas"
+          }
+        },
+        "required": [
+          "users",
+          "total",
+          "page",
+          "limit",
+          "totalPages"
+        ]
+      },
+      "AdminUpdateUserDto": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "Nome do usuário"
+          },
+          "email": {
+            "type": "string",
+            "description": "Email do usuário"
+          },
+          "status": {
+            "type": "string",
+            "description": "Status do usuário",
+            "enum": [
+              "active",
+              "inactive",
+              "pending",
+              "suspended"
+            ]
+          },
+          "role": {
+            "type": "string",
+            "description": "Role do usuário",
+            "enum": [
+              "user",
+              "admin",
+              "moderator",
+              "super_admin"
+            ]
+          },
+          "emailVerified": {
+            "type": "boolean",
+            "description": "Se o email foi verificado"
+          },
+          "credits": {
+            "type": "number",
+            "description": "Créditos do usuário"
+          }
+        }
+      },
+      "AdminBulkActionDto": {
+        "type": "object",
+        "properties": {
+          "userIds": {
+            "description": "IDs dos usuários para ação em lote",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "action": {
+            "type": "string",
+            "description": "Ação a ser executada",
+            "enum": [
+              "activate",
+              "suspend",
+              "ban",
+              "delete",
+              "add_credits"
+            ]
+          },
+          "value": {
+            "type": "number",
+            "description": "Valor para ações que precisam (ex: créditos)"
+          }
+        },
+        "required": [
+          "userIds",
+          "action"
+        ]
+      }
+    }
+  }
+}
