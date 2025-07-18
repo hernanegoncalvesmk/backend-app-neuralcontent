@@ -13,8 +13,11 @@ import {
   ValidationPipe,
   DefaultValuePipe,
   UseGuards,
+  UseInterceptors,
+  UploadedFile,
   Req,
 } from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
 import {
   ApiTags,
   ApiOperation,
@@ -22,6 +25,7 @@ import {
   ApiQuery,
   ApiParam,
   ApiBody,
+  ApiConsumes,
   ApiBearerAuth,
   ApiSecurity,
 } from '@nestjs/swagger';

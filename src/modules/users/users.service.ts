@@ -550,7 +550,7 @@ export class UsersService {
         fileType: FileType.IMAGE,
         context: FileContext.AVATAR,
         processImage: true,
-        generateThumbnail: true,
+        createThumbnail: true,
         maxWidth: 800,
         maxHeight: 800,
         quality: 85,
