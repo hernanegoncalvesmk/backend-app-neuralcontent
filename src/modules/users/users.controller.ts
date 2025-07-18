@@ -15,6 +15,7 @@ import {
   UseGuards,
   UseInterceptors,
   UploadedFile,
+  BadRequestException,
   Req,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -510,5 +511,67 @@ export class UsersController {
   async deactivateUser(@Param('id', ParseIntPipe) id: number): Promise<UserResponseDto> {
     const user = await this.usersService.updateStatus(id, UserStatus.INACTIVE);
     return new UserResponseDto(user);
+  }
+
+  @Post('profile/picture')
+  @HttpCode(HttpStatus.OK)
+  @UseInterceptors(FileInterceptor('picture'))
+  @ApiOperation({ 
+    summary: 'Upload profile picture',
+    description: 'Allows authenticated users to upload their profile picture. Only image files are allowed (JPEG, PNG, WebP, GIF). Maximum file size is 5MB.',
+  })
+  @ApiConsumes('multipart/form-data')
+  @ApiBody({
+    description: 'Profile picture file',
+    schema: {
+      type: 'object',
+      properties: {
+        picture: {
+          type: 'string',
+          format: 'binary',
+          description: 'Image file for profile picture',
+        },
+      },
+      required: ['picture'],
+    },
+  })
+  @ApiResponse({ 
+    status: HttpStatus.OK, 
+    type: UserResponseDto,
+    description: 'Profile picture uploaded successfully',
+  })
+  @ApiResponse({ 
+    status: HttpStatus.BAD_REQUEST, 
+    description: 'Invalid file type or size',
+  })
+  @ApiResponse({ 
+    status: HttpStatus.UNAUTHORIZED, 
+    description: 'Unauthorized access',
+  })
+  @ApiResponse({ 
+    status: HttpStatus.NOT_FOUND, 
+    description: 'User not found',
+  })
+  async uploadProfilePicture(
+    @UploadedFile() file: Express.Multer.File,
+    @Req() req: Request & { user: any },
+  ): Promise<UserResponseDto> {
+    if (!file) {
+      throw new BadRequestException('No file uploaded');
+    }
+
+    const fileInfo = {
+      originalname: file.originalname,
+      mimetype: file.mimetype,
+      buffer: file.buffer,
+      size: file.size,
+    };
+
+    const updatedUser = await this.usersService.updateProfilePicture(
+      req.user.id,
+      fileInfo,
+    );
+
+    return new UserResponseDto(updatedUser);
   }
 }
