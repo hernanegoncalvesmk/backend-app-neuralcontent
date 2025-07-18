@@ -13,13 +13,21 @@ export {
   RefreshTokenDto, 
   AuthResponseDto, 
   LogoutDto,
-  ValidateTokenDto,
-  ForgotPasswordDto,
-  ResetPasswordDto 
+  ValidateTokenDto
 } from './refresh-token.dto';
 
 // DTOs de gestão de senha
 export { ChangePasswordDto } from './change-password.dto';
+
+// DTOs de verificação de email
+export {
+  VerifyEmailDto,
+  ResendVerificationDto,
+  ForgotPasswordDto,
+  ResetPasswordDto,
+  VerifyEmailResponseDto,
+  EmailOperationResponseDto,
+} from './verify-email.dto';
 
 // Re-export do UserRole para uso externo
 export type { UserRole as AuthUserRole } from './register.dto';

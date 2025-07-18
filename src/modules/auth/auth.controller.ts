@@ -22,7 +22,13 @@ import {
   RegisterDto, 
   RefreshTokenDto, 
   AuthResponseDto,
-  LogoutDto 
+  LogoutDto,
+  VerifyEmailDto,
+  ResendVerificationDto,
+  ForgotPasswordDto,
+  ResetPasswordDto,
+  VerifyEmailResponseDto,
+  EmailOperationResponseDto,
 } from './dto';
 import { Public } from '../../shared/decorators/public.decorator';
 import { AuthGuard } from '../../shared/guards/auth.guard';
@@ -266,5 +272,166 @@ export class AuthController {
       deviceType,
       // location pode ser obtida através de serviço de geolocalização IP
     };
+  }
+
+  // ===================================================================
+  // ENDPOINTS DE VERIFICAÇÃO DE EMAIL E RECUPERAÇÃO DE SENHA
+  // ===================================================================
+
+  /**
+   * Verificar email do usuário
+   */
+  @Post('verify-email')
+  @Public()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Verificar email do usuário',
+    description: 'Verifica o email do usuário usando token recebido por email',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Email verificado com sucesso',
+    type: VerifyEmailResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Token inválido ou expirado',
+  })
+  @ApiBody({ type: VerifyEmailDto })
+  async verifyEmail(
+    @Body() verifyEmailDto: VerifyEmailDto,
+  ): Promise<VerifyEmailResponseDto> {
+    try {
+      this.logger.log(`Verificação de email solicitada`);
+      
+      const result = await this.authService.verifyEmail(
+        verifyEmailDto.token,
+        verifyEmailDto.email,
+      );
+
+      return result;
+    } catch (error) {
+      this.logger.error(`Erro na verificação de email: ${error.message}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Reenviar email de verificação
+   */
+  @Post('resend-verification')
+  @Public()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Reenviar email de verificação',
+    description: 'Reenvia o email de verificação para o usuário',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Email de verificação reenviado',
+    type: EmailOperationResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Email já verificado ou inválido',
+  })
+  @ApiBody({ type: ResendVerificationDto })
+  async resendVerification(
+    @Body() resendDto: ResendVerificationDto,
+  ): Promise<EmailOperationResponseDto> {
+    try {
+      this.logger.log(`Reenvio de verificação solicitado para: ${resendDto.email}`);
+      
+      const result = await this.authService.resendVerificationEmail(resendDto.email);
+
+      return result;
+    } catch (error) {
+      this.logger.error(`Erro no reenvio de verificação: ${error.message}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Solicitar recuperação de senha
+   */
+  @Post('forgot-password')
+  @Public()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Solicitar recuperação de senha',
+    description: 'Envia email com instruções para recuperação de senha',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Instruções enviadas por email',
+    type: EmailOperationResponseDto,
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Email inválido ou usuário não encontrado',
+  })
+  @ApiBody({ type: ForgotPasswordDto })
+  async forgotPassword(
+    @Body() forgotPasswordDto: ForgotPasswordDto,
+  ): Promise<EmailOperationResponseDto> {
+    try {
+      this.logger.log(`Recuperação de senha solicitada para: ${forgotPasswordDto.email}`);
+      
+      const result = await this.authService.forgotPassword(
+        forgotPasswordDto.email,
+        forgotPasswordDto.callbackUrl,
+      );
+
+      return result;
+    } catch (error) {
+      this.logger.error(`Erro na recuperação de senha: ${error.message}`);
+      throw error;
+    }
+  }
+
+  /**
+   * Reset de senha
+   */
+  @Post('reset-password')
+  @Public()
+  @HttpCode(HttpStatus.OK)
+  @ApiOperation({
+    summary: 'Reset de senha',
+    description: 'Redefine a senha do usuário usando token de recuperação',
+  })
+  @ApiResponse({
+    status: 200,
+    description: 'Senha redefinida com sucesso',
+    schema: {
+      type: 'object',
+      properties: {
+        success: { type: 'boolean' },
+        message: { type: 'string' },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Token inválido, expirado ou senhas não coincidem',
+  })
+  @ApiBody({ type: ResetPasswordDto })
+  async resetPassword(
+    @Body() resetPasswordDto: ResetPasswordDto,
+  ): Promise<{ success: boolean; message: string }> {
+    try {
+      this.logger.log(`Reset de senha solicitado`);
+      
+      const result = await this.authService.resetPassword(
+        resetPasswordDto.token,
+        resetPasswordDto.newPassword,
+        resetPasswordDto.confirmPassword,
+        resetPasswordDto.email,
+      );
+
+      return result;
+    } catch (error) {
+      this.logger.error(`Erro no reset de senha: ${error.message}`);
+      throw error;
+    }
   }
 }

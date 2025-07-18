@@ -13,7 +13,7 @@ import {
   Length,
 } from 'class-validator';
 import { Type } from 'class-transformer';
-import { CreditServiceType } from '../entities/credit-transaction.entity';
+import { CreditService } from '../entities/credit-transaction.entity';
 
 /**
  * DTO para consumo de créditos
@@ -42,13 +42,12 @@ export class ConsumeCreditsDto {
   amount: number;
 
   @ApiProperty({
-    description: 'Tipo de serviço que está consumindo os créditos',
-    enum: CreditServiceType,
-    example: CreditServiceType.TEXT_GENERATION,
+    description: 'Tipo de serviço que consumirá os créditos',
+    enum: CreditService,
+    example: CreditService.CONTENT_GENERATION,
   })
-  @IsNotEmpty()
-  @IsEnum(CreditServiceType)
-  serviceType: CreditServiceType;
+  @IsEnum(CreditService)
+  serviceType: CreditService;
 
   @ApiProperty({
     description: 'Descrição detalhada do consumo',
@@ -145,10 +144,10 @@ export class ConsumeCreditsResponseDto {
 
   @ApiProperty({
     description: 'Tipo do serviço consumido',
-    enum: CreditServiceType,
-    example: CreditServiceType.TEXT_GENERATION,
+    enum: CreditService,
+    example: CreditService.CONTENT_GENERATION,
   })
-  serviceType: CreditServiceType;
+  serviceType: CreditService;
 
   @ApiProperty({
     description: 'Mensagem descritiva do resultado',
@@ -191,12 +190,12 @@ export class ValidateCreditsDto {
 
   @ApiProperty({
     description: 'Tipo do serviço para calcular custo',
-    enum: CreditServiceType,
-    example: CreditServiceType.TEXT_GENERATION,
+    enum: CreditService,
+    example: CreditService.CONTENT_GENERATION,
   })
   @IsNotEmpty()
-  @IsEnum(CreditServiceType)
-  serviceType: CreditServiceType;
+  @IsEnum(CreditService)
+  serviceType: CreditService;
 }
 
 /**
@@ -241,10 +240,10 @@ export class ValidateCreditsResponseDto {
 
   @ApiProperty({
     description: 'Tipo do serviço',
-    enum: CreditServiceType,
-    example: CreditServiceType.TEXT_GENERATION,
+    enum: CreditService,
+    example: CreditService.CONTENT_GENERATION,
   })
-  serviceType: CreditServiceType;
+  serviceType: CreditService;
 
   @ApiProperty({
     description: 'Mensagem explicativa',

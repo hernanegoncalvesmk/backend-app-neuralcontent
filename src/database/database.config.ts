@@ -32,6 +32,7 @@ export default registerAs(
     // Production optimizations
     cache: {
       duration: 30000, // 30 seconds
+      tableName: 'sys_query_result_cache', // Nome oficial com prefixo
     },
 
     // Timezone configuration

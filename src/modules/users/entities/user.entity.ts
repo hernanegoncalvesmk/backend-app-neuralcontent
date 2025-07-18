@@ -17,8 +17,7 @@ import { UserRole, UserStatus } from '../dto';
  * - Controle de acesso baseado em roles
  * - Auditoria completa
  */
-@Entity('users')
-@Index(['email'], { unique: true })
+@Entity('usr_users')
 @Index(['status'])
 @Index(['role'])
 @Index(['isEmailVerified'])
@@ -155,11 +154,27 @@ export class User extends BaseEntity {
   lockedUntil?: Date;
 
   @Column({
+    type: 'varchar',
+    length: 255,
+    nullable: true,
+    comment: 'Token para verificação de email',
+  })
+  emailVerificationToken?: string;
+
+  @Column({
     type: 'timestamp',
     nullable: true,
     comment: 'Data de expiração do token de verificação de email',
   })
   emailVerificationTokenExpiresAt?: Date;
+
+  @Column({
+    type: 'varchar',
+    length: 255,
+    nullable: true,
+    comment: 'Token para reset de senha',
+  })
+  passwordResetToken?: string;
 
   @Column({
     type: 'timestamp',
@@ -181,6 +196,14 @@ export class User extends BaseEntity {
     comment: 'Preferência para receber newsletters',
   })
   marketingEmails: boolean;
+
+  @Column({
+    type: 'varchar',
+    length: 500,
+    nullable: true,
+    comment: 'URL da foto de perfil do usuário',
+  })
+  profilePicture?: string;
 
   @Column({
     type: 'json',

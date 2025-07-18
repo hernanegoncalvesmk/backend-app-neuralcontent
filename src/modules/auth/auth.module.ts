@@ -12,6 +12,7 @@ import { User } from '../users/entities/user.entity';
 // Shared modules
 import { LoggerModule } from '../../shared/logger/logger.module';
 import { CacheModule } from '../../shared/cache/cache.module';
+import { EmailModule } from '../email/email.module';
 
 /**
  * Módulo de autenticação
@@ -58,6 +59,7 @@ import { CacheModule } from '../../shared/cache/cache.module';
     // Módulos compartilhados
     LoggerModule,
     CacheModule,
+    EmailModule,
   ],
 
   controllers: [

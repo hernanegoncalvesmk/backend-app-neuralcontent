@@ -5,6 +5,7 @@ import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
 import { User } from './entities/user.entity';
 import { AuthModule } from '../auth/auth.module';
+import { UploadModule } from '../upload/upload.module';
 
 /**
  * UsersModule - Módulo de gestão de usuários
@@ -26,6 +27,7 @@ import { AuthModule } from '../auth/auth.module';
     TypeOrmModule.forFeature([User]),
     ConfigModule, // Para acessar configurações
     AuthModule, // Para AuthGuard e JWT
+    UploadModule, // Para UploadService
   ],
   controllers: [UsersController],
   providers: [UsersService],

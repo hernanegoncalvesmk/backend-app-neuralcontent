@@ -21,6 +21,7 @@ import { PlansModule } from './modules/plans/plans.module';
 import { PaymentsModule } from './modules/payments/payments.module';
 import { CreditsModule } from './modules/credits/credits.module';
 import { AdminModule } from './modules/admin/admin.module';
+import { EmailModule } from './modules/email/email.module';
 import { CustomThrottlerGuard } from './shared/guards/simple-throttler.guard';
 
 @Module({
@@ -64,6 +65,7 @@ import { CustomThrottlerGuard } from './shared/guards/simple-throttler.guard';
     PaymentsModule,
     CreditsModule,
     AdminModule,
+    EmailModule,
   ],
   controllers: [AppController],
   providers: [

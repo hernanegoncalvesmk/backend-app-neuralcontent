@@ -29,14 +29,16 @@ export enum CreditTransactionStatus {
 /**
  * Serviços que consomem créditos
  */
-export enum CreditServiceType {
-  TEXT_GENERATION = 'text_generation',
+export enum CreditService {
+  CONTENT_GENERATION = 'content_generation',
+  TEXT_TRANSLATION = 'text_translation',
   IMAGE_GENERATION = 'image_generation',
-  TRANSLATION = 'translation',
-  SUMMARIZATION = 'summarization',
-  VOICE_SYNTHESIS = 'voice_synthesis',
+  AUDIO_GENERATION = 'audio_generation',
+  VIDEO_GENERATION = 'video_generation',
+  OCR_PROCESSING = 'ocr_processing',
   DOCUMENT_ANALYSIS = 'document_analysis',
-  CUSTOM_SERVICE = 'custom_service'
+  API_USAGE = 'api_usage',
+  PREMIUM_FEATURE = 'premium_feature'
 }
 
 /**
@@ -53,7 +55,7 @@ export enum CreditServiceType {
  * - Controle de saldo e expiração
  * - Metadata extensível para contexto
  */
-@Entity('credit_transactions')
+@Entity('crd_credit_transactions')
 @Index(['userId', 'createdAt'])
 @Index(['type', 'status'])
 @Index(['serviceType'])
@@ -107,19 +109,19 @@ export class CreditTransaction extends BaseEntity {
   @Column({ type: 'int', unsigned: true, name: 'balance_after' })
   balanceAfter: number;
 
-  @ApiProperty({
+    @ApiProperty({
     description: 'Tipo de serviço que consumiu os créditos',
-    enum: CreditServiceType,
-    example: CreditServiceType.TEXT_GENERATION,
+    enum: CreditService,
+    example: CreditService.CONTENT_GENERATION,
     required: false,
   })
   @Column({
     type: 'enum',
-    enum: CreditServiceType,
+    enum: CreditService,
     nullable: true,
-    name: 'service_type',
+    comment: 'Tipo de serviço que consumiu os créditos',
   })
-  serviceType?: CreditServiceType;
+  serviceType?: CreditService;
 
   @ApiProperty({
     description: 'ID da transação de pagamento relacionada',

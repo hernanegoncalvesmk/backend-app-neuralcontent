@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bem-vindo ao NeuralContent</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8fafc;
+            color: #334155;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 40px 30px;
+            text-align: center;
+            color: white;
+        }
+        
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 16px;
+        }
+        
+        .content {
+            padding: 40px 30px;
+        }
+        
+        .welcome-message {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .welcome-message h2 {
+            color: #1e293b;
+            font-size: 22px;
+            margin-bottom: 12px;
+        }
+        
+        .welcome-message p {
+            color: #64748b;
+            font-size: 16px;
+        }
+        
+        .features {
+            background-color: #f8fafc;
+            border-radius: 8px;
+            padding: 25px;
+            margin: 30px 0;
+        }
+        
+        .features h3 {
+            color: #1e293b;
+            font-size: 18px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .feature-list {
+            list-style: none;
+        }
+        
+        .feature-list li {
+            padding: 8px 0;
+            position: relative;
+            padding-left: 25px;
+        }
+        
+        .feature-list li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #22c55e;
+            font-weight: bold;
+        }
+        
+        .cta-section {
+            text-align: center;
+            margin: 30px 0;
+        }
+        
+        .cta-button {
+            display: inline-block;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-decoration: none;
+            padding: 14px 30px;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+        
+        .cta-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .footer {
+            background-color: #f1f5f9;
+            padding: 25px 30px;
+            text-align: center;
+            border-top: 1px solid #e2e8f0;
+        }
+        
+        .footer p {
+            color: #64748b;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+        
+        .social-links {
+            margin: 15px 0;
+        }
+        
+        .social-links a {
+            display: inline-block;
+            margin: 0 10px;
+            color: #667eea;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        
+        .unsubscribe {
+            color: #94a3b8;
+            font-size: 12px;
+            margin-top: 15px;
+        }
+        
+        .unsubscribe a {
+            color: #667eea;
+            text-decoration: none;
+        }
+        
+        @media only screen and (max-width: 600px) {
+            .container {
+                margin: 0;
+                border-radius: 0;
+            }
+            
+            .header, .content, .footer {
+                padding: 25px 20px;
+            }
+            
+            .header h1 {
+                font-size: 20px;
+            }
+            
+            .welcome-message h2 {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">🧠 NeuralContent</div>
+            <h1>Bem-vindo à nossa plataforma!</h1>
+            <p>Transforme suas ideias em conteúdo extraordinário</p>
+        </div>
+        
+        <div class="content">
+            <div class="welcome-message">
+                <h2>Olá, {{userName}}! 👋</h2>
+                <p>Estamos muito felizes em tê-lo conosco. Sua jornada de criação de conteúdo inteligente começa agora!</p>
+            </div>
+            
+            <div class="features">
+                <h3>🚀 O que você pode fazer:</h3>
+                <ul class="feature-list">
+                    <li>Criar conteúdo de alta qualidade usando IA</li>
+                    <li>Gerenciar seus créditos e planos</li>
+                    <li>Acessar templates profissionais</li>
+                    <li>Exportar em múltiplos formatos</li>
+                    <li>Colaborar com sua equipe</li>
+                </ul>
+            </div>
+            
+            <div class="cta-section">
+                <a href="{{dashboardUrl}}" class="cta-button">
+                    Começar Agora 🚀
+                </a>
+            </div>
+            
+            <p style="text-align: center; color: #64748b; margin-top: 25px;">
+                Precisa de ajuda? Nossa equipe está sempre pronta para ajudar!<br>
+                <a href="mailto:suporte@neuralcontent.com" style="color: #667eea;">suporte@neuralcontent.com</a>
+            </p>
+        </div>
+        
+        <div class="footer">
+            <p><strong>NeuralContent</strong> - Plataforma de Criação de Conteúdo com IA</p>
+            <div class="social-links">
+                <a href="{{websiteUrl}}">Site</a> |
+                <a href="{{helpUrl}}">Ajuda</a> |
+                <a href="{{blogUrl}}">Blog</a>
+            </div>
+            <div class="unsubscribe">
+                <p>
+                    Você recebeu este email porque se registrou no NeuralContent.<br>
+                    <a href="{{unsubscribeUrl}}">Cancelar inscrição</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

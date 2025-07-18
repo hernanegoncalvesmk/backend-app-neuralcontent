@@ -2,7 +2,7 @@ import { Injectable, BadRequestException, NotFoundException, ConflictException }
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, DataSource } from 'typeorm';
 import { LoggerService } from '../../shared/logger/logger.service';
-import { CreditTransaction, CreditTransactionType, CreditTransactionStatus, CreditServiceType } from './entities/credit-transaction.entity';
+import { CreditTransaction, CreditTransactionType, CreditTransactionStatus, CreditService } from './entities/credit-transaction.entity';
 import { User } from '../users/entities/user.entity';
 import {
   ConsumeCreditsDto,
@@ -362,15 +362,17 @@ export class CreditsService {
   /**
    * Calcula o custo do serviço baseado no tipo
    */
-  private calculateServiceCost(serviceType: CreditServiceType, amount: number): number {
-    const serviceMultipliers: Record<CreditServiceType, number> = {
-      [CreditServiceType.TEXT_GENERATION]: 1,
-      [CreditServiceType.IMAGE_GENERATION]: 2,
-      [CreditServiceType.TRANSLATION]: 1,
-      [CreditServiceType.SUMMARIZATION]: 1,
-      [CreditServiceType.VOICE_SYNTHESIS]: 2,
-      [CreditServiceType.DOCUMENT_ANALYSIS]: 1,
-      [CreditServiceType.CUSTOM_SERVICE]: 1,
+  private calculateServiceCost(serviceType: CreditService, amount: number): number {
+    const serviceMultipliers: Record<CreditService, number> = {
+      [CreditService.CONTENT_GENERATION]: 1,
+      [CreditService.IMAGE_GENERATION]: 2,
+      [CreditService.TEXT_TRANSLATION]: 1,
+      [CreditService.AUDIO_GENERATION]: 2,
+      [CreditService.VIDEO_GENERATION]: 3,
+      [CreditService.OCR_PROCESSING]: 1,
+      [CreditService.DOCUMENT_ANALYSIS]: 1,
+      [CreditService.API_USAGE]: 1,
+      [CreditService.PREMIUM_FEATURE]: 1,
     };
 
     const multiplier = serviceMultipliers[serviceType] || 1;

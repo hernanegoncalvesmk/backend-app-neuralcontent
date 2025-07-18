@@ -18,7 +18,7 @@ import { User } from '../../users/entities/user.entity';
  * @author NeuralContent Team
  * @since 1.0.0
  */
-@Entity('user_sessions')
+@Entity('usr_sessions')
 @Index(['userId', 'isActive'])
 @Index(['refreshTokenHash'])
 @Index(['expiresAt'])

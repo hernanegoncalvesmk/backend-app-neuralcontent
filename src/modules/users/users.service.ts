@@ -24,6 +24,10 @@ import {
 // Entity
 import { User } from './entities/user.entity';
 
+// Services
+import { UploadService, UploadedFileInfo } from '../upload/services/upload.service';
+import { UploadFileDto, FileType, FileContext } from '../upload/dto/upload-file.dto';
+
 // Custom Exceptions
 import { 
   BusinessValidationException,
