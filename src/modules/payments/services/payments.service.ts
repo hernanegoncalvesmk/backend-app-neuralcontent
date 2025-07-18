@@ -386,10 +386,10 @@ export class PaymentsService {
         status: SubscriptionStatus.ACTIVE,
         startDate: startDate,
         nextBillingDate,
-        creditsPerPeriod: 1000, // TODO: pegar do plano
+        creditsGranted: 1000, // TODO: pegar do plano
         creditsUsed: 0,
         autoRenew: true,
-        amount: payment.amount,
+        pricePaid: payment.amount / 100, // converter de centavos para valor decimal
         currency: payment.currency,
       });
 

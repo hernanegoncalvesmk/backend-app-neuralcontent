@@ -13,13 +13,12 @@ import { User } from '../../users/entities/user.entity';
 import { Plan } from '../../plans/entities/plan.entity';
 
 export enum SubscriptionStatus {
+  TRIAL = 'trial',
   ACTIVE = 'active',
-  INACTIVE = 'inactive',
   CANCELLED = 'cancelled',
   EXPIRED = 'expired',
   SUSPENDED = 'suspended',
   PENDING = 'pending',
-  TRIALING = 'trialing',
 }
 
 export enum BillingCycle {
@@ -29,11 +28,11 @@ export enum BillingCycle {
   LIFETIME = 'lifetime',
 }
 
-@Entity('pay_user_subscriptions')
+@Entity('pln_user_subscriptions')
 @Index(['status'])
 @Index(['userId'])
 @Index(['planId'])
-@Index(['externalSubscriptionId'])
+@Index(['stripeSubscriptionId'])
 @Index(['currentPeriodEnd'])
 export class UserSubscription {
   @ApiProperty({
@@ -82,66 +81,100 @@ export class UserSubscription {
   billingCycle: BillingCycle;
 
   @ApiProperty({
-    description: 'ID da assinatura no provedor externo',
+    description: 'ID da assinatura no Stripe',
     example: 'sub_1234567890',
   })
   @Column({
     type: 'varchar',
-    length: 255,
-    name: 'external_subscription_id',
+    length: 100,
+    name: 'stripe_subscription_id',
+    nullable: true,
+    unique: true,
+  })
+  stripeSubscriptionId?: string;
+
+  @ApiProperty({
+    description: 'ID do cliente no Stripe',
+    example: 'cus_1234567890',
+  })
+  @Column({
+    type: 'varchar',
+    length: 100,
+    name: 'stripe_customer_id',
     nullable: true,
   })
-  externalSubscriptionId?: string;
+  stripeCustomerId?: string;
 
   @ApiProperty({
     description: 'Data de início da assinatura',
     example: '2025-07-14T10:00:00.000Z',
   })
-  @Column({ type: 'datetime', name: 'start_date' })
+  @Column({ type: 'timestamp', name: 'start_date' })
   startDate: Date;
 
   @ApiProperty({
-    description: 'Data de fim do período atual',
-    example: '2025-08-14T10:00:00.000Z',
+    description: 'Data de início do período atual',
+    example: '2025-07-14T10:00:00.000Z',
   })
-  @Column({ type: 'datetime', name: 'current_period_start' })
-  currentPeriodStart: Date;
+  @Column({ type: 'timestamp', name: 'current_period_start', nullable: true })
+  currentPeriodStart?: Date;
 
   @ApiProperty({
     description: 'Data de fim do período atual',
     example: '2025-08-14T10:00:00.000Z',
   })
-  @Column({ type: 'datetime', name: 'current_period_end' })
-  currentPeriodEnd: Date;
+  @Column({ type: 'timestamp', name: 'current_period_end', nullable: true })
+  currentPeriodEnd?: Date;
+
+  @ApiProperty({
+    description: 'Data de início do período de trial',
+    example: '2025-07-14T10:00:00.000Z',
+  })
+  @Column({ type: 'timestamp', name: 'trial_start_date', nullable: true })
+  trialStartDate?: Date;
+
+  @ApiProperty({
+    description: 'Data de fim do período de trial',
+    example: '2025-07-21T10:00:00.000Z',
+  })
+  @Column({ type: 'timestamp', name: 'trial_end_date', nullable: true })
+  trialEndDate?: Date;
+
+  @ApiProperty({
+    description: 'Se o usuário já utilizou o período de trial',
+    example: false,
+    default: false,
+  })
+  @Column({ type: 'boolean', name: 'is_trial_used', default: false })
+  isTrialUsed: boolean;
 
   @ApiProperty({
     description: 'Data de cancelamento da assinatura',
     example: '2025-08-14T10:00:00.000Z',
   })
-  @Column({ type: 'datetime', name: 'cancelled_at', nullable: true })
+  @Column({ type: 'timestamp', name: 'cancelled_at', nullable: true })
   cancelledAt?: Date;
-
-  @ApiProperty({
-    description: 'Data de fim da assinatura',
-    example: '2025-08-14T10:00:00.000Z',
-  })
-  @Column({ type: 'datetime', name: 'ended_at', nullable: true })
-  endedAt?: Date;
 
   @ApiProperty({
     description: 'Data da próxima cobrança',
     example: '2025-08-14T10:00:00.000Z',
   })
-  @Column({ type: 'datetime', name: 'next_billing_date', nullable: true })
+  @Column({ type: 'timestamp', name: 'next_billing_date', nullable: true })
   nextBillingDate?: Date;
 
   @ApiProperty({
-    description: 'Valor da assinatura em centavos',
-    example: 2990,
+    description: 'Preço pago pela assinatura',
+    example: 29.90,
     minimum: 0,
   })
-  @Column({ type: 'int', unsigned: true })
-  amount: number;
+  @Column({ 
+    type: 'decimal', 
+    precision: 10, 
+    scale: 2, 
+    name: 'price_paid',
+    nullable: true 
+  })
+  pricePaid?: number;
 
   @ApiProperty({
     description: 'Moeda da assinatura',
@@ -152,35 +185,20 @@ export class UserSubscription {
   currency: string;
 
   @ApiProperty({
-    description: 'Quantidade de créditos por período',
+    description: 'Créditos concedidos com esta assinatura',
     example: 1000,
     minimum: 0,
   })
-  @Column({ type: 'int', unsigned: true, name: 'credits_per_period', default: 0 })
-  creditsPerPeriod: number;
+  @Column({ type: 'int', unsigned: true, name: 'credits_granted', default: 0 })
+  creditsGranted: number;
 
   @ApiProperty({
-    description: 'Créditos utilizados no período atual',
+    description: 'Créditos utilizados nesta assinatura',
     example: 150,
     minimum: 0,
   })
   @Column({ type: 'int', unsigned: true, name: 'credits_used', default: 0 })
   creditsUsed: number;
-
-  @ApiProperty({
-    description: 'Se a assinatura é de teste',
-    example: false,
-    default: false,
-  })
-  @Column({ type: 'boolean', name: 'is_trial', default: false })
-  isTrial: boolean;
-
-  @ApiProperty({
-    description: 'Data de fim do período de teste',
-    example: '2025-07-21T10:00:00.000Z',
-  })
-  @Column({ type: 'datetime', name: 'trial_end', nullable: true })
-  trialEnd?: Date;
 
   @ApiProperty({
     description: 'Se a renovação automática está ativa',
@@ -232,7 +250,7 @@ export class UserSubscription {
     example: 850,
   })
   get creditsRemaining(): number {
-    return Math.max(0, this.creditsPerPeriod - this.creditsUsed);
+    return Math.max(0, this.creditsGranted - this.creditsUsed);
   }
 
   @ApiProperty({
@@ -240,14 +258,18 @@ export class UserSubscription {
     example: false,
   })
   get isExpired(): boolean {
-    return new Date() > this.currentPeriodEnd;
+    return Boolean(this.currentPeriodEnd && new Date() > this.currentPeriodEnd);
   }
 
   @ApiProperty({
-    description: 'Se a assinatura está em período de teste',
+    description: 'Se a assinatura está em período de trial',
     example: false,
   })
   get isInTrial(): boolean {
-    return Boolean(this.isTrial && this.trialEnd && new Date() < this.trialEnd);
+    return Boolean(
+      this.status === SubscriptionStatus.TRIAL && 
+      this.trialEndDate && 
+      new Date() < this.trialEndDate
+    );
   }
 }

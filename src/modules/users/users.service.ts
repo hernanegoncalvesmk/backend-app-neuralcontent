@@ -4,6 +4,7 @@ import {
   ConflictException, 
   BadRequestException,
   ForbiddenException,
+  InternalServerErrorException,
   Logger 
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -72,6 +73,7 @@ export class UsersService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private readonly configService: ConfigService,
+    private readonly uploadService: UploadService,
   ) {
     this.saltRounds = this.configService.get<number>('BCRYPT_ROUNDS', 12);
   }
@@ -500,6 +502,87 @@ export class UsersService {
       where,
       order: { createdAt: 'DESC' },
     });
+  }
+
+  /**
+   * Atualizar foto de perfil do usuário
+   * 
+   * @param userId - ID do usuário
+   * @param fileInfo - Informações do arquivo de imagem
+   * @returns User com profilePicture atualizado
+   * @throws NotFoundException se usuário não existir
+   * @throws BadRequestException se arquivo inválido
+   */
+  async updateProfilePicture(
+    userId: number,
+    fileInfo: UploadedFileInfo,
+  ): Promise<User> {
+    this.logger.log(`Updating profile picture for user ID: ${userId}`);
+
+    try {
+      // Buscar usuário existente
+      const user = await this.findOne(userId);
+      if (!user) {
+        throw new ResourceNotFoundException('User', userId);
+      }
+
+      // Validar que é uma imagem
+      const allowedImageTypes = [
+        'image/jpeg',
+        'image/jpg', 
+        'image/png',
+        'image/webp',
+        'image/gif'
+      ];
+
+      if (!allowedImageTypes.includes(fileInfo.mimetype)) {
+        throw new BadRequestException('Only image files are allowed for profile pictures');
+      }
+
+      // Validar tamanho (máximo 5MB para fotos de perfil)
+      const maxProfilePictureSize = 5 * 1024 * 1024; // 5MB
+      if (fileInfo.size > maxProfilePictureSize) {
+        throw new BadRequestException('Profile picture must be smaller than 5MB');
+      }
+
+      // Upload da imagem usando o UploadService
+      const uploadDto: UploadFileDto = {
+        fileType: FileType.IMAGE,
+        context: FileContext.AVATAR,
+        processImage: true,
+        generateThumbnail: true,
+        maxWidth: 800,
+        maxHeight: 800,
+        quality: 85,
+      };
+
+      const uploadResult = await this.uploadService.uploadFile(
+        fileInfo,
+        uploadDto,
+        user,
+      );
+
+      // Atualizar o campo profilePicture no usuário
+      await this.userRepository.update(userId, {
+        profilePicture: uploadResult.url,
+      });
+
+      // Buscar e retornar usuário atualizado
+      const updatedUser = await this.findOne(userId);
+      
+      this.logger.log(`Profile picture updated successfully for user ID: ${userId}`);
+      return updatedUser;
+
+    } catch (error) {
+      this.logger.error(`Error updating profile picture for user ID: ${userId}`, error.stack);
+      
+      if (error instanceof ResourceNotFoundException || 
+          error instanceof BadRequestException) {
+        throw error;
+      }
+      
+      throw new InternalServerErrorException('Failed to update profile picture');
+    }
   }
 
   // ===== MÉTODOS AUXILIARES PRIVADOS =====
