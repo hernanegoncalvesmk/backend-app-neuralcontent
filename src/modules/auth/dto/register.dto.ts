@@ -1,13 +1,13 @@
-import {
-  IsEmail,
-  IsNotEmpty,
-  IsString,
-  MinLength,
-  MaxLength,
-  Matches,
+import { 
+  IsEmail, 
+  IsNotEmpty, 
+  IsString, 
+  MinLength, 
+  MaxLength, 
+  Matches, 
   IsOptional,
   IsEnum,
-  IsBoolean,
+  IsBoolean 
 } from 'class-validator';
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
@@ -18,76 +18,49 @@ import { Transform } from 'class-transformer';
 export enum UserRole {
   USER = 'user',
   ADMIN = 'admin',
-  MODERATOR = 'moderator',
+  MODERATOR = 'moderator'
 }
 
 /**
  * DTO para registro de novo usuário
- *
+ * 
  * @description Valida os dados de entrada para criação de nova conta
  * @author NeuralContent Team
  * @since 1.0.0
  */
 export class RegisterDto {
   @ApiProperty({
-    description: 'Primeiro nome do usuário',
-    example: 'João',
+    description: 'Nome completo do usuário',
+    example: 'João Silva Santos',
     minLength: 2,
     maxLength: 100,
   })
   @IsString({
-    message: 'Primeiro nome deve ser uma string',
+    message: 'Nome deve ser uma string',
   })
   @IsNotEmpty({
-    message: 'Primeiro nome é obrigatório',
+    message: 'Nome é obrigatório',
   })
   @MinLength(2, {
-    message: 'Primeiro nome deve ter pelo menos 2 caracteres',
+    message: 'Nome deve ter pelo menos 2 caracteres',
   })
   @MaxLength(100, {
-    message: 'Primeiro nome deve ter no máximo 100 caracteres',
+    message: 'Nome deve ter no máximo 100 caracteres',
   })
   @Matches(/^[a-zA-ZÀ-ÿ\s]+$/, {
-    message: 'Primeiro nome deve conter apenas letras e espaços',
+    message: 'Nome deve conter apenas letras e espaços',
   })
   @Transform(({ value }) => value?.trim())
-  firstName: string;
-
-  @ApiProperty({
-    description: 'Sobrenome do usuário',
-    example: 'Silva Santos',
-    minLength: 2,
-    maxLength: 100,
-  })
-  @IsString({
-    message: 'Sobrenome deve ser uma string',
-  })
-  @IsNotEmpty({
-    message: 'Sobrenome é obrigatório',
-  })
-  @MinLength(2, {
-    message: 'Sobrenome deve ter pelo menos 2 caracteres',
-  })
-  @MaxLength(100, {
-    message: 'Sobrenome deve ter no máximo 100 caracteres',
-  })
-  @Matches(/^[a-zA-ZÀ-ÿ\s]+$/, {
-    message: 'Sobrenome deve conter apenas letras e espaços',
-  })
-  @Transform(({ value }) => value?.trim())
-  lastName: string;
+  name: string;
 
   @ApiProperty({
     description: 'Email único do usuário',
     example: 'joao.silva@neuralcontent.com',
     format: 'email',
   })
-  @IsEmail(
-    {},
-    {
-      message: 'Email deve ter um formato válido',
-    },
-  )
+  @IsEmail({}, {
+    message: 'Email deve ter um formato válido',
+  })
   @IsNotEmpty({
     message: 'Email é obrigatório',
   })
@@ -115,10 +88,12 @@ export class RegisterDto {
   @MaxLength(50, {
     message: 'Senha deve ter no máximo 50 caracteres',
   })
-  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/, {
-    message:
-      'Senha deve conter pelo menos: 1 letra minúscula, 1 maiúscula, 1 número e 1 caractere especial',
-  })
+  @Matches(
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/, 
+    {
+      message: 'Senha deve conter pelo menos: 1 letra minúscula, 1 maiúscula, 1 número e 1 caractere especial',
+    }
+  )
   password: string;
 
   @ApiPropertyOptional({

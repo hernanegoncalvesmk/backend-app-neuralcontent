@@ -2,6 +2,7 @@
 # NEURALCONTENT API - PRODUCTION DOCKERFILE
 # ==============================================
 # Multi-stage build para otimizar tamanho e segurança
+# Enhanced for PASSO 3.3 - Production Ready Deployment
 # Baseado em Node.js 20 LTS Alpine para menor footprint
 
 # ==============================================
@@ -13,12 +14,14 @@ FROM node:20-alpine AS builder
 LABEL maintainer="NeuralContent Team"
 LABEL version="1.0.0"
 LABEL description="NeuralContent API Production Build"
+LABEL stage="builder"
 
 # Instalar dependências do sistema necessárias para build
 RUN apk add --no-cache \
     python3 \
     make \
     g++ \
+    curl \
     && ln -sf python3 /usr/bin/python
 
 # Criar usuário não-root para segurança
@@ -33,18 +36,20 @@ COPY package*.json ./
 COPY tsconfig*.json ./
 COPY nest-cli.json ./
 
-# Instalar dependências (apenas production)
-RUN npm ci --only=production && npm cache clean --force
-
-# Instalar dependências de desenvolvimento para build
-RUN npm ci
+# Instalar todas as dependências para build
+RUN npm ci && npm cache clean --force
 
 # Copiar código fonte
 COPY src/ ./src/
 COPY test/ ./test/
+COPY scripts/ ./scripts/
 
-# Build da aplicação
-RUN npm run build
+# Build da aplicação otimizado para produção
+ENV NODE_ENV=production
+RUN npm run build:prod
+
+# Instalar apenas dependências de produção em pasta separada
+RUN npm ci --only=production --prefix ./prod_modules
 
 # ==============================================
 # STAGE 2: Production Stage

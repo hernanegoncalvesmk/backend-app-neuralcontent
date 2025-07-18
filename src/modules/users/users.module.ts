@@ -4,8 +4,6 @@ import { ConfigModule } from '@nestjs/config';
 import { UsersService } from './users.service';
 import { UsersController } from './users.controller';
 import { User } from './entities/user.entity';
-import { CreditBalance } from '../credits/entities/credit-balance.entity';
-import { VerificationToken } from '../auth/entities/verification-token.entity';
 import { AuthModule } from '../auth/auth.module';
 
 /**
@@ -25,7 +23,7 @@ import { AuthModule } from '../auth/auth.module';
  */
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, CreditBalance, VerificationToken]),
+    TypeOrmModule.forFeature([User]),
     ConfigModule, // Para acessar configurações
     AuthModule, // Para AuthGuard e JWT
   ],

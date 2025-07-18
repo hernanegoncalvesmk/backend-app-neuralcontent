@@ -1,26 +1,26 @@
-import {
-  Entity,
-  PrimaryGeneratedColumn,
-  Column,
-  ManyToOne,
-  JoinColumn,
-  CreateDateColumn,
+import { 
+  Entity, 
+  PrimaryGeneratedColumn, 
+  Column, 
+  ManyToOne, 
+  JoinColumn, 
+  CreateDateColumn, 
   UpdateDateColumn,
-  Index,
+  Index 
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { User } from '../../users/entities/user.entity';
 
 /**
  * Entidade para controle de sessões de usuário
- *
+ * 
  * @description Gerencia sessões ativas, refresh tokens e controle de segurança
- * Alinhada com migration usr_sessions para compatibilidade completa
  * @author NeuralContent Team
  * @since 1.0.0
  */
-@Entity('usr_sessions')
+@Entity('user_sessions')
 @Index(['userId', 'isActive'])
+@Index(['refreshTokenHash'])
 @Index(['expiresAt'])
 export class UserSession {
   @ApiProperty({
@@ -34,28 +34,21 @@ export class UserSession {
     description: 'ID do usuário proprietário da sessão',
     example: 1,
   })
-  @Column('int', { name: 'user_id' })
+  @Column('int')
   userId: number;
 
   @ApiProperty({
-    description: 'Token único da sessão',
-    example: 'session-token-unique-hash',
+    description: 'Hash do refresh token para segurança',
+    example: 'bcrypt-hashed-refresh-token',
   })
-  @Column({ type: 'varchar', length: 255, unique: true, name: 'session_token' })
-  sessionToken: string;
-
-  @ApiProperty({
-    description: 'Token de refresh único',
-    example: 'refresh-token-unique-hash',
-  })
-  @Column({ type: 'varchar', length: 255, unique: true, name: 'refresh_token' })
-  refreshToken: string;
+  @Column({ type: 'varchar', length: 255 })
+  refreshTokenHash: string;
 
   @ApiProperty({
     description: 'Data de expiração da sessão',
     example: '2025-07-20T12:00:00Z',
   })
-  @Column('timestamp', { name: 'expires_at' })
+  @Column('timestamp')
   expiresAt: Date;
 
   @ApiProperty({
@@ -63,42 +56,71 @@ export class UserSession {
     example: true,
     default: true,
   })
-  @Column('boolean', { default: true, name: 'is_active' })
+  @Column('boolean', { default: true })
   isActive: boolean;
 
   @ApiProperty({
     description: 'Endereço IP da sessão',
     example: '192.168.1.100',
   })
-  @Column('varchar', { length: 45, nullable: true, name: 'ip_address' })
+  @Column('varchar', { length: 45, nullable: true })
   ipAddress?: string;
 
   @ApiProperty({
     description: 'User Agent do navegador/dispositivo',
     example: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
   })
-  @Column('text', { nullable: true, name: 'user_agent' })
+  @Column('text', { nullable: true })
   userAgent?: string;
+
+  @ApiProperty({
+    description: 'Localização geográfica aproximada',
+    example: 'São Paulo, BR',
+  })
+  @Column('varchar', { length: 100, nullable: true })
+  location?: string;
+
+  @ApiProperty({
+    description: 'Tipo de dispositivo utilizado',
+    example: 'desktop',
+  })
+  @Column('varchar', { length: 50, nullable: true })
+  deviceType?: string;
+
+  @ApiProperty({
+    description: 'Data da última atividade na sessão',
+    example: '2025-07-13T15:30:00Z',
+  })
+  @Column('timestamp', { nullable: true })
+  lastActivityAt?: Date;
+
+  @ApiProperty({
+    description: 'Contador de tentativas de renovação',
+    example: 0,
+    default: 0,
+  })
+  @Column('int', { default: 0 })
+  refreshCount: number;
 
   @ApiProperty({
     description: 'Data de criação da sessão',
     example: '2025-07-13T12:00:00Z',
   })
-  @CreateDateColumn({ name: 'created_at' })
+  @CreateDateColumn()
   createdAt: Date;
 
   @ApiProperty({
     description: 'Data da última atualização',
     example: '2025-07-13T15:30:00Z',
   })
-  @UpdateDateColumn({ name: 'updated_at' })
+  @UpdateDateColumn()
   updatedAt: Date;
 
   // Relacionamentos
   @ManyToOne(() => User, {
     onDelete: 'CASCADE',
   })
-  @JoinColumn({ name: 'user_id' })
+  @JoinColumn({ name: 'userId' })
   user: User;
 
   /**
@@ -117,24 +139,18 @@ export class UserSession {
   }
 
   /**
-   * Gera um novo session token único
+   * Atualiza a última atividade
    */
-  static generateSessionToken(): string {
-    return require('crypto').randomBytes(32).toString('hex');
+  updateActivity(): void {
+    this.lastActivityAt = new Date();
+    this.updatedAt = new Date();
   }
 
   /**
-   * Gera um novo refresh token único
+   * Incrementa contador de refresh
    */
-  static generateRefreshToken(): string {
-    return require('crypto').randomBytes(32).toString('hex');
-  }
-
-  /**
-   * Calcula a data de expiração baseada na duração
-   */
-  static calculateExpirationDate(durationHours: number = 24): Date {
-    const now = new Date();
-    return new Date(now.getTime() + durationHours * 60 * 60 * 1000);
+  incrementRefreshCount(): void {
+    this.refreshCount++;
+    this.updatedAt = new Date();
   }
 }

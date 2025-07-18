@@ -9,5 +9,4 @@ export { UserSession } from '../../modules/auth/entities/user-session.entity';
 
 // Export plans entities
 export { Plan, PlanType } from '../../modules/plans/entities/plan.entity';
-export { Feature } from '../../modules/plans/entities/feature.entity';
 export { PlanFeature } from '../../modules/plans/entities/plan-feature.entity';

@@ -2,6 +2,7 @@
 
 # 🚀 NeuralContent API Deploy Script
 # Automated deployment script for production and development environments
+# Enhanced for PASSO 3.3 - Production Ready Deployment
 # 
 # Usage:
 #   ./deploy.sh [env] [action]
@@ -10,6 +11,7 @@
 #   ./deploy.sh prod deploy
 #   ./deploy.sh dev start
 #   ./deploy.sh staging restart
+#   ./deploy.sh prod rollback
 
 set -e  # Exit on any error
 

@@ -1,64 +1,37 @@
 import { PartialType, OmitType } from '@nestjs/mapped-types';
-import {
-  IsOptional,
-  IsString,
-  MinLength,
-  MaxLength,
-  IsEnum,
-  IsBoolean,
-  Matches,
-} from 'class-validator';
+import { IsOptional, IsString, MinLength, MaxLength, IsEnum, IsBoolean, Matches } from 'class-validator';
 import { ApiPropertyOptional } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { CreateUserDto, UserRole } from './create-user.dto';
+import { CreateUserDto, UserRole, UserStatus } from './create-user.dto';
 
 /**
  * DTO para atualização de usuário
- *
+ * 
  * @description Valida dados para atualização de usuários existentes
  * @author NeuralContent Team
  * @since 1.0.0
  */
 export class UpdateUserDto extends PartialType(
-  OmitType(CreateUserDto, ['password'] as const),
+  OmitType(CreateUserDto, ['password'] as const)
 ) {
   @ApiPropertyOptional({
-    description: 'Primeiro nome do usuário',
-    example: 'João',
+    description: 'Nome completo do usuário',
+    example: 'João Silva Santos Atualizado',
     minLength: 2,
     maxLength: 100,
   })
   @IsOptional()
   @IsString({
-    message: 'Primeiro nome deve ser uma string',
+    message: 'Nome deve ser uma string',
   })
   @MinLength(2, {
-    message: 'Primeiro nome deve ter pelo menos 2 caracteres',
+    message: 'Nome deve ter pelo menos 2 caracteres',
   })
   @MaxLength(100, {
-    message: 'Primeiro nome deve ter no máximo 100 caracteres',
+    message: 'Nome deve ter no máximo 100 caracteres',
   })
   @Transform(({ value }) => value?.trim())
-  firstName?: string;
-
-  @ApiPropertyOptional({
-    description: 'Sobrenome do usuário',
-    example: 'Silva Santos',
-    minLength: 2,
-    maxLength: 100,
-  })
-  @IsOptional()
-  @IsString({
-    message: 'Sobrenome deve ser uma string',
-  })
-  @MinLength(2, {
-    message: 'Sobrenome deve ter pelo menos 2 caracteres',
-  })
-  @MaxLength(100, {
-    message: 'Sobrenome deve ter no máximo 100 caracteres',
-  })
-  @Transform(({ value }) => value?.trim())
-  lastName?: string;
+  name?: string;
 
   @ApiPropertyOptional({
     description: 'Papel do usuário no sistema',
@@ -66,19 +39,19 @@ export class UpdateUserDto extends PartialType(
   })
   @IsOptional()
   @IsEnum(UserRole, {
-    message: 'Role deve ser: user, admin, super-admin ou guest',
+    message: 'Role deve ser: user, admin ou moderator',
   })
   role?: UserRole;
 
   @ApiPropertyOptional({
-    description: 'Se o usuário está ativo',
-    example: true,
+    description: 'Status do usuário',
+    enum: UserStatus,
   })
   @IsOptional()
-  @IsBoolean({
-    message: 'isActive deve ser um valor booleano',
+  @IsEnum(UserStatus, {
+    message: 'Status deve ser: active, inactive, pending ou suspended',
   })
-  isActive?: boolean;
+  status?: UserStatus;
 
   @ApiPropertyOptional({
     description: 'Se o email foi verificado',
@@ -201,7 +174,7 @@ export class UpdateUserDto extends PartialType(
 
 /**
  * DTO para mudança de senha
- *
+ * 
  * @description Valida dados para alteração de senha do usuário
  * @author NeuralContent Team
  * @since 1.0.0
@@ -240,10 +213,12 @@ export class ChangePasswordDto {
   @MaxLength(50, {
     message: 'Nova senha deve ter no máximo 50 caracteres',
   })
-  @Matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/, {
-    message:
-      'Nova senha deve conter pelo menos: 1 letra minúscula, 1 maiúscula, 1 número e 1 caractere especial',
-  })
+  @Matches(
+    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/,
+    {
+      message: 'Nova senha deve conter pelo menos: 1 letra minúscula, 1 maiúscula, 1 número e 1 caractere especial',
+    }
+  )
   newPassword: string;
 
   @ApiPropertyOptional({

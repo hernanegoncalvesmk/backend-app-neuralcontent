@@ -1,140 +1,39 @@
 /**
- * PM2 Ecosystem Configuration - Production Optimized
+ * PM2 Ecosystem Configuration
  * NeuralContent API - Production & Development Environments
+ * Enhanced for PASSO 3.3 - Production Ready Configuration
  * 
- * @description Configuração profissional otimizada para deploy com PM2
+ * @description Configuração profissional para deploy com PM2
  * @author NeuralContent Team
  * @version 1.0.0
  * @license MIT
- * @updated 2025-07-17
  */
 
 module.exports = {
   apps: [
     {
-      // 🚀 PRODUCTION CONFIGURATION - OPTIMIZED
+      // 🚀 PRODUCTION CONFIGURATION
       name: 'neuralcontent-api-prod',
       script: './dist/main.js',
       instances: 'max', // Utiliza todos os cores disponíveis
       exec_mode: 'cluster',
       autorestart: true,
-      watch: false, // Desabilitado em produção
-      max_memory_restart: '512M',
-      min_uptime: '30s',
-      max_restarts: 10,
+      watch: false,
+      max_memory_restart: '500M',
+      min_uptime: '10s',
+      max_restarts: 5,
       restart_delay: 4000,
-      kill_timeout: 10000,
-      listen_timeout: 10000,
-      
-      // 📊 Logging Configuration
-      log_type: 'json',
-      log_date_format: 'YYYY-MM-DD HH:mm:ss Z',
-      error_file: '/var/log/neuralcontent/error.log',
-      out_file: '/var/log/neuralcontent/out.log',
-      log_file: '/var/log/neuralcontent/combined.log',
-      merge_logs: true,
-      
-      // 🌍 Production Environment Variables
+      env: {
+        NODE_ENV: 'production',
+        PORT: 3001,
+        API_PREFIX: 'v1'
+      },
       env_production: {
         NODE_ENV: 'production',
         PORT: 3001,
         API_PREFIX: 'v1',
-        
-        // 🔗 Production URLs
-        FRONTEND_URL: 'https://app.neuralcontent.com',
-        BACKEND_URL: 'https://api.neuralcontent.com',
-        CORS_ORIGIN: 'https://app.neuralcontent.com,https://neuralcontent.com',
-        
-        // 🗄️ Database Production Settings
-        DB_SYNCHRONIZE: 'false',
-        DB_LOGGING: 'error',
-        DB_POOL_SIZE: '20',
-        DB_CONNECTION_TIMEOUT: '30000',
-        DB_ACQUIRE_TIMEOUT: '30000',
-        DB_IDLE_TIMEOUT: '300000',
-        
-        // 📝 Redis Production Settings
-        REDIS_DB: '1',
-        REDIS_KEY_PREFIX: 'neuralcontent:prod:',
-        REDIS_TTL: '7200',
-        REDIS_CONNECT_TIMEOUT: '10000',
-        
-        // 📊 Logging Production Settings
-        LOG_LEVEL: 'warn',
-        LOG_DIR: '/var/log/neuralcontent',
-        ENABLE_FILE_LOGS: 'true',
-        ENABLE_CONSOLE_LOGS: 'false',
-        LOG_MAX_SIZE: '50m',
-        LOG_MAX_FILES: '30d',
-        
-        // 🛡️ Security Production Settings
-        RATE_LIMIT_LIMIT: '500',
-        RATE_LIMIT_GLOBAL: '10000',
-        BCRYPT_ROUNDS: '12',
-        
-        // 🔒 SSL Settings
-        SSL_ENABLED: 'true',
-        FORCE_HTTPS: 'true',
-        TRUST_PROXY: 'true',
-        
-        // 📈 Monitoring Settings
-        ENABLE_METRICS: 'true',
-        METRICS_PORT: '9090',
-        SWAGGER_ENABLED: 'false',
-        PROMETHEUS_ENABLED: 'true',
-        
-        // 📦 Cache Settings
-        CACHE_TTL_DEFAULT: '300',
-        CACHE_TTL_USER: '600',
-        CACHE_TTL_PLANS: '3600',
-        CACHE_TTL_HEALTH: '60'
-      }
-    },
-
-    {
-      // 🧪 STAGING CONFIGURATION
-      name: 'neuralcontent-api-staging',
-      script: './dist/main.js',
-      instances: 2,
-      exec_mode: 'cluster',
-      autorestart: true,
-      watch: false,
-      max_memory_restart: '256M',
-      min_uptime: '10s',
-      max_restarts: 15,
-      restart_delay: 2000,
-      
-      env_staging: {
-        NODE_ENV: 'staging',
-        PORT: 3002,
-        API_PREFIX: 'v1',
-        
-        FRONTEND_URL: 'https://staging.neuralcontent.com',
-        BACKEND_URL: 'https://api-staging.neuralcontent.com',
-        
-        DB_SYNCHRONIZE: 'false',
-        DB_LOGGING: 'warn',
-        LOG_LEVEL: 'info',
-        SWAGGER_ENABLED: 'true',
-        ENABLE_METRICS: 'true'
-      }
-    },
-        PORT: 3001,
-        API_PREFIX: 'v1',
-        FRONTEND_URL: 'https://app.neuralbook.app',
-        BACKEND_URL: 'https://api.neuralbook.app',
-        // Database Production
-        DB_HOST: '167.235.253.236',
-        DB_PORT: 3306,
-        DB_USERNAME: 'app_NeuralContent_8785',
-        DB_NAME: 'app_NeuralContent_8785',
-        // Redis Production
-        REDIS_HOST: 'localhost',
-        REDIS_PORT: 6379,
-        // Security
-        BCRYPT_ROUNDS: 12,
-        RATE_LIMIT_TTL: 60,
-        RATE_LIMIT_LIMIT: 100
+        // Load from .env.production file
+        env_file: '.env.production'
       },
       // Logging Configuration
       log_file: './logs/app.log',

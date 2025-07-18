@@ -2,6 +2,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import {
   IsNotEmpty,
   IsPositive,
+  IsEnum,
   IsOptional,
   IsString,
   IsObject,
@@ -12,6 +13,7 @@ import {
   Length,
 } from 'class-validator';
 import { Type } from 'class-transformer';
+import { CreditServiceType } from '../entities/credit-transaction.entity';
 
 /**
  * DTO para consumo de créditos
@@ -41,20 +43,12 @@ export class ConsumeCreditsDto {
 
   @ApiProperty({
     description: 'Tipo de serviço que está consumindo os créditos',
-    example: 'text_generation',
-    enum: [
-      'text_generation',
-      'image_generation',
-      'translation',
-      'summarization',
-      'voice_synthesis',
-      'document_analysis',
-      'custom_service',
-    ],
+    enum: CreditServiceType,
+    example: CreditServiceType.TEXT_GENERATION,
   })
   @IsNotEmpty()
-  @IsString()
-  serviceType: string;
+  @IsEnum(CreditServiceType)
+  serviceType: CreditServiceType;
 
   @ApiProperty({
     description: 'Descrição detalhada do consumo',
@@ -151,9 +145,10 @@ export class ConsumeCreditsResponseDto {
 
   @ApiProperty({
     description: 'Tipo do serviço consumido',
-    example: 'text_generation',
+    enum: CreditServiceType,
+    example: CreditServiceType.TEXT_GENERATION,
   })
-  serviceType: string;
+  serviceType: CreditServiceType;
 
   @ApiProperty({
     description: 'Mensagem descritiva do resultado',
@@ -196,11 +191,12 @@ export class ValidateCreditsDto {
 
   @ApiProperty({
     description: 'Tipo do serviço para calcular custo',
-    example: 'text_generation',
+    enum: CreditServiceType,
+    example: CreditServiceType.TEXT_GENERATION,
   })
   @IsNotEmpty()
-  @IsString()
-  serviceType: string;
+  @IsEnum(CreditServiceType)
+  serviceType: CreditServiceType;
 }
 
 /**
@@ -245,9 +241,10 @@ export class ValidateCreditsResponseDto {
 
   @ApiProperty({
     description: 'Tipo do serviço',
-    example: 'text_generation',
+    enum: CreditServiceType,
+    example: CreditServiceType.TEXT_GENERATION,
   })
-  serviceType: string;
+  serviceType: CreditServiceType;
 
   @ApiProperty({
     description: 'Mensagem explicativa',

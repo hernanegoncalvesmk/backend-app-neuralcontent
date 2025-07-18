@@ -11,7 +11,7 @@ import { validateConfig } from './config/validate-config';
 import { DatabaseModule } from './database/database.module';
 import { CacheModule } from './shared/cache/cache.module';
 import { LoggerModule } from './shared/logger/logger.module';
-import { SimpleWinstonInterceptor } from './shared/interceptors/simple-winston.interceptor';
+import { LoggingInterceptor } from './shared/interceptors/logging.interceptor';
 import { SecurityMiddleware } from './shared/middleware/security.middleware';
 import { HttpExceptionFilter } from './shared/filters/http-exception.filter';
 import { AllExceptionsFilter } from './shared/filters/all-exceptions.filter';
@@ -74,7 +74,7 @@ import { CustomThrottlerGuard } from './shared/guards/simple-throttler.guard';
     },
     {
       provide: APP_INTERCEPTOR,
-      useClass: SimpleWinstonInterceptor,
+      useClass: LoggingInterceptor,
     },
     {
       provide: APP_FILTER,

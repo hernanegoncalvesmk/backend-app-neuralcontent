@@ -7,7 +7,6 @@ import { PassportModule } from '@nestjs/passport';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { UserSession } from './entities/user-session.entity';
-import { VerificationToken } from './entities/verification-token.entity';
 import { User } from '../users/entities/user.entity';
 
 // Shared modules
@@ -16,11 +15,11 @@ import { CacheModule } from '../../shared/cache/cache.module';
 
 /**
  * Módulo de autenticação
- *
+ * 
  * @description Fornece funcionalidades completas de autenticação e autorização
  * @author NeuralContent Team
  * @since 1.0.0
- *
+ * 
  * @features
  * - Login/Logout de usuários
  * - Registro de novos usuários
@@ -32,7 +31,10 @@ import { CacheModule } from '../../shared/cache/cache.module';
 @Module({
   imports: [
     // TypeORM para entidades
-    TypeOrmModule.forFeature([User, UserSession, VerificationToken]),
+    TypeOrmModule.forFeature([
+      User,
+      UserSession,
+    ]),
 
     // JWT Module com configuração assíncrona
     JwtModule.registerAsync({
@@ -58,10 +60,18 @@ import { CacheModule } from '../../shared/cache/cache.module';
     CacheModule,
   ],
 
-  controllers: [AuthController],
+  controllers: [
+    AuthController,
+  ],
 
-  providers: [AuthService],
+  providers: [
+    AuthService,
+  ],
 
-  exports: [AuthService, JwtModule, PassportModule],
+  exports: [
+    AuthService,
+    JwtModule,
+    PassportModule,
+  ],
 })
 export class AuthModule {}

@@ -1,26 +1,9 @@
-import {
-  Injectable,
-  Logger,
-  NotFoundException,
-  BadRequestException,
-  ConflictException,
-} from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, BadRequestException, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import {
-  Payment,
-  PaymentStatus,
-  PaymentMethod,
-  PaymentType,
-} from '../entities/payment.entity';
-import {
-  UserSubscription,
-  SubscriptionStatus,
-} from '../entities/user-subscription.entity';
-import {
-  CreatePaymentDto,
-  CreatePaymentIntentDto,
-} from '../dto/create-payment.dto';
+import { Payment, PaymentStatus, PaymentMethod, PaymentType } from '../entities/payment.entity';
+import { UserSubscription, SubscriptionStatus } from '../entities/user-subscription.entity';
+import { CreatePaymentDto, CreatePaymentIntentDto } from '../dto/create-payment.dto';
 import { StripeService } from './stripe.service';
 import { PayPalService } from './paypal.service';
 
@@ -41,15 +24,7 @@ export class PaymentsService {
    * Cria um novo pagamento
    */
   async createPayment(createPaymentDto: CreatePaymentDto): Promise<Payment> {
-    const {
-      userId,
-      planId,
-      amount,
-      currency = 'BRL',
-      paymentMethod,
-      paymentType,
-      metadata,
-    } = createPaymentDto;
+    const { userId, planId, amount, currency = 'BRL', paymentMethod, paymentType, metadata } = createPaymentDto;
 
     // Criar registro de pagamento
     const payment = this.paymentRepository.create({
@@ -72,15 +47,12 @@ export class PaymentsService {
   /**
    * Cria um Payment Intent (Stripe ou PayPal)
    */
-  async createPaymentIntent(
-    createPaymentIntentDto: CreatePaymentIntentDto,
-  ): Promise<{
+  async createPaymentIntent(createPaymentIntentDto: CreatePaymentIntentDto): Promise<{
     payment: Payment;
     clientSecret?: string;
     approvalUrl?: string;
   }> {
-    const { planId, amount, paymentMethod, successUrl, cancelUrl, metadata } =
-      createPaymentIntentDto;
+    const { planId, amount, paymentMethod, successUrl, cancelUrl, metadata } = createPaymentIntentDto;
 
     if (!amount && !planId) {
       throw new BadRequestException('Either amount or planId is required');
@@ -134,6 +106,7 @@ export class PaymentsService {
           payment,
           clientSecret: paymentIntent.client_secret || undefined,
         };
+
       } else if (paymentMethod === PaymentMethod.PAYPAL) {
         // Criar ordem no PayPal
         const order = await this.paypalService.createOrder({
@@ -141,9 +114,7 @@ export class PaymentsService {
           currency: 'BRL',
           returnUrl: successUrl || 'http://localhost:3000/payment/success',
           cancelUrl: cancelUrl || 'http://localhost:3000/payment/cancel',
-          description: planId
-            ? 'Assinatura NeuralContent'
-            : 'Pagamento NeuralContent',
+          description: planId ? 'Assinatura NeuralContent' : 'Pagamento NeuralContent',
           metadata: {
             paymentId: payment.id,
             userId: userId,
@@ -165,6 +136,7 @@ export class PaymentsService {
       }
 
       throw new BadRequestException('Unsupported payment method');
+
     } catch (error) {
       // Se houve erro, marcar pagamento como falhou
       payment.status = PaymentStatus.FAILED;
@@ -178,10 +150,7 @@ export class PaymentsService {
   /**
    * Confirma um pagamento
    */
-  async confirmPayment(
-    paymentId: string,
-    externalData?: any,
-  ): Promise<Payment> {
+  async confirmPayment(paymentId: string, externalData?: any): Promise<Payment> {
     const payment = await this.paymentRepository.findOne({
       where: { id: paymentId },
     });
@@ -203,25 +172,21 @@ export class PaymentsService {
 
       if (payment.paymentMethod === PaymentMethod.STRIPE) {
         // Verificar status no Stripe
-        const paymentIntent = await this.stripeService.retrievePaymentIntent(
-          payment.externalPaymentId,
-        );
+        const paymentIntent = await this.stripeService.retrievePaymentIntent(payment.externalPaymentId);
         confirmed = paymentIntent.status === 'succeeded';
-
+        
         if (confirmed) {
           payment.confirmedAt = new Date();
           payment.gatewayResponse = paymentIntent;
         }
+
       } else if (payment.paymentMethod === PaymentMethod.PAYPAL) {
         // Capturar ordem no PayPal
-        const captureResult = await this.paypalService.captureOrder(
-          payment.externalPaymentId,
-        );
-        const captureInfo =
-          this.paypalService.extractCaptureInfo(captureResult);
-
+        const captureResult = await this.paypalService.captureOrder(payment.externalPaymentId);
+        const captureInfo = this.paypalService.extractCaptureInfo(captureResult);
+        
         confirmed = captureInfo?.status === 'COMPLETED';
-
+        
         if (confirmed) {
           payment.confirmedAt = new Date();
           payment.gatewayResponse = captureResult;
@@ -230,12 +195,9 @@ export class PaymentsService {
 
       if (confirmed) {
         payment.status = PaymentStatus.COMPLETED;
-
+        
         // Se é pagamento de assinatura, criar/atualizar assinatura
-        if (
-          payment.paymentType === PaymentType.SUBSCRIPTION &&
-          payment.planId
-        ) {
+        if (payment.paymentType === PaymentType.SUBSCRIPTION && payment.planId) {
           await this.createOrUpdateSubscription(payment);
         }
 
@@ -246,6 +208,7 @@ export class PaymentsService {
       }
 
       return await this.paymentRepository.save(payment);
+
     } catch (error) {
       payment.status = PaymentStatus.FAILED;
       payment.failureReason = error.message;
@@ -258,9 +221,7 @@ export class PaymentsService {
    * Cancela um pagamento
    */
   async cancelPayment(paymentId: string): Promise<Payment> {
-    const payment = await this.paymentRepository.findOne({
-      where: { id: paymentId },
-    });
+    const payment = await this.paymentRepository.findOne({ where: { id: paymentId } });
 
     if (!payment) {
       throw new NotFoundException('Payment not found');
@@ -271,10 +232,7 @@ export class PaymentsService {
     }
 
     try {
-      if (
-        payment.paymentMethod === PaymentMethod.STRIPE &&
-        payment.externalPaymentId
-      ) {
+      if (payment.paymentMethod === PaymentMethod.STRIPE && payment.externalPaymentId) {
         await this.stripeService.cancelPaymentIntent(payment.externalPaymentId);
       }
 
@@ -283,6 +241,7 @@ export class PaymentsService {
 
       this.logger.log(`Payment cancelled: ${payment.id}`);
       return await this.paymentRepository.save(payment);
+
     } catch (error) {
       this.logger.error(`Error cancelling payment ${paymentId}:`, error);
       throw error;
@@ -297,9 +256,7 @@ export class PaymentsService {
     amount?: number,
     reason?: string,
   ): Promise<Payment> {
-    const payment = await this.paymentRepository.findOne({
-      where: { id: paymentId },
-    });
+    const payment = await this.paymentRepository.findOne({ where: { id: paymentId } });
 
     if (!payment) {
       throw new NotFoundException('Payment not found');
@@ -313,12 +270,9 @@ export class PaymentsService {
       throw new ConflictException('Payment already fully refunded');
     }
 
-    const refundAmount = amount || payment.amount - payment.refundedAmount;
-
-    if (
-      refundAmount <= 0 ||
-      refundAmount > payment.amount - payment.refundedAmount
-    ) {
+    const refundAmount = amount || (payment.amount - payment.refundedAmount);
+    
+    if (refundAmount <= 0 || refundAmount > (payment.amount - payment.refundedAmount)) {
       throw new BadRequestException('Invalid refund amount');
     }
 
@@ -335,9 +289,7 @@ export class PaymentsService {
         );
       } else if (payment.paymentMethod === PaymentMethod.PAYPAL) {
         // Para PayPal, você precisaria do capture ID
-        const captureInfo = this.paypalService.extractCaptureInfo(
-          payment.gatewayResponse,
-        );
+        const captureInfo = this.paypalService.extractCaptureInfo(payment.gatewayResponse);
         if (captureInfo) {
           await this.paypalService.createRefund(
             captureInfo.captureId,
@@ -349,20 +301,16 @@ export class PaymentsService {
       }
 
       payment.refundedAmount += refundAmount;
-
+      
       if (payment.refundedAmount >= payment.amount) {
         payment.status = PaymentStatus.REFUNDED;
       }
 
-      this.logger.log(
-        `Refund created for payment ${paymentId}: ${refundAmount}`,
-      );
+      this.logger.log(`Refund created for payment ${paymentId}: ${refundAmount}`);
       return await this.paymentRepository.save(payment);
+
     } catch (error) {
-      this.logger.error(
-        `Error creating refund for payment ${paymentId}:`,
-        error,
-      );
+      this.logger.error(`Error creating refund for payment ${paymentId}:`, error);
       throw error;
     }
   }
@@ -403,15 +351,13 @@ export class PaymentsService {
   /**
    * Cria ou atualiza assinatura do usuário
    */
-  private async createOrUpdateSubscription(
-    payment: Payment,
-  ): Promise<UserSubscription> {
+  private async createOrUpdateSubscription(payment: Payment): Promise<UserSubscription> {
     if (!payment.planId) {
       throw new BadRequestException('Plan ID is required for subscription');
     }
 
     const existingSubscription = await this.subscriptionRepository.findOne({
-      where: {
+      where: { 
         userId: payment.userId,
         planId: payment.planId,
         status: SubscriptionStatus.ACTIVE,
@@ -421,11 +367,8 @@ export class PaymentsService {
     if (existingSubscription) {
       // Estender assinatura existente
       const daysToAdd = 30; // TODO: pegar do plano
-      const currentBillingDate =
-        existingSubscription.nextBillingDate || new Date();
-      const newBillingDate = new Date(
-        currentBillingDate.getTime() + daysToAdd * 24 * 60 * 60 * 1000,
-      );
+      const currentBillingDate = existingSubscription.nextBillingDate || new Date();
+      const newBillingDate = new Date(currentBillingDate.getTime() + (daysToAdd * 24 * 60 * 60 * 1000));
 
       existingSubscription.nextBillingDate = newBillingDate;
       existingSubscription.updatedAt = new Date();
@@ -435,9 +378,7 @@ export class PaymentsService {
     } else {
       // Criar nova assinatura
       const startDate = new Date();
-      const nextBillingDate = new Date(
-        startDate.getTime() + 30 * 24 * 60 * 60 * 1000,
-      ); // 30 dias
+      const nextBillingDate = new Date(startDate.getTime() + (30 * 24 * 60 * 60 * 1000)); // 30 dias
 
       const subscription = this.subscriptionRepository.create({
         userId: payment.userId,
@@ -445,10 +386,10 @@ export class PaymentsService {
         status: SubscriptionStatus.ACTIVE,
         startDate: startDate,
         nextBillingDate,
-        creditsGranted: 1000, // TODO: pegar do plano
+        creditsPerPeriod: 1000, // TODO: pegar do plano
         creditsUsed: 0,
         autoRenew: true,
-        pricePaid: payment.amount / 100, // converter de centavos para valor decimal
+        amount: payment.amount,
         currency: payment.currency,
       });
 
@@ -460,11 +401,9 @@ export class PaymentsService {
   /**
    * Busca assinatura ativa de um usuário
    */
-  async getUserActiveSubscription(
-    userId: string,
-  ): Promise<UserSubscription | null> {
+  async getUserActiveSubscription(userId: string): Promise<UserSubscription | null> {
     return await this.subscriptionRepository.findOne({
-      where: {
+      where: { 
         userId,
         status: SubscriptionStatus.ACTIVE,
       },
@@ -480,92 +419,5 @@ export class PaymentsService {
       where: { userId },
       order: { createdAt: 'DESC' },
     });
-  }
-
-  /**
-   * Cria uma nova assinatura para um usuário
-   */
-  async createUserSubscription(
-    createSubscriptionDto: any,
-  ): Promise<UserSubscription> {
-    this.logger.log(
-      `Creating subscription for user ${createSubscriptionDto.userId}`,
-    );
-
-    try {
-      const subscription = new UserSubscription();
-      Object.assign(subscription, createSubscriptionDto);
-      subscription.status =
-        createSubscriptionDto.status || SubscriptionStatus.ACTIVE;
-
-      const savedSubscription =
-        await this.subscriptionRepository.save(subscription);
-      this.logger.log(`Subscription created with ID: ${savedSubscription.id}`);
-
-      return savedSubscription;
-    } catch (error) {
-      this.logger.error(`Error creating subscription: ${error.message}`);
-      throw new BadRequestException('Erro ao criar assinatura');
-    }
-  }
-
-  /**
-   * Atualiza uma assinatura existente
-   */
-  async updateUserSubscription(
-    subscriptionId: string,
-    updateSubscriptionDto: any,
-  ): Promise<UserSubscription> {
-    this.logger.log(`Updating subscription ${subscriptionId}`);
-
-    const subscription = await this.subscriptionRepository.findOne({
-      where: { id: subscriptionId },
-    });
-
-    if (!subscription) {
-      throw new NotFoundException('Assinatura não encontrada');
-    }
-
-    try {
-      Object.assign(subscription, updateSubscriptionDto);
-      const updatedSubscription =
-        await this.subscriptionRepository.save(subscription);
-
-      this.logger.log(`Subscription ${subscriptionId} updated successfully`);
-      return updatedSubscription;
-    } catch (error) {
-      this.logger.error(`Error updating subscription: ${error.message}`);
-      throw new BadRequestException('Erro ao atualizar assinatura');
-    }
-  }
-
-  /**
-   * Cancela uma assinatura
-   */
-  async cancelUserSubscription(
-    subscriptionId: string,
-  ): Promise<{ message: string }> {
-    this.logger.log(`Canceling subscription ${subscriptionId}`);
-
-    const subscription = await this.subscriptionRepository.findOne({
-      where: { id: subscriptionId },
-    });
-
-    if (!subscription) {
-      throw new NotFoundException('Assinatura não encontrada');
-    }
-
-    try {
-      subscription.status = SubscriptionStatus.CANCELLED;
-      subscription.cancelledAt = new Date();
-
-      await this.subscriptionRepository.save(subscription);
-
-      this.logger.log(`Subscription ${subscriptionId} canceled successfully`);
-      return { message: 'Assinatura cancelada com sucesso' };
-    } catch (error) {
-      this.logger.error(`Error canceling subscription: ${error.message}`);
-      throw new BadRequestException('Erro ao cancelar assinatura');
-    }
   }
 }

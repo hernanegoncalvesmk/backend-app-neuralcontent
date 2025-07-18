@@ -1,10 +1,10 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { Exclude, Expose, Transform } from 'class-transformer';
-import { UserRole } from './create-user.dto';
+import { UserRole, UserStatus } from './create-user.dto';
 
 /**
  * DTO para resposta de usuário
- *
+ * 
  * @description Estrutura de retorno de dados do usuário (sem dados sensíveis)
  * @author NeuralContent Team
  * @since 1.0.0
@@ -25,18 +25,11 @@ export class UserResponseDto {
   email: string;
 
   @ApiProperty({
-    description: 'Primeiro nome do usuário',
-    example: 'João',
+    description: 'Nome completo do usuário',
+    example: 'João Silva Santos',
   })
   @Expose()
-  firstName: string;
-
-  @ApiProperty({
-    description: 'Sobrenome do usuário',
-    example: 'Silva Santos',
-  })
-  @Expose()
-  lastName: string;
+  name: string;
 
   @ApiProperty({
     description: 'Papel do usuário no sistema',
@@ -47,11 +40,12 @@ export class UserResponseDto {
   role: UserRole;
 
   @ApiProperty({
-    description: 'Se o usuário está ativo',
-    example: true,
+    description: 'Status do usuário',
+    enum: UserStatus,
+    example: UserStatus.ACTIVE,
   })
   @Expose()
-  isActive: boolean;
+  status: UserStatus;
 
   @ApiProperty({
     description: 'Se o email foi verificado',
@@ -66,15 +60,7 @@ export class UserResponseDto {
     required: false,
   })
   @Expose()
-  avatar?: string;
-
-  @ApiPropertyOptional({
-    description: 'Data de verificação do email',
-    example: '2025-07-13T10:30:00Z',
-  })
-  @Expose()
-  @Transform(({ value }) => value?.toISOString())
-  emailVerifiedAt?: Date;
+  avatarUrl?: string;
 
   @ApiPropertyOptional({
     description: 'Telefone de contato do usuário',
@@ -84,11 +70,39 @@ export class UserResponseDto {
   phone?: string;
 
   @ApiPropertyOptional({
-    description: 'Preferências do usuário',
-    example: { theme: 'dark', language: 'pt-BR' },
+    description: 'Biografia ou descrição do usuário',
+    example: 'Desenvolvedor apaixonado por tecnologia e inovação.',
   })
   @Expose()
-  preferences?: Record<string, any>;
+  bio?: string;
+
+  @ApiPropertyOptional({
+    description: 'Cidade do usuário',
+    example: 'São Paulo',
+  })
+  @Expose()
+  city?: string;
+
+  @ApiPropertyOptional({
+    description: 'País do usuário',
+    example: 'Brasil',
+  })
+  @Expose()
+  country?: string;
+
+  @ApiPropertyOptional({
+    description: 'Timezone do usuário',
+    example: 'America/Sao_Paulo',
+  })
+  @Expose()
+  timezone?: string;
+
+  @ApiPropertyOptional({
+    description: 'Idioma preferido do usuário',
+    example: 'pt-BR',
+  })
+  @Expose()
+  preferredLanguage?: string;
 
   @ApiProperty({
     description: 'Data de criação do usuário',
@@ -119,30 +133,31 @@ export class UserResponseDto {
   password: string;
 
   @Exclude()
+  emailVerificationToken: string;
+
+  @Exclude()
+  passwordResetToken: string;
+
+  @Exclude()
+  failedLoginAttempts: number;
+
+  @Exclude()
+  lockedUntil: Date;
+
+  @Exclude()
+  metadata: any;
+
+  @Exclude()
   deletedAt: Date;
 
   constructor(partial: Partial<UserResponseDto>) {
     Object.assign(this, partial);
-
-    // Mapear o nome completo se não estiver presente
-    if (!this.firstName && !this.lastName && (partial as any).name) {
-      const nameParts = (partial as any).name.split(' ');
-      this.firstName = nameParts[0];
-      this.lastName = nameParts.slice(1).join(' ');
-    }
-  }
-
-  /**
-   * Retorna o nome completo do usuário
-   */
-  getFullName(): string {
-    return `${this.firstName} ${this.lastName}`.trim();
   }
 }
 
 /**
  * DTO para lista paginada de usuários
- *
+ * 
  * @description Estrutura de retorno para listas paginadas
  * @author NeuralContent Team
  * @since 1.0.0
@@ -173,7 +188,7 @@ export class UserListResponseDto {
 
 /**
  * DTO para estatísticas de usuários
- *
+ * 
  * @description Estrutura para retorno de estatísticas
  * @author NeuralContent Team
  * @since 1.0.0
@@ -192,10 +207,16 @@ export class UserStatsResponseDto {
   activeUsers: number;
 
   @ApiProperty({
-    description: 'Usuários inativos',
-    example: 275,
+    description: 'Usuários pendentes',
+    example: 120,
   })
-  inactiveUsers: number;
+  pendingUsers: number;
+
+  @ApiProperty({
+    description: 'Usuários suspensos',
+    example: 155,
+  })
+  suspendedUsers: number;
 
   @ApiProperty({
     description: 'Novos usuários hoje',

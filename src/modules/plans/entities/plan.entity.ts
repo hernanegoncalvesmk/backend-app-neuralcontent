@@ -9,7 +9,6 @@ import {
 } from 'typeorm';
 import { ApiProperty } from '@nestjs/swagger';
 import { PlanFeature } from './plan-feature.entity';
-import { PlanPrice } from './plan-price.entity';
 
 export enum PlanType {
   FREE = 'free',
@@ -136,24 +135,13 @@ export class Plan {
 
   // Relationships
   @ApiProperty({
-    description: 'Relacionamentos plano-feature',
+    description: 'Funcionalidades do plano',
     type: () => [PlanFeature],
     required: false,
   })
-  @OneToMany(() => PlanFeature, (planFeature) => planFeature.plan, {
+  @OneToMany(() => PlanFeature, (feature) => feature.plan, {
     cascade: true,
     eager: false,
   })
-  planFeatures: PlanFeature[];
-
-  @ApiProperty({
-    description: 'Preços do plano em diferentes moedas e períodos',
-    type: () => [PlanPrice],
-    required: false,
-  })
-  @OneToMany(() => PlanPrice, (planPrice) => planPrice.plan, {
-    cascade: true,
-    eager: false,
-  })
-  prices: PlanPrice[];
+  features: PlanFeature[];
 }
