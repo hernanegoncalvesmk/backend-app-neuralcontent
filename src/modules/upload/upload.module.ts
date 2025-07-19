@@ -4,6 +4,8 @@ import { ConfigModule } from '@nestjs/config';
 import { MulterModule } from '@nestjs/platform-express';
 import { memoryStorage } from 'multer';
 
+import { AuthModule } from '../auth/auth.module';
+
 import { UploadController } from './controllers/upload.controller';
 import { UploadService } from './services/upload.service';
 import { BackblazeService } from './services/backblaze.service';
@@ -21,6 +23,7 @@ import { UploadedFile } from './entities/uploaded-file.entity';
   imports: [
     TypeOrmModule.forFeature([UploadedFile]),
     ConfigModule,
+    AuthModule, // Importa o módulo de autenticação completo
     MulterModule.register({
       storage: memoryStorage(),
       limits: {

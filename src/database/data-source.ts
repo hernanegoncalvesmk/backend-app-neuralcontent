@@ -1,10 +1,11 @@
-import { DataSource, DataSourceOptions } from 'typeorm';
+import { DataSource } from 'typeorm';
 import { config } from 'dotenv';
+import { join } from 'path';
 
 // Load environment variables
 config();
 
-const dataSourceOptions: DataSourceOptions = {
+const AppDataSource = new DataSource({
   type: 'mysql',
   host: process.env.DB_HOST || 'localhost',
   port: parseInt(process.env.DB_PORT || '3306', 10),
@@ -13,9 +14,9 @@ const dataSourceOptions: DataSourceOptions = {
   database: process.env.DB_NAME || 'neuralcontent',
 
   // Entity and migration paths
-  entities: [__dirname + '/../**/*.entity{.ts,.js}'],
-  migrations: [__dirname + '/migrations/*{.ts,.js}'],
-  subscribers: [__dirname + '/subscribers/*{.ts,.js}'],
+  entities: [join(__dirname, '../**/*.entity{.ts,.js}')],
+  migrations: [join(__dirname, 'migrations/*{.ts,.js}')],
+  subscribers: [join(__dirname, 'subscribers/*{.ts,.js}')],
 
   // Development settings
   synchronize: process.env.NODE_ENV === 'development',
@@ -41,10 +42,7 @@ const dataSourceOptions: DataSourceOptions = {
   // Migration settings
   migrationsRun: false,
   migrationsTableName: 'migrations',
-};
-
-// Create and export the data source
-export const AppDataSource = new DataSource(dataSourceOptions);
+});
 
 // Initialize connection
 export const initializeDatabase = async () => {
@@ -73,4 +71,5 @@ export const closeDatabase = async () => {
   }
 };
 
+// Default export for TypeORM CLI
 export default AppDataSource;

@@ -25,6 +25,14 @@ async function bootstrap() {
   // Set global prefix for all routes
   app.setGlobalPrefix(apiPrefix);
 
+  // Enable CORS for frontend development
+  app.enableCors({
+    origin: ['http://localhost:3000', 'http://127.0.0.1:3000'],
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+    allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
+    credentials: true,
+  });
+
   // Enable validation globally
   app.useGlobalPipes(
     new ValidationPipe({

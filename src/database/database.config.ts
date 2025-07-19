@@ -16,8 +16,8 @@ export default registerAs(
     migrations: [__dirname + '/../database/migrations/*{.ts,.js}'],
     subscribers: [__dirname + '/../database/subscribers/*{.ts,.js}'],
 
-    // Development settings
-    synchronize: process.env.NODE_ENV === 'development',
+    // Development settings - TEMPORARIAMENTE DESABILITADO PARA CORRIGIR ENUM
+    synchronize: false, // process.env.NODE_ENV === 'development',
     logging:
       process.env.NODE_ENV === 'development' ? ['query', 'error'] : ['error'],
     logger: 'advanced-console',
